@@ -1,12 +1,46 @@
-#! -*- coding: utf-8 -*-
 """
-parser function
+Helper functions and data structures
 """
 import re
 from contextlib import contextmanager
 
 from ._compat import string_types
-from . import block, inline, scanner as scan_module
+
+camelcase_re = re.compile(r'([A-Z]+)(?=[a-z0-9])')
+
+
+def camel_to_snake_case(name):
+    """Takes a camelCased string and converts to snake_case."""
+    def _join(match):
+        word = match.group()
+
+        if len(word) > 1:
+            return ('_%s_%s' % (word[:-1], word[-1])).lower()
+
+        return '_' + word.lower()
+
+    return camelcase_re.sub(_join, name).lstrip('_')
+
+
+def is_parenthesis_paired(text):
+    """Check if the text only contains:
+    1. blackslash escaped parentheses, or
+    2. parentheses paired.
+    """
+    count = 0
+    escape = False
+    for c in text:
+        if escape:
+            escape = False
+        elif c == '\\':
+            escape = True
+        elif c == '(':
+            count += 1
+        elif c == ')':
+            if count == 0:
+                return False
+            count -= 1
+    return count == 0
 
 
 def _preprocess_text(text):
@@ -28,6 +62,13 @@ class Source(object):
         if not self._states:
             return None
         return self._states[-1]
+
+    @property
+    def root(self):
+        """Returns the root element, which is at the bottom of self._states."""
+        if not self._states:
+            return None
+        return self._states[0]
 
     def push_state(self, element):
         """Push a new state to the state stack."""
@@ -57,7 +98,7 @@ class Source(object):
     @property
     def rest(self):
         """The remaining source unparsed."""
-        return self._buffer[self.pos :]
+        return self._buffer[self.pos:]
 
     def _expect_re(self, regexp):
         if isinstance(regexp, string_types):
@@ -106,16 +147,12 @@ class Source(object):
         else:
             return None
 
-    def expect_element(self, element_type):
-        """Check whether the rest of source matches the given element type."""
-        return block._element_types[element_type].match(self)
-
     def next_line(self, consume=False, require_prefix=True):
         """"""
         lf = self._buffer.find('\n', self.pos)
         if lf < 0:
             lf = len(self._buffer) - 1
-        line = self._buffer[self.pos : lf + 1]
+        line = self._buffer[self.pos:lf + 1]
         if require_prefix:
             prefix_len = self.match_prefix(self.prefix, line)
             if prefix_len < 0:
@@ -134,53 +171,38 @@ class Source(object):
 
     def _update_prefix(self):
         for s in self._states:
-            if isinstance(s, block.ListItem):
+            if hasattr(s, '_second_prefix'):
                 s._prefix = s._second_prefix
 
 
-def parse(source):
-    """Parses given text into AST"""
-    block_elements = block.get_elements()
-    if isinstance(source, string_types):
-        source = Source(source)
-    ast = []
-    while not source.exhausted:
-        for name, ele_type in block_elements:
-            if ele_type.match(source):
-                result = ele_type.parse(source)
-                if not isinstance(result, block.BlockElement):
-                    result = ele_type(result)
-                ast.append(result)
-                break
-        else:
-            # Quit the current parsing and go back to higher level parsing
+def scan_inline(text, elements):
+    """Scans the text and return a generator of inline elements.
+    Any holes that don't match any elements will be thrown as-is.
+
+    :param text: the text to be parsed.
+    :param elements: a list of element types to be included in parsing.
+    :returns: a generator of elements or holes.
+    """
+    def find_first(text):
+        first = 1 << 32
+        pair = (None, None)
+
+        for e in elements:
+            match = e.search(text)
+            if not match:
+                continue
+            if match.start() < first:
+                pair = (e, match)
+            first = match.start()
+        return pair
+
+    while text:
+        e, match = find_first(text)
+        if not e:
             break
-    return ast
-
-
-# Only generates at the first time and use cache then.
-_scanner = None
-
-
-def parse_inline(text):
-    """Use re.Scanner to parse inline tokens"""
-    elements = inline.get_elements()
-    scanner = _scanner_for(elements)
-    ast = []
-    for name, match in scanner.scan_with_holes(text):
-        element_type = inline._element_types[name]
-        ast.append(element_type(match))
-    return ast
-
-
-def _scanner_for(elements):
-    global _scanner
-    if _scanner:
-        return _scanner
-    rules = [
-        (name, pattern)
-        for name, element in elements
-        for pattern in element.patterns
-    ]
-    _scanner = scan_module.Scanner(rules, re.M)
-    return _scanner
+        if match.start() > 0:
+            yield text[: match.start()]
+        yield e(match)
+        text = text[match.end():]
+    if text:
+        yield text

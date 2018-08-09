@@ -2,9 +2,11 @@
 """
 Inline(span) level elements
 """
-
+import re
+from .utils import string_types
 
 _element_types = {}
+_renderer = None
 
 __all__ = ('Literal',)
 
@@ -26,10 +28,6 @@ def add_element(element_type, override=False):
             _element_types[element_type.__name__] = element_type
 
 
-def get_elements():
-    return sorted(_element_types.items(), key=lambda e: e[1].priority, reverse=True)
-
-
 _tags = [
     'address', 'article', 'aside', 'base', 'basefont', 'blockquote',
     'body', 'caption', 'center', 'col', 'colgroup', 'dd', 'details',
@@ -42,8 +40,18 @@ _tags = [
     'th', 'thead', 'title', 'tr', 'track', 'ul'
 ]
 _tag_name = r'[A-Za-z][A-Za-z0-9\-]*'
-_attribute = r' +[A-Za-z:_][A-Za-z0-9\-_\.:]*(?: *= *(?:[^\s"\'`=<>]+|\'[^\']*\'|"[^"]*"))?'
-_attribute_no_lf = r' +[A-Za-z:_][A-Za-z0-9\-_\.:]*(?: *= *(?:[^\s"\'`=<>]+|\'[^\n\']*\'|"[^\n"]*"))?'
+_attribute = (
+    r' +[A-Za-z:_][A-Za-z0-9\-_\.:]*'
+    r'(?: *= *(?:[^\s"\'`=<>]+|\'[^\']*\'|"[^"]*"))?'
+)
+_attribute_no_lf = (
+    r' +[A-Za-z:_][A-Za-z0-9\-_\.:]*'
+    r'(?: *= *(?:[^\s"\'`=<>]+|\'[^\n\']*\'|"[^\n"]*"))?'
+)
+_link_label = r'(?P<label>\[(?:\\\\|\\[\[\]]|[^\[\]])+\])'
+_link_dest = r'(?P<label><(?:\\\\|\\[<>]|[^\s<>])*>|\S+)'
+_link_title = (r'(?P<title>"(?:\\\\|\\"|[^"])*"|\'(?:\\\\|\\\'|[^\'])*\''
+               r'|\((?:\\\\|\\\)|[^\(\)])*\))')
 
 
 class InlineElement(object):
@@ -51,76 +59,60 @@ class InlineElement(object):
 
     #: Use to denote the precedence in parsing
     priority = 5
-    #: element regex patterns definition
-    patterns = ()
+    #: element regex pattern
+    pattern = None
 
     def __init__(self, match):
         """Parses the matched object into an element"""
         pass
 
+    @classmethod
+    def search(cls, text):
+        """Searches the text and return the match object.
+        Returns ``cls.pattern.search(text)`` by default.
+        Override this method to do some further checking on match result."""
+        if isinstance(cls.pattern, string_types):
+            cls.pattern = re.compile(cls.pattern)
+        return cls.pattern.search(text)
+
 
 class Literal(InlineElement):
-
-    priority = 3
-    patterns = (r'\\[!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~]',)
+    """Literal escapes need to be parsed at the first."""
+    priority = 9
+    pattern = re.compile(r'\\[!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~]')
 
     def __init__(self, match):
-        self.children = _escape(match.group()[1:])
+        self.children = match.group()[1:]
 
 
-class HardBreak(InlineElement):
-
+class LineBreak(InlineElement):
+    """Line breaks:
+    Soft: '\n'
+    Hard: '  \n'
+    """
     priority = 2
-    patterns = (r' {2,}\n',)
+    pattern = re.compile(r'( {2,})?\n')
+
+    def __init__(self, match):
+        if match.group(1):
+            self.soft = False
+        else:
+            self.soft = True
 
 
 class Link(InlineElement):
-
-    name = 'link'
-    patterns = (
-        r'\[([^\]]+)\]\(([^ ]+) "([^"]+)"\)',
-        r'\[([^\]]+)\]\(([^\)]+)\)')
-
-    @classmethod
-    def parse(cls, match):
-        groups = match.groups()
-        content = {
-            'text': groups[0],
-            'link': groups[1]}
-
-        try:
-            content['title'] = groups[2]
-        except IndexError:
-            pass
-
-        return content
-
-    @classmethod
-    def render(content, ctx):
-        link = urlquote(clean_backslash(content['link']))
-        if content.get('title'):
-            title = _escape(clean_backslash(content['title']))
-            return (
-                '<a href="%s" title="%s">%s</a>'
-                % (link, title, content['text'])
-            )
-        else:
-            return (
-                '<a href="%s">%s</a>'
-                % (link, content['text'])
-            )
+    pass
 
 
 class InlineHTML(InlineElement):
 
-    priority = 7
-    patterns = (
-        r'<%s(?:%s)* */?>' % (_tag_name, _attribute),   # open tag
-        r'</%s *>' % (_tag_name,),                      # closing tag
-        r'<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?-->',          # HTML comment
-        r'<\?[\s\S]*?\?>',                              # processing instruction
-        r'<![A-Z]+ +[\s\S]*?>',                         # declaration
-        r'<!\[CDATA\[[\s\S]*?\]\]>'                     # CDATA section
+    pattern = (
+        r'(?:<%s(?:%s)* */?>'    # open tag
+        r'|</%s *>'              # closing tag
+        r'|<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?-->'   # HTML comment
+        r'|<\?[\s\S]*?\?>'       # processing instruction
+        r'|<![A-Z]+ +[\s\S]*?>'  # declaration
+        r'|<!\[CDATA\[[\s\S]*?\]\]>)'                       # CDATA section
     )
 
     def __init__(self, match):
@@ -174,10 +166,10 @@ class Emphasis(InlineElement):
 
     name = 'emphasis'
     patterns = (
-        r'(?<!\\)(?:\*(?=\w)|(?<!\w)\*(?=[^*\s]))[\s\S]+'
-        r'(?<!\\)(?:(?<=\w)\*|(?<=[^*\s])\*(?!\w))',
-        r'(?<!\\)(?:(?<!\w)_(?=\w)|(?<!\w)_(?=[^_\s]))[\s\S]+'
-        r'(?<!\\)(?:(?<=\w)_(?!\w)|(?<=[^_\s])_(?!\w))'
+        r'(?:\*(?=\w)|(?<!\w)\*(?=[^*\s]))[\s\S]+'
+        r'(?:(?<=\w)\*|(?<=[^*\s])\*(?!\w))',
+        r'(?:(?<!\w)_(?=\w)|(?<!\w)_(?=[^_\s]))[\s\S]+'
+        r'(?:(?<=\w)_(?!\w)|(?<=[^_\s])_(?!\w))'
     )
 
     @classmethod
@@ -281,35 +273,17 @@ class Url(InlineElement):
 
 class AutoLink(InlineElement):
 
-    name = 'auto_link'
     patterns = (r'<[^>]+>',)
-    children = {}
 
     @classmethod
     def parse(cls, match):
         return {'link': match.group(0)[1:-1]}
 
-    @classmethod
-    def render(content, ctx):
-        link = content['link']
-        text = 'mailto:' + link if '@' in link else link
-        return Link.render(
-            {'link': link,
-             'text': text},
-            ctx)
-
-
-def _escape(text):
-    text = text.replace('&amp;', '&') \
-               .replace('&', '&amp;')
-    return text.replace('<', '&lt;') \
-               .replace('>', '&gt;') \
-               .replace('"', '&quot;')
-
 
 class RawText(InlineElement):
-
+    """The raw text has itself only in its priority level to eat all texts unparsed."""
     priority = 1
+    pattern = re.compile(r'.+')
 
     def __init__(self, match):
-        self.children = _escape(match.group())
+        self.children = match.group()

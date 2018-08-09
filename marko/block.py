@@ -4,9 +4,9 @@ Block level elements
 """
 import re
 from . import inline
+from .helpers import Source
 
-_root_node = None
-_element_types = {}
+_renderer = None
 
 __all__ = (
     'CodeBlock',
@@ -19,27 +19,6 @@ __all__ = (
     'HTMLBlock',
     'Paragraph'
 )
-
-
-def add_element(element_type, override=False):
-    """Add a block element.
-
-    :param element_type: the element type class.
-    :param override: whether to replace the element type that bases.
-    """
-    if not override:
-        _element_types[element_type.__name__] = element_type
-    else:
-        for cls in element_type.__bases__:
-            if cls in _element_types.values():
-                _element_types[cls.__name__] = element_type
-                break
-        else:
-            _element_types[element_type.__name__] = element_type
-
-
-def get_elements():
-    return sorted(_element_types.items(), key=lambda e: e[1].priority, reverse=True)
 
 
 class BlockElement(object):
@@ -73,16 +52,12 @@ class Document(BlockElement):
 
     _prefix = ''
 
-    def __init__(self, source):
-        self.footnotes = []
+    def __init__(self, text):
+        self.footnotes = {}
         self.link_ref_defs = {}
-        global _root_node
-        _root_node = self
-        inline._root_node = self
+        source = Source(text)
         with source.under_state(self):
-            self.children = parser.parse(source)
-        _root_node = None
-        inline._root_node = None
+            self.children = _renderer.parse(source)
 
 
 class BlankLine(BlockElement):
@@ -112,7 +87,8 @@ class Heading(BlockElement):
 
     def __init__(self, match):
         self.level = len(match.group(1))
-        self.children = parser.parse_inline(match.group(2).strip())
+        self.children = _renderer.parse_inline(
+            match.group(2).strip())
 
     @classmethod
     def match(cls, source):
@@ -132,7 +108,9 @@ class SetextHeading(BlockElement):
 
     def __init__(self, lines):
         self.level = 1 if lines.pop().strip()[0] == '=' else 2
-        self.children = ''.join(line.lstrip() for line in lines)
+        self.children = _renderer.parse_inline(
+            ''.join(line.lstrip() for line in lines)
+        )
 
 
 class CodeBlock(BlockElement):
@@ -141,7 +119,7 @@ class CodeBlock(BlockElement):
     priority = 9
 
     def __init__(self, lines):
-        self.content = inline._element_types['RawText'](lines)
+        self.content = [inline.RawText(lines)]
 
     @classmethod
     def match(cls, source):
@@ -186,7 +164,7 @@ class FencedCode(BlockElement):
 
     def __init__(self, match):
         self.lang = match[0]
-        self.children = inline._element_types['RawText'](match[1])
+        self.children = [inline.RawText(match[1])]
 
     @classmethod
     def match(cls, source):
@@ -242,7 +220,7 @@ class HTMLBlock(BlockElement):
     _end_cond = None
 
     def __init__(self, lines):
-        self.children = lines
+        self.children = [lines]
 
     @classmethod
     def match(cls, source):
@@ -298,10 +276,8 @@ class Paragraph(BlockElement):
     pattern = re.compile(r'[^\n]+$\n?', flags=re.M)
 
     def __init__(self, lines):
-        lines = ''.join(line.lstrip() for line in lines)
-        if not lines.endswith('\n'):
-            lines += '\n'
-        self.children = parser.parse_inline(lines)
+        lines = ''.join(line.lstrip() for line in lines).rstrip('\n')
+        self.children = _renderer.parse_inline(lines)
         self._tight = False
 
     @classmethod
@@ -315,20 +291,20 @@ class Paragraph(BlockElement):
     @classmethod
     def break_paragraph(cls, source, parse_setext=True):
         if (
-            source.expect_element('Quote')
-            or source.expect_element('Heading')
-            or source.expect_element('BlankLine')
-            or source.expect_element('FencedCode')
+            _renderer.block_elements['Quote'].match(source)
+            or _renderer.block_elements['Heading'].match(source)
+            or _renderer.block_elements['BlankLine'].match(source)
+            or _renderer.block_elements['FencedCode'].match(source)
         ):
             return True
-        if source.expect_element('List'):
+        if _renderer.block_elements['List'].match(source):
             result = ListItem.parse_leading(source.next_line())
             if (result[1][:-1] == '1' or result[1] in '*-+') and result[3]:
                 return True
-        html_type = source.expect_element('HTMLBlock')
+        html_type = _renderer.block_elements['HTMLBlock'].match(source)
         if html_type and html_type != 7:
             return True
-        if source.expect_element('ThematicBreak'):
+        if _renderer.block_elements['ThematicBreak'].match(source):
             if parse_setext and cls.is_setext_heading(source.next_line()):
                 return False
             return True
@@ -350,13 +326,16 @@ class Paragraph(BlockElement):
             else:
                 # check lazy continuation, store the previous state stack
                 states = source._states[:]
-                while source.state is not _root_node:
+                while len(source._states) > 1:
                     source.pop_state()
-                    if cls.break_paragraph(source, False):
-                        end_parse = True
+                    if source.next_line():
+                        # matches the prefix, quit the loop
+                        if cls.break_paragraph(source, False):
+                            # stop the whole parsing
+                            end_parse = True
+                        else:
+                            lines.append(source.next_line(True))
                         break
-                else:
-                    lines.append(source.next_line(True))
                 source._states = states
         return lines
 
@@ -375,7 +354,7 @@ class Quote(BlockElement):
     def parse(cls, source):
         state = cls()
         with source.under_state(state):
-            state.children = parser.parse(source)
+            state.children = _renderer.parse(source)
         return state
 
 
@@ -450,7 +429,7 @@ class ListItem(BlockElement):
         line = line.expandtabs()
         stripped_line = line.lstrip()
         indent = len(line) - len(stripped_line)
-        temp = stripped_line.split(maxsplit=1)
+        temp = stripped_line.split(None, 1)
         bullet = temp[0]
         if len(temp) == 1:
             mid = 1
@@ -477,11 +456,16 @@ class ListItem(BlockElement):
     def parse(cls, source):
         state = cls()
         with source.under_state(state):
-            state.children = parser.parse(source)
+            state.children = _renderer.parse(source)
         return state
 
 
-# import parsers here to avoid cyclic import
-from . import parser  # noqa
-for name in __all__:
-    add_element(globals()[name])
+class LinkRefDef(BlockElement):
+    """Link reference definition:
+    [label]: destination "title"
+    """
+    pattern = re.compile(r' {,3}%s(?P<s1>\s+)')
+
+    @classmethod
+    def match(cls, source):
+        pass

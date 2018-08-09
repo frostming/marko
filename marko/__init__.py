@@ -11,12 +11,16 @@
  Created by Frost Ming<mianghong@gmail.com>
 """
 from .html_renderer import HTMLRenderer
-from .ast_renderer import ASTRenderer
+from .base_renderer import BaseRenderer
 from .block import Document
-from .parser import Source
 
 
-def markdown(text, renderer=ASTRenderer):
+def markdown(text, renderer=HTMLRenderer):
     """Parse and render the given text to HTML output with default settings."""
-    with renderer() as renderer:
-        return renderer.render(Document(Source(text)))
+    if issubclass(renderer, BaseRenderer):
+        renderer = renderer()
+    assert isinstance(
+        renderer, BaseRenderer
+    ), "The renderer must be a subclass or instance of BaseRenderer`."
+    with renderer as renderer:
+        return renderer.render(Document(text))
