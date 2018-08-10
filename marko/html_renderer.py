@@ -2,10 +2,10 @@
 """
 HTML renderer
 """
-from .base_renderer import BaseRenderer
+from .renderer import Renderer
 
 
-class HTMLRenderer(BaseRenderer):
+class HTMLRenderer(Renderer):
     """The most common renderer for markdown parser"""
 
     def render_paragraph(self, element):

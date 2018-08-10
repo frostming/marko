@@ -173,36 +173,3 @@ class Source(object):
         for s in self._states:
             if hasattr(s, '_second_prefix'):
                 s._prefix = s._second_prefix
-
-
-def scan_inline(text, elements):
-    """Scans the text and return a generator of inline elements.
-    Any holes that don't match any elements will be thrown as-is.
-
-    :param text: the text to be parsed.
-    :param elements: a list of element types to be included in parsing.
-    :returns: a generator of elements or holes.
-    """
-    def find_first(text):
-        first = 1 << 32
-        pair = (None, None)
-
-        for e in elements:
-            match = e.search(text)
-            if not match:
-                continue
-            if match.start() < first:
-                pair = (e, match)
-            first = match.start()
-        return pair
-
-    while text:
-        e, match = find_first(text)
-        if not e:
-            break
-        if match.start() > 0:
-            yield text[: match.start()]
-        yield e(match)
-        text = text[match.end():]
-    if text:
-        yield text

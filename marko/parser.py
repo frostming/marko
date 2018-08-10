@@ -1,40 +1,20 @@
-#! -*- coding: utf-8 -*-
 """
-Base renderer class
+Base parser
 """
 import itertools
-
-from . import block, inline
-from ._compat import string_types
-from .helpers import camel_to_snake_case, scan_inline
+from . import block, inline, inline_parser
+from .helpers import string_types
 
 
-class BaseRenderer(object):
-    """The base class of renderers.
-
-    A custom renderer should subclass this class and include your own render functions.
-
-    A render function should:
-
-    * be named as ``render_<element_name>``, where the ``element_name`` is the snake
-      case form of the element class name, the renderer will search the corresponding
-      function in this way.
-    * accept the element instance and return any output you want.
-
-    If no corresponding render function is found, renderer will fallback to call
-    :meth:`BaseRenderer.render_children`.
-
-    All elements defined in CommonMark's spec are included in the base renderer
+class Parser(object):
+    """
+    All elements defined in CommonMark's spec are included in the parser
     by default. To add your custom elements, you can either:
 
     1. pass the element classes as ``extras`` arguments to the constructor.
-    2. or call :meth:`BaseRenderer.add_element` by yourself inside the ``__init__``
-       method body, especially when you want to override the default element.
-
-    Suppose you have a custom renderer called ``MyRenderer``, to use it::
-
-        renderer = MyRenderer()
-        renderer.markdown(text)
+    2. or subclass to your own parser and call :meth:`Parser.add_element`
+       inside the ``__init__`` body, especially when you want to override
+       the default element.
 
     Attributes:
         block_elements(dict): a dict of name: block_element pairs
@@ -42,14 +22,12 @@ class BaseRenderer(object):
 
     :param \*extras: extra elements to be included in parsing process.
     """
-
     def __init__(self, *extras):
-        self.root_node = None
         self.block_elements = {}
         self.inline_elements = {}
         # Create references in block and inline modules to avoid cyclic import.
-        block._renderer = self
-        inline._renderer = self
+        block.parser = self
+        inline.parser = self
 
         for element in itertools.chain(
             (getattr(block, name) for name in block.__all__),
@@ -86,11 +64,6 @@ class BaseRenderer(object):
             else:
                 dest[element.__name__] = element
 
-    def markdown(self, text):
-        """Parse and render the givin markdown text."""
-        self.root_node = self.block_elements['Document'](text)
-        return self.render(self.root_node)
-
     def parse(self, source_or_text):
         """Do the actual parsing and returns an AST or parsed element.
 
@@ -99,9 +72,9 @@ class BaseRenderer(object):
             - text: returns the parsed Document element.
             - source: parse the source and returns the parsed children as a list.
         """
-        element_list = self._get_element_list(self.block_elements)
         if isinstance(source_or_text, string_types):
             return self.block_elements['Document'](source_or_text)
+        element_list = self._get_element_list(self.block_elements)
         ast = []
         while not source_or_text.exhausted:
             for name, ele_type in element_list:
@@ -124,54 +97,15 @@ class BaseRenderer(object):
         :param text: the text to be parsed.
         :returns: a list of inline elements.
         """
-        element_list = self._get_element_list(self.inline_elements)
-        ast = []
-        for element in scan_inline(text, element_list):
-            if isinstance(element, string_types):
-                ast.append(inline.RawText(element))
-            else:
-                ast.append(element)
-        return ast
-
-    def render(self, element):
-        """Renders the given element to string.
-
-        :param element: a element to be rendered.
-        :returns: the output string or any values.
-        """
-        # Store the root node to provide some context to render functions
-        if not self.root_node:
-            self.root_node = element
-        render_func = getattr(
-            self, self._cls_to_func_name(element.__class__), None)
-        if not render_func:
-            render_func = self.render_children
-        return render_func(element)
-
-    def render_children(self, element):
-        """
-        Recursively renders child elements. Joins the rendered
-        strings with no space in between.
-
-        If newlines / spaces are needed between elements, add them
-        in their respective templates, or override this function
-        in the renderer subclass, so that whitespace won't seem to
-        appear magically for anyone reading your program.
-
-        :param element: a branch node who has children attribute.
-        """
-        rendered = [self.render(child) for child in element.children]
-        return ''.join(rendered)
-
-    def _cls_to_func_name(self, klass):
-        element_types = itertools.chain(
-            self.block_elements.items(),
-            self.inline_elements.items()
-        )
-        for name, cls in element_types:
-            if cls is klass:
-                return 'render_' + camel_to_snake_case(name)
+        element_list = self._build_inline_element_list()
+        return inline_parser.parse(text, element_list, fallback=inline.RawText)
 
     @staticmethod
     def _get_element_list(elements):
         return sorted(elements.items(), key=lambda e: e[1].priority, reverse=True)
+
+    def _build_inline_element_list(self):
+        """Return a list of elements, each item is a list of elements
+        with the same priority.
+        """
+        return [e for e in self.inline_elements.values() if not e.virtual]

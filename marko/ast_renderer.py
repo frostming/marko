@@ -2,12 +2,12 @@
 AST renderers for inspecting the markdown parsing result.
 """
 import json
-from .base_renderer import BaseRenderer
+from .renderer import Renderer
 from ._compat import string_types
 from .helpers import camel_to_snake_case
 
 
-class ASTRenderer(BaseRenderer):
+class ASTRenderer(Renderer):
     """Render as AST structure.
 
     Example::
@@ -31,7 +31,7 @@ class ASTRenderer(BaseRenderer):
         return rv
 
 
-class XMLRenderer(BaseRenderer):
+class XMLRenderer(Renderer):
     """Render as XML format AST.
 
     It will render the parsed result and XML string and you can print it or

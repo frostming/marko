@@ -3,77 +3,40 @@
 Inline(span) level elements
 """
 import re
-from .utils import string_types
+from .helpers import string_types
 
-_element_types = {}
-_renderer = None
+parser = None
 
-__all__ = ('Literal',)
-
-
-def add_element(element_type, override=False):
-    """Add an inline element.
-
-    :param element_type: the element type class.
-    :param override: whether to replace the element type that bases.
-    """
-    if not override:
-        _element_types[element_type.__name__] = element_type
-    else:
-        for cls in element_type.__bases__:
-            if cls in _element_types.values():
-                _element_types[cls.__name__] = element_type
-                break
-        else:
-            _element_types[element_type.__name__] = element_type
-
-
-_tags = [
-    'address', 'article', 'aside', 'base', 'basefont', 'blockquote',
-    'body', 'caption', 'center', 'col', 'colgroup', 'dd', 'details',
-    'dialog', 'dir', 'div', 'dl', 'dt', 'fieldset', 'figcaption',
-    'figure', 'footer', 'form', 'frame', 'frameset', 'h1', 'h2',
-    'h3', 'h4', 'h5', 'h6', 'head', 'header', 'hr', 'html', 'iframe',
-    'legend', 'li', 'link', 'main', 'menu', 'menuitem', 'meta',
-    'nav', 'noframes', 'ol', 'optgroup', 'option', 'p', 'param',
-    'section', 'source', 'summary', 'table', 'tbody', 'td', 'tfoot',
-    'th', 'thead', 'title', 'tr', 'track', 'ul'
-]
-_tag_name = r'[A-Za-z][A-Za-z0-9\-]*'
-_attribute = (
-    r' +[A-Za-z:_][A-Za-z0-9\-_\.:]*'
-    r'(?: *= *(?:[^\s"\'`=<>]+|\'[^\']*\'|"[^"]*"))?'
-)
-_attribute_no_lf = (
-    r' +[A-Za-z:_][A-Za-z0-9\-_\.:]*'
-    r'(?: *= *(?:[^\s"\'`=<>]+|\'[^\n\']*\'|"[^\n"]*"))?'
-)
-_link_label = r'(?P<label>\[(?:\\\\|\\[\[\]]|[^\[\]])+\])'
-_link_dest = r'(?P<label><(?:\\\\|\\[<>]|[^\s<>])*>|\S+)'
-_link_title = (r'(?P<title>"(?:\\\\|\\"|[^"])*"|\'(?:\\\\|\\\'|[^\'])*\''
-               r'|\((?:\\\\|\\\)|[^\(\)])*\))')
+__all__ = ('LineBreak', 'Literal', 'LinkOrEmph', 'InlineHTML', 'CodeSpan',
+           'Emphasis', 'StrongEmphasis', 'Link', 'Image')
 
 
 class InlineElement(object):
     """Any inline element should inherit this class"""
 
-    #: Use to denote the precedence in parsing
+    #: Use to denote the precedence in parsing.
     priority = 5
-    #: element regex pattern
+    #: element regex pattern.
     pattern = None
+    #: whether to parse children.
+    parse_children = False
+    #: which match group to parse.
+    parse_group = 1
+    #: if True, it won't be included in parsing process but produced by other elements
+    #: other elements instead.
+    virtual = False
 
     def __init__(self, match):
         """Parses the matched object into an element"""
-        pass
+        if not self.parse_children:
+            self.children = match.group(self.parse_group)
 
     @classmethod
-    def search(cls, text):
-        """Searches the text and return the match object.
-        Returns ``cls.pattern.search(text)`` by default.
-        Override this method to do some further checking on match result."""
+    def find(cls, text):
+        """This method should return an iterable containing matches of this element."""
         if isinstance(cls.pattern, string_types):
             cls.pattern = re.compile(cls.pattern)
-        return cls.pattern.search(text)
+        return cls.pattern.finditer(text)
 
 
 class Literal(InlineElement):
@@ -91,17 +54,10 @@ class LineBreak(InlineElement):
     Hard: '  \n'
     """
     priority = 2
-    pattern = re.compile(r'( {2,})?\n')
+    pattern = re.compile(r'( *|\\)\n')
 
     def __init__(self, match):
-        if match.group(1):
-            self.soft = False
-        else:
-            self.soft = True
-
-
-class Link(InlineElement):
-    pass
+        self.soft = match.group(1).startswith(('  ', '\\'))
 
 
 class InlineHTML(InlineElement):
@@ -119,160 +75,51 @@ class InlineHTML(InlineElement):
         self.children = match.group(0)
 
 
-class LinkRef(InlineElement):
+class LinkOrEmph(InlineElement):
+    """This is a special element, whose parsing is done specially.
+    And it produces Link or Emphasis elements.
+    """
 
-    name = 'link_ref'
-
-    @classmethod
-    def parse(cls, match):
-        groups = match.groups()
-        return {
-            'text': groups[0][1:-1],
-            'ref': normalize_label((groups[1] or groups[0])[1:-1]),
-            'full': match.group()
-        }
-
-    @classmethod
-    def render(content, ctx):
-        try:
-            link, title = ctx['link_ref'][content['ref']]
-        except KeyError:
-            return '%(full)s' % content
-        else:
-            return Link.render(
-                {'link': link,
-                 'title': title,
-                 'text': content['text']},
-                ctx)
+    def __new__(cls, match):
+        return parser.inline_elements[match.type](match)
 
 
-class DoubleEmphasis(InlineElement):
-
-    name = 'double_emphasis'
-    patterns = (
-        r'\*\*[^ ](?:[^ ]+ \*\* )*[^\*]*\*\*',
-        r'__[^ ](?:[^ ]+ __ )*[^_]*__')
-
-    @classmethod
-    def parse(cls, match):
-        return {'text': match.group(0)[2:-2]}
-
-    @classmethod
-    def render(content, ctx):
-        return '<strong>%(text)s</strong>' % content
+class StrongEmphasis(InlineElement):
+    """Strong emphasis: **sample text**"""
+    virtual = True
 
 
 class Emphasis(InlineElement):
+    """Emphasis: *sample text*"""
+    virtual = True
 
-    name = 'emphasis'
-    patterns = (
-        r'(?:\*(?=\w)|(?<!\w)\*(?=[^*\s]))[\s\S]+'
-        r'(?:(?<=\w)\*|(?<=[^*\s])\*(?!\w))',
-        r'(?:(?<!\w)_(?=\w)|(?<!\w)_(?=[^_\s]))[\s\S]+'
-        r'(?:(?<=\w)_(?!\w)|(?<=[^_\s])_(?!\w))'
-    )
 
-    @classmethod
-    def parse(cls, match):
-        return {'text': match.group(0)[1:-1]}
+class Link(InlineElement):
+    """Link: [text](/link/destination)"""
+    virtual = True
 
-    @classmethod
-    def render(content, ctx):
-        return '<em>%(text)s</em>' % content
+
+class Image(InlineElement):
+    """Image: ![alt](/src/address)"""
+    virtual = True
 
 
 class CodeSpan(InlineElement):
 
-    name = 'code_span'
-    patterns = (
-        r'(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)',)
+    priority = 7
+    pattern = re.compile(r'(`+)([\s\S]+?)(?<!`)\1(?!`)')
 
-    @classmethod
-    def parse(cls, match):
-        return {'text': re.sub(r'\s+', ' ', match.group(2).strip())}
-
-    @classmethod
-    def render(content, ctx):
-        return '<code>%(text)s</code>' % content
-
-
-class Image(InlineElement):
-
-    name = 'image'
-    patterns = (
-        r'!\[([^\]]+)\]\(([^ ]+) "([^"]+)"\)',
-        r'!\[([^\]]+)\]\(([^\)]+)\)')
-
-    @classmethod
-    def parse(cls, match):
-        groups = match.groups()
-        content = {
-            'text': groups[0],
-            'link': groups[1]}
-
-        try:
-            content['title'] = groups[2]
-        except IndexError:
-            pass
-
-        return content
-
-    @classmethod
-    def render(content, ctx):
-        if 'title' in content:
-            return (
-                '<img src="%(link)s" '
-                'title="%(title)s">%(text)s</img>' % content)
-        else:
-            return (
-                '<img src="%(link)s">%(text)s</img>' % content)
-
-
-class ImageRef(InlineElement):
-
-    name = 'image_ref'
-    patterns = (r'!\[([^\]]+)\] ?\[([^\]]+)\]',)
-
-    @classmethod
-    def parse(cls, match):
-        return {
-            'text': match.group(1),
-            'ref': match.group(2)}
-
-    @classmethod
-    def render(content, ctx):
-        try:
-            link, title = ctx[content['ref']]
-        except KeyError:
-            return '%(text)s' % content
-        else:
-            return Image.render(
-                {'link': link,
-                 'title': title,
-                 'text': content['text']},
-                ctx)
+    def __init__(self, match):
+        self.children = re.sub(r'\s+', ' ', match.group(2).strip())
 
 
 class Url(InlineElement):
 
-    name = 'url'
-    patterns = (r'''https?:\/\/[^\s<]+[^<.,:;"')\]\s]''',)
-
-    @classmethod
-    def parse(cls, match):
-        return {'link': match.group(0)}
-
-    @classmethod
-    def render(content, ctx):
-        return Link.render(
-            {'link': content['link'],
-             'text': content['link']},
-            ctx
-        )
+    priority = 1
 
 
 class AutoLink(InlineElement):
-
+    priority = 7
     patterns = (r'<[^>]+>',)
 
     @classmethod
@@ -281,9 +128,7 @@ class AutoLink(InlineElement):
 
 
 class RawText(InlineElement):
-    """The raw text has itself only in its priority level to eat all texts unparsed."""
-    priority = 1
-    pattern = re.compile(r'.+')
+    """The raw text is the fallback for all holes that doesn't match any others."""
 
     def __init__(self, match):
-        self.children = match.group()
+        self.children = match

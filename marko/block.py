@@ -3,12 +3,13 @@
 Block level elements
 """
 import re
-from . import inline
-from .helpers import Source
+from . import inline, patterns
+from .helpers import Source, is_parenthesis_paired
 
-_renderer = None
+parser = None
 
 __all__ = (
+    'Document',
     'CodeBlock',
     'Heading',
     'List',
@@ -17,6 +18,7 @@ __all__ = (
     'FencedCode',
     'ThematicBreak',
     'HTMLBlock',
+    'LinkRefDef',
     'Paragraph'
 )
 
@@ -53,11 +55,14 @@ class Document(BlockElement):
     _prefix = ''
 
     def __init__(self, text):
-        self.footnotes = {}
         self.link_ref_defs = {}
         source = Source(text)
         with source.under_state(self):
-            self.children = _renderer.parse(source)
+            self.children = parser.parse(source)
+
+    @classmethod
+    def match(cls, source):
+        return False
 
 
 class BlankLine(BlockElement):
@@ -87,7 +92,7 @@ class Heading(BlockElement):
 
     def __init__(self, match):
         self.level = len(match.group(1))
-        self.children = _renderer.parse_inline(
+        self.children = parser.parse_inline(
             match.group(2).strip())
 
     @classmethod
@@ -108,7 +113,7 @@ class SetextHeading(BlockElement):
 
     def __init__(self, lines):
         self.level = 1 if lines.pop().strip()[0] == '=' else 2
-        self.children = _renderer.parse_inline(
+        self.children = parser.parse_inline(
             ''.join(line.lstrip() for line in lines)
         )
 
@@ -152,7 +157,7 @@ class CodeBlock(BlockElement):
                 break
         else:
             return line
-        return line[i + 1 :]
+        return line[i + 1:]
 
 
 class FencedCode(BlockElement):
@@ -239,13 +244,13 @@ class HTMLBlock(BlockElement):
         if source.expect_re(r' {,3}<!\[CDATA\['):
             cls._end_cond = re.compile(r'\]\]>')
             return 5
-        block_tag = r'(?:%s)' % ('|'.join(inline._tags),)
+        block_tag = r'(?:%s)' % ('|'.join(patterns.tags),)
         if source.expect_re(r' {,3}</?%s(?: +|/?>|$)(?im)' % block_tag):
             cls._end_cond = None
             return 6
         if source.expect_re(
             r' {,3}(<%(tag)s(?:%(attr)s)*[^\n\S]*/?>|</%(tag)s[^\n\S]*>)[^\n\S]*$(?m)'
-            % {'tag': inline._tag_name, 'attr': inline._attribute_no_lf}
+            % {'tag': patterns.tag_name, 'attr': patterns.attribute_no_lf}
         ):
             cls._end_cond = None
             return 7
@@ -277,7 +282,7 @@ class Paragraph(BlockElement):
 
     def __init__(self, lines):
         lines = ''.join(line.lstrip() for line in lines).rstrip('\n')
-        self.children = _renderer.parse_inline(lines)
+        self.children = parser.parse_inline(lines)
         self._tight = False
 
     @classmethod
@@ -291,20 +296,20 @@ class Paragraph(BlockElement):
     @classmethod
     def break_paragraph(cls, source, parse_setext=True):
         if (
-            _renderer.block_elements['Quote'].match(source)
-            or _renderer.block_elements['Heading'].match(source)
-            or _renderer.block_elements['BlankLine'].match(source)
-            or _renderer.block_elements['FencedCode'].match(source)
+            parser.block_elements['Quote'].match(source)
+            or parser.block_elements['Heading'].match(source)
+            or parser.block_elements['BlankLine'].match(source)
+            or parser.block_elements['FencedCode'].match(source)
         ):
             return True
-        if _renderer.block_elements['List'].match(source):
+        if parser.block_elements['List'].match(source):
             result = ListItem.parse_leading(source.next_line())
             if (result[1][:-1] == '1' or result[1] in '*-+') and result[3]:
                 return True
-        html_type = _renderer.block_elements['HTMLBlock'].match(source)
+        html_type = parser.block_elements['HTMLBlock'].match(source)
         if html_type and html_type != 7:
             return True
-        if _renderer.block_elements['ThematicBreak'].match(source):
+        if parser.block_elements['ThematicBreak'].match(source):
             if parse_setext and cls.is_setext_heading(source.next_line()):
                 return False
             return True
@@ -354,7 +359,7 @@ class Quote(BlockElement):
     def parse(cls, source):
         state = cls()
         with source.under_state(state):
-            state.children = _renderer.parse(source)
+            state.children = parser.parse(source)
         return state
 
 
@@ -456,7 +461,7 @@ class ListItem(BlockElement):
     def parse(cls, source):
         state = cls()
         with source.under_state(state):
-            state.children = _renderer.parse(source)
+            state.children = parser.parse(source)
         return state
 
 
@@ -464,8 +469,36 @@ class LinkRefDef(BlockElement):
     """Link reference definition:
     [label]: destination "title"
     """
-    pattern = re.compile(r' {,3}%s(?P<s1>\s+)')
+    pattern = re.compile(
+        r' {,3}%s:(?P<s1>\s*)%s(?P<s2>\s*)(?:(?<=\s)%s)?[^\n\S]*$'
+        % (patterns.link_label, patterns.link_dest, patterns.link_title)
+    )
+    _parse_info = None
 
     @classmethod
     def match(cls, source):
-        pass
+        m = source.expect_re(cls.pattern)
+        if not m:
+            return False
+        rv = m.groupdict()
+        if rv['s1'].count('\n') > 1 or rv['s1'].count('\n') > 1:
+            return False
+        label = rv['label'][1:-1]
+        if rv['dest'][0] == '<' and rv['dest'][-1] == '>':
+            dest = rv['dest'][1:-1]
+        elif is_parenthesis_paired(rv['dest']):
+            dest = rv['dest']
+        else:
+            return False
+        title = rv['title'][1:-1] if rv['title'] else None
+        if title and re.search(r'^$', title, re.M):
+            return False
+        cls._parse_info = label, dest, title
+        return m
+
+    @classmethod
+    def parse(cls, source):
+        label, dest, title = cls._parse_info
+        source.root.link_ref_defs[label] = (dest, title)
+        source.expect_re(cls.pattern, True)
+        return cls()
