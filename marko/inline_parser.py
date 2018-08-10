@@ -20,6 +20,11 @@ def parse(text, elements, fallback):
 
 class Token(object):
     """An intermediate class to wrap the match object."""
+    PROCEDE = 0
+    INTERSECT = 1
+    CONTAIN = 2
+    SHADE = 3
+
     def __init__(self, etype, match, text, fallback):
         self.etype = etype
         self.match = match
@@ -31,4 +36,11 @@ class Token(object):
         self.fallback = fallback
 
     def relation(self, other):
-        """
+        if self.end >= other.start:
+            return Token.PROCEDE
+        if self.end >= other.end:
+            if other.start >= self.inner_start and other.end <= self.inner_end:
+                return Token.CONTAIN
+            if self.inner_end <= other.start:
+                return Token.SHADE
+        return Token.INTERSECT
