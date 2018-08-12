@@ -4,11 +4,14 @@ Inline(span) level elements
 """
 import re
 from .helpers import string_types
+from . import parser_inline
 
+# backrefs to avoid cylic  import
 parser = None
+_root_node = None
 
 __all__ = ('LineBreak', 'Literal', 'LinkOrEmph', 'InlineHTML', 'CodeSpan',
-           'Emphasis', 'StrongEmphasis', 'Link', 'Image')
+           'Emphasis', 'StrongEmphasis', 'Link', 'Image', 'RawText')
 
 
 class InlineElement(object):
@@ -83,6 +86,10 @@ class LinkOrEmph(InlineElement):
     def __new__(cls, match):
         return parser.inline_elements[match.type](match)
 
+    @classmethod
+    def find(cls, text):
+        return parser_inline.find_links_or_emphs(text, _root_node)
+
 
 class StrongEmphasis(InlineElement):
     """Strong emphasis: **sample text**"""
@@ -129,6 +136,7 @@ class AutoLink(InlineElement):
 
 class RawText(InlineElement):
     """The raw text is the fallback for all holes that doesn't match any others."""
+    virtual = True
 
     def __init__(self, match):
         self.children = match

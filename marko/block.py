@@ -13,12 +13,14 @@ __all__ = (
     'CodeBlock',
     'Heading',
     'List',
+    'ListItem',
     'BlankLine',
     'Quote',
     'FencedCode',
     'ThematicBreak',
     'HTMLBlock',
     'LinkRefDef',
+    'SetextHeading',
     'Paragraph'
 )
 
@@ -27,6 +29,9 @@ class BlockElement(object):
 
     #: Use to denote the precedence in parsing
     priority = 5
+    #: if True, it won't be included in parsing process but produced by other elements
+    #: other elements instead.
+    virtual = False
 
     @classmethod
     def match(self, source):
@@ -48,6 +53,9 @@ class BlockElement(object):
         """
         raise NotImplementedError()
 
+    def __lt__(self, o):
+        return self.priority < o.priority
+
 
 class Document(BlockElement):
     """Document node element."""
@@ -57,6 +65,7 @@ class Document(BlockElement):
     def __init__(self, text):
         self.link_ref_defs = {}
         source = Source(text)
+        inline._root_node = self
         with source.under_state(self):
             self.children = parser.parse(source)
 
@@ -109,7 +118,7 @@ class SetextHeading(BlockElement):
     It can only be created by Paragraph.parse.
     """
 
-    priority = 1
+    virtual = True
 
     def __init__(self, lines):
         self.level = 1 if lines.pop().strip()[0] == '=' else 2
@@ -303,7 +312,7 @@ class Paragraph(BlockElement):
         ):
             return True
         if parser.block_elements['List'].match(source):
-            result = ListItem.parse_leading(source.next_line())
+            result = parser.block_elements['ListItem'].parse_leading(source.next_line())
             if (result[1][:-1] == '1' or result[1] in '*-+') and result[3]:
                 return True
         html_type = parser.block_elements['HTMLBlock'].match(source)
@@ -327,7 +336,7 @@ class Paragraph(BlockElement):
             if line:
                 lines.append(source.next_line(True))
                 if cls.is_setext_heading(line):
-                    return SetextHeading(lines)
+                    return parser.block_elements['SetextHeading'](lines)
             else:
                 # check lazy continuation, store the previous state stack
                 states = source._states[:]
@@ -394,10 +403,10 @@ class List(BlockElement):
         tight = True
         with source.under_state(state):
             while not source.exhausted:
-                if ListItem.match(source):
-                    el = ListItem.parse(source)
+                if parser.block_elements['ListItem'].match(source):
+                    el = parser.block_elements['ListItem'].parse(source)
                     if not isinstance(el, BlockElement):
-                        el = ListItem(el)
+                        el = parser.block_elements['ListItem'](el)
                     children.append(el)
                     source.anchor()
                 elif BlankLine.match(source):
@@ -423,6 +432,7 @@ class ListItem(BlockElement):
     """List item element. It can only be created by List.parse"""
 
     _parse_info = None
+    virtual = True
 
     def __init__(self):
         indent, bullet, mid, tail = self._parse_info

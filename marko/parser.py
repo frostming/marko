@@ -74,10 +74,10 @@ class Parser(object):
         """
         if isinstance(source_or_text, string_types):
             return self.block_elements['Document'](source_or_text)
-        element_list = self._get_element_list(self.block_elements)
+        element_list = self._build_block_element_list()
         ast = []
         while not source_or_text.exhausted:
-            for name, ele_type in element_list:
+            for ele_type in element_list:
                 if ele_type.match(source_or_text):
                     result = ele_type.parse(source_or_text)
                     if not hasattr(result, 'priority'):
@@ -98,11 +98,17 @@ class Parser(object):
         :returns: a list of inline elements.
         """
         element_list = self._build_inline_element_list()
-        return inline_parser.parse(text, element_list, fallback=inline.RawText)
+        return inline_parser.parse(
+            text, element_list, fallback=self.inline_elements['RawText']
+        )
 
-    @staticmethod
-    def _get_element_list(elements):
-        return sorted(elements.items(), key=lambda e: e[1].priority, reverse=True)
+    def _build_block_element_list(self):
+        """Return a list of block elements, ordered from highest priority to lowest.
+        """
+        return sorted(
+            [e for e in self.block_elements.values() if not e.virtual],
+            reverse=True
+        )
 
     def _build_inline_element_list(self):
         """Return a list of elements, each item is a list of elements
