@@ -141,10 +141,12 @@ def find_links_or_emphs(text, root_node):
             escape = True
             i += 1
         elif text[i] == ']':
-            node = look_for_image_or_link(text, delimiters, i + 1, root_node, matches)
+            node = look_for_image_or_link(text, delimiters, i, root_node, matches)
             if node:
                 i = node.end()
                 matches.append(node)
+            else:
+                i += 1
         else:
             m = delimiters_re.match(text, i)
             if m:
@@ -157,23 +159,23 @@ def find_links_or_emphs(text, root_node):
 
 
 def look_for_image_or_link(text, delimiters, close, root_node, matches):
-    for i, d in reversed(enumerate(delimiters)):
+    for i, d in list(enumerate(delimiters))[::-1]:
         if d.content not in ('[', '!['):
             continue
         if not d.active:
             break   # break to remove the delimiter and return None
-        if not _is_legal_link_text(text[d.start + 1:close - 1]):
+        if not _is_legal_link_text(text[d.start + 1:close]):
             break
-        link_text = (d.start, close, text[d.start:close])
+        link_text = (d.start + 1, close, text[d.start + 1:close])
         etype = 'Image' if d.content == '![' else 'Link'
         match = (
-            _expect_inline_link(text, close)
-            or _expect_reference_link(text, close, link_text[2], root_node)
+            _expect_inline_link(text, close + 1)
+            or _expect_reference_link(text, close + 1, text[d.start:close + 1], root_node)
         )
         if not match:   # not a link
             break
         rv = MatchObj(
-            etype, text, d.start, match[2], match[0], match[1]
+            etype, text, d.start, match[2], link_text, match[0], match[1]
         )
         process_emphasis(text, delimiters, i, matches)
         if etype == 'Link':
@@ -197,7 +199,7 @@ def _is_legal_link_text(text):
 
 def _expect_inline_link(text, start):
     """(link_dest "link_title")"""
-    if text[start] != '(':
+    if start >= len(text) or text[start] != '(':
         return None
     i = start + 1
     m = patterns.whitespace.match(text, i)

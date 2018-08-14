@@ -28,19 +28,21 @@ class HTMLRenderer(Renderer):
         )
 
     def render_list_item(self, element):
-        return '<li>\n{}</li>\n'.format(self.render_children(element))
+        return '<li>{}{}</li>\n'.format(
+            '' if element._tight else '',
+            self.render_children(element))
 
     def render_quote(self, element):
         return '<blockquote>\n{}</blockquote>\n'.format(self.render_children(element))
 
     def render_fenced_code(self, element):
         lang = ' class="language-{}"'.format(element.lang) if element.lang else ''
-        return '<pre><code{}>\n{}</code></pre>\n'.format(
+        return '<pre><code{}>{}</code></pre>\n'.format(
             lang, self.render_children(element)
         )
 
     def render_code_block(self, element):
-        return '<pre><code>\n{}</code></pre>\n'.format(self.render_children(element))
+        return '<pre><code>{}</code></pre>\n'.format(self.render_children(element))
 
     def render_html_block(self, element):
         return element.children
@@ -78,10 +80,22 @@ class HTMLRenderer(Renderer):
 
     def render_link(self, element):
         template = '<a href="{}"{}>{}</a>'
-        title = ' title="{}"'.format(element.title) if element.title else ''
+        title = ' title="{}"'.format(
+            self.escape_html(element.title)) if element.title else ''
         url = self.escape_url(element.dest)
         body = self.render_children(element)
         return template.format(url, title, body)
+
+    def render_image(self, element):
+        template = '<img src="{}" alt="{}"{} />'
+        title = ' title="{}"'.format(
+            self.escape_html(element.title)) if element.title else ''
+        url = self.escape_url(element.dest)
+        render_func = self.render
+        self.render = self.render_plain_text
+        body = self.render_children(element)
+        self.render = render_func
+        return template.format(url, body, title)
 
     def render_literal(self, element):
         return self.render_raw_text(element)

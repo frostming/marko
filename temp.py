@@ -1,4 +1,4 @@
 from marko import markdown
 
 
-markdown("-\t\tfoo\n")
+markdown("-\n  foo\n-\n  ```\n  bar\n  ```\n-\n      baz\n")

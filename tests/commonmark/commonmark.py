@@ -5,6 +5,7 @@ import json
 from marko import markdown
 from traceback import print_tb
 from argparse import ArgumentParser
+from .normalize import normalize_html
 
 
 def run_tests(
@@ -34,9 +35,10 @@ def run_tests(
 
 def run_test(test_entry, quiet=False):
     test_case = test_entry['markdown']
+    print('Running test:', test_entry['example'])
     try:
         output = markdown(test_case)
-        success = test_entry['html'] == output
+        success = normalize_html(test_entry['html']) == normalize_html(output)
         if not success and not quiet:
             print_test_entry(test_entry, output)
         return success, test_entry['section']

@@ -6,20 +6,11 @@ from contextlib import contextmanager
 
 from ._compat import string_types
 
-camelcase_re = re.compile(r'([A-Z]+)(?=[a-z0-9])')
-
 
 def camel_to_snake_case(name):
     """Takes a camelCased string and converts to snake_case."""
-    def _join(match):
-        word = match.group()
-
-        if len(word) > 1:
-            return ('_%s_%s' % (word[:-1], word[-1])).lower()
-
-        return '_' + word.lower()
-
-    return camelcase_re.sub(_join, name).lstrip('_')
+    pattern = r'[A-Z][a-z]+|[A-Z]+(?![a-z])'
+    return '_'.join(map(str.lower, re.findall(pattern, name)))
 
 
 def is_paired(text, open='(', close=')'):
@@ -44,7 +35,7 @@ def is_paired(text, open='(', close=')'):
 
 
 def _preprocess_text(text):
-    return re.sub(r'^ +$', '', text, flags=re.M).replace('\r\n', '\n')
+    return text.replace('\r\n', '\n')
 
 
 class Source(object):

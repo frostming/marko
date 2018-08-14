@@ -4,7 +4,7 @@ Inline(span) level elements
 """
 import re
 from .helpers import string_types
-from . import inline_parser
+from . import inline_parser, patterns
 
 # backrefs to avoid cylic  import
 parser = None
@@ -45,10 +45,14 @@ class InlineElement(object):
 class Literal(InlineElement):
     """Literal escapes need to be parsed at the first."""
     priority = 9
-    pattern = re.compile(r'\\[!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~]')
+    pattern = re.compile(r'\\([!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~])')
 
     def __init__(self, match):
-        self.children = match.group()[1:]
+        self.children = match.group(1)
+
+    @classmethod
+    def strip_backslash(cls, text):
+        return cls.pattern.sub(r'\1', text)
 
 
 class LineBreak(InlineElement):
@@ -57,21 +61,22 @@ class LineBreak(InlineElement):
     Hard: '  \n'
     """
     priority = 2
-    pattern = re.compile(r'( *|\\)\n')
+    pattern = re.compile(r'( *|\\)\n(?!\Z)')
 
     def __init__(self, match):
-        self.soft = match.group(1).startswith(('  ', '\\'))
+        self.soft = not match.group(1).startswith(('  ', '\\'))
 
 
 class InlineHTML(InlineElement):
 
     pattern = (
-        r'(?:<%s(?:%s)* */?>'    # open tag
+        r'(<%s(?:%s)* */?>'    # open tag
         r'|</%s *>'              # closing tag
         r'|<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?-->'   # HTML comment
         r'|<\?[\s\S]*?\?>'       # processing instruction
         r'|<![A-Z]+ +[\s\S]*?>'  # declaration
-        r'|<!\[CDATA\[[\s\S]*?\]\]>)'                       # CDATA section
+        r'|<!\[CDATA\[[\s\S]*?\]\]>)'         # CDATA section
+        % (patterns.tag_name, patterns.attribute, patterns.tag_name)
     )
 
     def __init__(self, match):
@@ -110,8 +115,13 @@ class Link(InlineElement):
     parse_children = True
 
     def __init__(self, match):
-        self.dest = match.group(2)
-        self.title = match.group(3)
+        if match.group(2)[0] == '<' and match.group(2)[-1] == '>':
+            self.dest = match.group(2)[1:-1]
+        else:
+            self.dest = match.group(2)
+        self.dest = Literal.strip_backslash(self.dest)
+        self.title = Literal.strip_backslash(
+            match.group(3)[1:-1]) if match.group(3) else None
 
 
 class Image(InlineElement):
@@ -120,8 +130,13 @@ class Image(InlineElement):
     parse_children = True
 
     def __init__(self, match):
-        self.dest = match.group(2)
-        self.title = match.group(3)
+        if match.group(2)[0] == '<' and match.group(2)[-1] == '>':
+            self.dest = match.group(2)[1:-1]
+        else:
+            self.dest = match.group(2)
+        self.dest = Literal.strip_backslash(self.dest)
+        self.title = Literal.strip_backslash(
+            match.group(3)[1:-1]) if match.group(3) else None
 
 
 class CodeSpan(InlineElement):
