@@ -107,6 +107,7 @@ class Parser(object):
         """
         return sorted(
             [e for e in self.block_elements.values() if not e.virtual],
+            key=lambda e: e.priority,
             reverse=True
         )
 

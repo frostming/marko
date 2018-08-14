@@ -22,7 +22,7 @@ def camel_to_snake_case(name):
     return camelcase_re.sub(_join, name).lstrip('_')
 
 
-def is_parenthesis_paired(text):
+def is_paired(text, open='(', close=')'):
     """Check if the text only contains:
     1. blackslash escaped parentheses, or
     2. parentheses paired.
@@ -34,9 +34,9 @@ def is_parenthesis_paired(text):
             escape = False
         elif c == '\\':
             escape = True
-        elif c == '(':
+        elif c == open:
             count += 1
-        elif c == ')':
+        elif c == close:
             if count == 0:
                 return False
             count -= 1
@@ -173,3 +173,8 @@ class Source(object):
         for s in self._states:
             if hasattr(s, '_second_prefix'):
                 s._prefix = s._second_prefix
+
+
+def normalize_label(label):
+    """Return the normalized form of link label."""
+    return re.sub(r'\s+', ' ', label[1:-1]).strip().casefold()

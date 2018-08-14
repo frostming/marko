@@ -4,7 +4,7 @@ Inline(span) level elements
 """
 import re
 from .helpers import string_types
-from . import parser_inline
+from . import inline_parser
 
 # backrefs to avoid cylic  import
 parser = None
@@ -82,42 +82,55 @@ class LinkOrEmph(InlineElement):
     """This is a special element, whose parsing is done specially.
     And it produces Link or Emphasis elements.
     """
+    parse_children = True
 
     def __new__(cls, match):
-        return parser.inline_elements[match.type](match)
+        return parser.inline_elements[match.etype](match)
 
     @classmethod
     def find(cls, text):
-        return parser_inline.find_links_or_emphs(text, _root_node)
+        return inline_parser.find_links_or_emphs(text, _root_node)
 
 
 class StrongEmphasis(InlineElement):
     """Strong emphasis: **sample text**"""
     virtual = True
+    parse_children = True
 
 
 class Emphasis(InlineElement):
     """Emphasis: *sample text*"""
     virtual = True
+    parse_children = True
 
 
 class Link(InlineElement):
     """Link: [text](/link/destination)"""
     virtual = True
+    parse_children = True
+
+    def __init__(self, match):
+        self.dest = match.group(2)
+        self.title = match.group(3)
 
 
 class Image(InlineElement):
     """Image: ![alt](/src/address)"""
     virtual = True
+    parse_children = True
+
+    def __init__(self, match):
+        self.dest = match.group(2)
+        self.title = match.group(3)
 
 
 class CodeSpan(InlineElement):
 
     priority = 7
-    pattern = re.compile(r'(`+)([\s\S]+?)(?<!`)\1(?!`)')
+    pattern = re.compile(r'(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)')
 
     def __init__(self, match):
-        self.children = re.sub(r'\s+', ' ', match.group(2).strip())
+        self.children = ' '.join(match.group(2).split())
 
 
 class Url(InlineElement):
@@ -127,7 +140,7 @@ class Url(InlineElement):
 
 class AutoLink(InlineElement):
     priority = 7
-    patterns = (r'<[^>]+>',)
+    patterns = (r'<\w+://\w+>',)
 
     @classmethod
     def parse(cls, match):

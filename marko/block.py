@@ -4,7 +4,7 @@ Block level elements
 """
 import re
 from . import inline, patterns
-from .helpers import Source, is_parenthesis_paired
+from .helpers import Source, is_paired, normalize_label
 
 parser = None
 
@@ -133,7 +133,7 @@ class CodeBlock(BlockElement):
     priority = 9
 
     def __init__(self, lines):
-        self.content = [inline.RawText(lines)]
+        self.children = [inline.RawText(lines)]
 
     @classmethod
     def match(cls, source):
@@ -147,7 +147,7 @@ class CodeBlock(BlockElement):
         lines = [cls.strip_indent(source.next_line(True))]
         while not source.exhausted:
             if cls.match(source):
-                lines.append[cls.strip_indent(source.next_line(True))]
+                lines.append(cls.strip_indent(source.next_line(True)))
                 source.anchor()
             elif not source.next_line().strip():
                 lines.append(source.next_line(True))
@@ -493,14 +493,14 @@ class LinkRefDef(BlockElement):
         rv = m.groupdict()
         if rv['s1'].count('\n') > 1 or rv['s1'].count('\n') > 1:
             return False
-        label = rv['label'][1:-1]
+        label = rv['label']
         if rv['dest'][0] == '<' and rv['dest'][-1] == '>':
-            dest = rv['dest'][1:-1]
-        elif is_parenthesis_paired(rv['dest']):
+            dest = rv['dest']
+        elif is_paired(rv['dest'], '(', ')'):
             dest = rv['dest']
         else:
             return False
-        title = rv['title'][1:-1] if rv['title'] else None
+        title = rv['title']
         if title and re.search(r'^$', title, re.M):
             return False
         cls._parse_info = label, dest, title
@@ -509,6 +509,8 @@ class LinkRefDef(BlockElement):
     @classmethod
     def parse(cls, source):
         label, dest, title = cls._parse_info
-        source.root.link_ref_defs[label] = (dest, title)
+        normalized_label = normalize_label(label)
+        if normalized_label not in source.root.link_ref_defs:
+            source.root.link_ref_defs[normalized_label] = (dest, title)
         source.expect_re(cls.pattern, True)
         return cls()

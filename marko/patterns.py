@@ -1,6 +1,8 @@
 """
 Some regex patterns
 """
+import re
+
 tags = [
     'address', 'article', 'aside', 'base', 'basefont', 'blockquote',
     'body', 'caption', 'center', 'col', 'colgroup', 'dd', 'details',
@@ -25,3 +27,7 @@ link_label = r'(?P<label>\[(?:\\\\|\\[\[\]]|[^\[\]])+\])'
 link_dest = r'(?P<dest><(?:\\\\|\\[<>]|[^\s<>])*>|\S+)'
 link_title = (r'(?P<title>"(?:\\\\|\\"|[^"])*"|\'(?:\\\\|\\\'|[^\'])*\''
               r'|\((?:\\\\|\\\)|[^\(\)])*\))')
+
+link_dest_1 = re.compile(r'<(?:\\\\|\\[<>]|[^\s<>])*>')
+whitespace = re.compile(r'\s+')
+optional_label = re.compile(r'\[(?:\\\\|\\[\[\]]|[^\[\]])*\]')

@@ -48,14 +48,15 @@ class XMLRenderer(Renderer):
         </heading>
         </document>
     """
-
-    def markdown(self, text):
+    def __enter__(self):
         self.indent = 0
-        return super(XMLRenderer, self).markdown(text)
+        return super(XMLRenderer, self).__enter__()
+
+    def __exit__(self, *args):
+        self.indent = 0
+        return super(XMLRenderer, self).__exit__(*args)
 
     def render_children(self, element):
-        if isinstance(element, string_types):
-            return ' ' * self.indent + json.dumps(element)[1:-1]
         lines = []
         if element is self.root_node:
             lines.append(' ' * self.indent + '<?xml version="1.0" encoding="UTF-8"?>')
@@ -72,7 +73,10 @@ class XMLRenderer(Renderer):
         lines.append(' ' * self.indent + '<{}{}>'.format(element_name, attr_str))
         if getattr(element, 'children', None):
             self.indent += 2
-            lines.extend(self.render(child) for child in element.children)
+            if isinstance(element.children, string_types):
+                lines.append(' ' * self.indent + json.dumps(element.children)[1:-1])
+            else:
+                lines.extend(self.render(child) for child in element.children)
             self.indent -= 2
             lines.append(' ' * self.indent + '</{}>'.format(element_name))
         else:
