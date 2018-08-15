@@ -2,12 +2,28 @@
 """
 HTML renderer
 """
+import re
+
 from ._compat import string_types, html, quote
 from .renderer import Renderer
 
 
 class HTMLRenderer(Renderer):
     """The most common renderer for markdown parser"""
+
+    _charref = re.compile(r'&(#[0-9]+;'
+                          r'|#[xX][0-9a-fA-F]+;'
+                          r'|[^\t\n\f <&#;]{1,32};)')
+
+    def __enter__(self):
+        # commonmark spec doesn't respect char refs without ';' as end.
+        self._charref_bak = html._charref
+        html._charref = self._charref
+        return super(HTMLRenderer, self).__enter__()
+
+    def __exit__(self, *args):
+        html._charref = self._charref_bak
+        return super(HTMLRenderer, self).__exit__(*args)
 
     def render_paragraph(self, element):
         children = self.render_children(element)
@@ -28,9 +44,11 @@ class HTMLRenderer(Renderer):
         )
 
     def render_list_item(self, element):
-        return '<li>{}{}</li>\n'.format(
-            '' if element._tight else '',
-            self.render_children(element))
+        if len(element.children) == 1 and getattr(element.children[0], '_tight', False):
+            sep = ''
+        else:
+            sep = '\n'
+        return '<li>{}{}</li>\n'.format(sep, self.render_children(element))
 
     def render_quote(self, element):
         return '<blockquote>\n{}</blockquote>\n'.format(self.render_children(element))
@@ -38,11 +56,13 @@ class HTMLRenderer(Renderer):
     def render_fenced_code(self, element):
         lang = ' class="language-{}"'.format(element.lang) if element.lang else ''
         return '<pre><code{}>{}</code></pre>\n'.format(
-            lang, self.render_children(element)
+            lang, html.escape(element.children[0].children)
         )
 
     def render_code_block(self, element):
-        return '<pre><code>{}</code></pre>\n'.format(self.render_children(element))
+        return '<pre><code>{}</code></pre>\n'.format(
+            html.escape(element.children[0].children)
+        )
 
     def render_html_block(self, element):
         return element.children
@@ -86,6 +106,13 @@ class HTMLRenderer(Renderer):
         body = self.render_children(element)
         return template.format(url, title, body)
 
+    def render_auto_link(self, element):
+        return '<a href="{}{}">{}</a>'.format(
+            'mailto:' if element.is_mail else '',
+            self.escape_url(element.link),
+            self.escape_html(element.link)
+        )
+
     def render_image(self, element):
         template = '<img src="{}" alt="{}"{} />'
         title = ' title="{}"'.format(
@@ -109,7 +136,7 @@ class HTMLRenderer(Renderer):
         return '<br />\n'
 
     def render_code_span(self, element):
-        return '<code>{}</code>'.format(self.escape_html(element.children))
+        return '<code>{}</code>'.format(html.escape(element.children))
 
     @staticmethod
     def escape_html(raw):

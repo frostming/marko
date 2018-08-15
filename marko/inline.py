@@ -11,7 +11,7 @@ parser = None
 _root_node = None
 
 __all__ = ('LineBreak', 'Literal', 'LinkOrEmph', 'InlineHTML', 'CodeSpan',
-           'Emphasis', 'StrongEmphasis', 'Link', 'Image', 'RawText')
+           'Emphasis', 'StrongEmphasis', 'Link', 'Image', 'AutoLink', 'RawText')
 
 
 class InlineElement(object):
@@ -69,10 +69,11 @@ class LineBreak(InlineElement):
 
 class InlineHTML(InlineElement):
 
-    pattern = (
+    priority = 7
+    pattern = re.compile(
         r'(<%s(?:%s)* */?>'    # open tag
         r'|</%s *>'              # closing tag
-        r'|<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?-->'   # HTML comment
+        r'|<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?(?<!-)-->'   # HTML comment
         r'|<\?[\s\S]*?\?>'       # processing instruction
         r'|<![A-Z]+ +[\s\S]*?>'  # declaration
         r'|<!\[CDATA\[[\s\S]*?\]\]>)'         # CDATA section
@@ -115,10 +116,10 @@ class Link(InlineElement):
     parse_children = True
 
     def __init__(self, match):
-        if match.group(2)[0] == '<' and match.group(2)[-1] == '>':
+        if match.group(2) and match.group(2)[0] == '<' and match.group(2)[-1] == '>':
             self.dest = match.group(2)[1:-1]
         else:
-            self.dest = match.group(2)
+            self.dest = match.group(2) or ''
         self.dest = Literal.strip_backslash(self.dest)
         self.title = Literal.strip_backslash(
             match.group(3)[1:-1]) if match.group(3) else None
@@ -130,10 +131,10 @@ class Image(InlineElement):
     parse_children = True
 
     def __init__(self, match):
-        if match.group(2)[0] == '<' and match.group(2)[-1] == '>':
+        if match.group(2) and match.group(2)[0] == '<' and match.group(2)[-1] == '>':
             self.dest = match.group(2)[1:-1]
         else:
-            self.dest = match.group(2)
+            self.dest = match.group(2) or ''
         self.dest = Literal.strip_backslash(self.dest)
         self.title = Literal.strip_backslash(
             match.group(3)[1:-1]) if match.group(3) else None
@@ -155,11 +156,11 @@ class Url(InlineElement):
 
 class AutoLink(InlineElement):
     priority = 7
-    patterns = (r'<\w+://\w+>',)
+    pattern = re.compile(r'(<(?:%s|(%s))>)' % (patterns.uri, patterns.email))
 
-    @classmethod
-    def parse(cls, match):
-        return {'link': match.group(0)[1:-1]}
+    def __init__(self, match):
+        self.link = match.group()[1:-1]
+        self.is_mail = bool(match.group(2))
 
 
 class RawText(InlineElement):

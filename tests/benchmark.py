@@ -48,7 +48,7 @@ def run_commonmark(package):
 @benchmark('marko')
 def run_marko(package):
     with open(TEST_FILE, 'r') as fin:
-        return package.markdown(fin)
+        return package.markdown(fin.read())
 
 
 def run(package_name):

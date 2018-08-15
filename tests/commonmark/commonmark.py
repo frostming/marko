@@ -35,7 +35,6 @@ def run_tests(
 
 def run_test(test_entry, quiet=False):
     test_case = test_entry['markdown']
-    print('Running test:', test_entry['example'])
     try:
         output = markdown(test_case)
         success = normalize_html(test_entry['html']) == normalize_html(output)

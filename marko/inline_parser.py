@@ -107,7 +107,8 @@ class Token(object):
         if e.parse_children:
             self.children = _resolve_overlap(self.children)
             e.children = make_elements(
-                self.children, self.text, self.inner_start, self.inner_end, self.fallback
+                self.children, self.text, self.inner_start,
+                self.inner_end, self.fallback
             )
         return e
 
@@ -132,6 +133,7 @@ def find_links_or_emphs(text, root_node):
     delimiters = []
     escape = False
     matches = []
+    code_pattern = re.compile(r'(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)')
 
     while i < len(text):
         if escape:
@@ -140,6 +142,8 @@ def find_links_or_emphs(text, root_node):
         elif text[i] == '\\':
             escape = True
             i += 1
+        elif code_pattern.match(text, i):
+            i = code_pattern.match(text, i).end()
         elif text[i] == ']':
             node = look_for_image_or_link(text, delimiters, i, root_node, matches)
             if node:
@@ -164,13 +168,13 @@ def look_for_image_or_link(text, delimiters, close, root_node, matches):
             continue
         if not d.active:
             break   # break to remove the delimiter and return None
-        if not _is_legal_link_text(text[d.start + 1:close]):
+        if not _is_legal_link_text(text[d.end:close]):
             break
-        link_text = (d.start + 1, close, text[d.start + 1:close])
+        link_text = (d.end, close, text[d.end:close])
         etype = 'Image' if d.content == '![' else 'Link'
         match = (
-            _expect_inline_link(text, close + 1)
-            or _expect_reference_link(text, close + 1, text[d.start:close + 1], root_node)
+            _expect_inline_link(text, close + 1) or
+            _expect_reference_link(text, close + 1, link_text[2], root_node)
         )
         if not match:   # not a link
             break
@@ -233,8 +237,8 @@ def _expect_inline_link(text, start):
             return None
         link_dest = prev, i, text[prev:i]
     link_title = i, i, None
-    link_title_re = re.compile(r'(?:\s+%s)?\s*\)')
-    m = link_title_re.match(text, i)
+    tail_re = re.compile(r'(?:\s+%s)?\s*\)' % patterns.link_title)
+    m = tail_re.match(text, i)
     if not m:
         return None
     if m.group('title'):
@@ -246,7 +250,7 @@ def _expect_reference_link(text, start, link_text, root_node):
     match = patterns.optional_label.match(text, start)
     link_label = link_text
     if match and match.group()[1:-1]:
-        link_label = match.group()
+        link_label = match.group()[1:-1]
     result = _get_reference_link(link_label, root_node)
     if not result:
         return None
@@ -279,6 +283,7 @@ def process_emphasis(text, delimiters, stack_bottom, matches):
             )
             matches.append(match)
             del delimiters[opener + 1:cur]
+            cur -= cur - opener - 1
             if d_opener.remove(n):
                 delimiters.remove(d_opener)
                 cur -= 1
@@ -286,7 +291,7 @@ def process_emphasis(text, delimiters, stack_bottom, matches):
                 delimiters.remove(d_closer)
             cur = cur - 1 if cur > 0 else None
         else:
-            bottom = cur - 1 if cur > 0 else None
+            bottom = cur - 1 if cur > 1 else None
             if d_closer.content[0] == '*':
                 star_bottom = bottom
             else:
@@ -320,6 +325,7 @@ def _nearest_opener(delimiters, higher, lower):
 
 
 class Delimiter(object):
+    whitespace_re = re.compile(r'\s')
 
     def __init__(self, match, text):
         self.start = match.start()
@@ -349,22 +355,24 @@ class Delimiter(object):
 
     def is_left_flanking(self):
         return (
-            not self.followed_by(string.whitespace)
-            and self.end != len(self.text)
+            self.end < len(self.text) and
+            self.whitespace_re.match(self.text, self.end) is None
         ) and (
             not self.followed_by(string.punctuation)
             or self.start == 0
-            or self.preceded_by(string.whitespace + string.punctuation)
+            or self.preceded_by(string.punctuation)
+            or self.whitespace_re.match(self.text, self.start - 1)
         )
 
     def is_right_flanking(self):
         return (
-            not self.preceded_by(string.whitespace)
-            and self.start != 0
+            self.start > 0 and
+            self.whitespace_re.match(self.text, self.start - 1) is None
         ) and (
             not self.preceded_by(string.punctuation)
             or self.end == len(self.text)
-            or self.followed_by(string.whitespace + string.punctuation)
+            or self.followed_by(string.punctuation)
+            or self.whitespace_re.match(self.text, self.end)
         )
 
     def followed_by(self, target):

@@ -46,6 +46,7 @@ class Source(object):
         self.pos = 0
         self._anchor = 0
         self._states = []
+        self.match = False
 
     @property
     def state(self):
@@ -91,10 +92,10 @@ class Source(object):
         """The remaining source unparsed."""
         return self._buffer[self.pos:]
 
-    def _expect_re(self, regexp):
+    def _expect_re(self, regexp, pos):
         if isinstance(regexp, string_types):
             regexp = re.compile(regexp)
-        return regexp.match(self._buffer, self.pos)
+        return regexp.match(self._buffer, pos)
 
     @staticmethod
     def match_prefix(prefix, line):
@@ -102,10 +103,10 @@ class Source(object):
         return the position of the end of prefix.
         If the prefix is not matched, return -1.
         """
-        if re.match(prefix, ' ' * 999) and not line.strip():
-            return 0
         m = re.match(prefix, line.expandtabs(4))
         if not m:
+            if re.match(prefix, line.expandtabs(4).replace('\n', ' ' * 99 + '\n')):
+                return len(line) - 1
             return -1
         pos = m.end()
         if pos == 0:
@@ -114,45 +115,44 @@ class Source(object):
             if len(line[:i].expandtabs(4)) >= pos:
                 return i
 
-    def expect_re(self, regexp, consume=False):
+    def expect_re(self, regexp):
         """Test against the given regular expression and returns the match object.
 
         :param regexp: the expression to be tested.
-        :param consume: whether to consume the body of source.
         :returns: the match object.
         """
         prefix_len = self.match_prefix(
             self.prefix, self.next_line(require_prefix=False)
         )
         if prefix_len >= 0:
-            self.anchor()
-            self.pos += prefix_len
-            rv = self._expect_re(regexp)
-            if rv and consume:
-                self.pos = rv.end()
-                if rv.group()[-1] == '\n':
-                    self._update_prefix()
-            else:
-                self.reset()
-            return rv
+            match = self._expect_re(regexp, self.pos + prefix_len)
+            self.match = match
+            return match
         else:
             return None
 
-    def next_line(self, consume=False, require_prefix=True):
-        """"""
-        lf = self._buffer.find('\n', self.pos)
-        if lf < 0:
-            lf = len(self._buffer) - 1
-        line = self._buffer[self.pos:lf + 1]
+    def next_line(self, require_prefix=True):
+        """Return the next line in the source.
+
+        :param require_prefix:  if False, the whole line will be returned.
+            otherwise, return the line with prefix stripped or None if the prefix
+            is not matched.
+        """
         if require_prefix:
-            prefix_len = self.match_prefix(self.prefix, line)
-            if prefix_len < 0:
-                return None
-            line = line[prefix_len:]
-        if consume:
-            self.pos = lf + 1
-            self._update_prefix()
-        return line
+            m = self.expect_re(r'[^\n]*?$\n?(?m)')
+        else:
+            m = self._expect_re(r'[^\n]*$\n?(?m)', self.pos)
+        self.match = m
+        if m:
+            return m.group()
+
+    def consume(self):
+        """Consume the body of source. ``pos`` will move forward."""
+        if self.match:
+            self.pos = self.match.end()
+            if self.match.group()[-1] == '\n':
+                self._update_prefix()
+            self.match = None
 
     def anchor(self):
         self._anchor = self.pos
@@ -168,4 +168,4 @@ class Source(object):
 
 def normalize_label(label):
     """Return the normalized form of link label."""
-    return re.sub(r'\s+', ' ', label[1:-1]).strip().casefold()
+    return re.sub(r'\s+', ' ', label).strip().casefold()
