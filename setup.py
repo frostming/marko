@@ -79,6 +79,7 @@ setup(
     cmdclass={
         'upload': UploadCommand
     },
+    entry_points={'console_scripts': ['marko = marko.cli:main']},
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

@@ -2,7 +2,7 @@ import re
 import sys
 import codecs
 import json
-from marko.ext.gfm import markdown
+from marko import markdown
 from traceback import print_tb
 from argparse import ArgumentParser
 from .normalize import normalize_html
