@@ -2,17 +2,15 @@ import re
 import sys
 import codecs
 import json
-from marko import markdown
+from marko.ext.gfm import markdown
 from traceback import print_tb
 from argparse import ArgumentParser
 from .normalize import normalize_html
 
 
 def run_tests(
-    test_entries, start=None, end=None, quiet=False, verbose=False, known=False
+    test_entries, start=None, end=None, quiet=False, verbose=False
 ):
-    if known:
-        print('ignoring tests:', ', '.join(map(str, KNOWN)) + '\n')
     start = start or 0
     end = end or sys.maxsize
     results = [
@@ -20,7 +18,6 @@ def run_tests(
         for test_entry in test_entries
         if test_entry['example'] >= start
         and test_entry['example'] <= end
-        and (not known or test_entry['example'] not in KNOWN)
     ]
     if verbose:
         print_failure_in_sections(results)
@@ -50,6 +47,53 @@ def run_test(test_entry, quiet=False):
 def load_tests(specfile):
     with codecs.open(specfile, 'r', 'utf-8') as fin:
         return json.load(fin)
+
+
+def get_tests(specfile):
+    line_number = 0
+    start_line = 0
+    end_line = 0
+    example_number = 0
+    markdown_lines = []
+    html_lines = []
+    state = 0  # 0 regular text, 1 markdown example, 2 html output
+    headertext = ''
+    tests = []
+
+    header_re = re.compile('#+ ')
+
+    with open(specfile, 'r', encoding='utf-8', newline='\n') as specf:
+        for line in specf:
+            line_number = line_number + 1
+            l = line.strip()
+            if l.startswith("`" * 32 + " example"):
+                state = 1
+            elif state == 2 and l == "`" * 32:
+                state = 0
+                example_number = example_number + 1
+                end_line = line_number
+                tests.append({
+                    "markdown": ''.join(markdown_lines).replace('→', "\t"),
+                    "html": ''.join(html_lines).replace('→', "\t"),
+                    "example": example_number,
+                    "start_line": start_line,
+                    "end_line": end_line,
+                    "section": headertext})
+                start_line = 0
+                markdown_lines = []
+                html_lines = []
+            elif l == ".":
+                state = 2
+            elif state == 1:
+                if start_line == 0:
+                    start_line = line_number - 1
+                markdown_lines.append(line)
+            elif state == 2:
+                html_lines.append(line)
+            elif state == 0 and re.match(header_re, line):
+                headertext = header_re.sub('', line).strip()
+    print(json.dumps(tests, ensure_ascii=True, indent=2))
+    return 0
 
 
 def locate_section(section, tests):
@@ -143,15 +187,13 @@ def main():
         '--file',
         dest='tests',
         type=load_tests,
-        default='tests/commonmark/commonmark.json',
+        default='tests/spec/commonmark.json',
         help="Specify alternative specfile to run.",
     )
     parser.add_argument(
-        '-n',
-        '--ignore-known',
-        dest='known',
-        action='store_true',
-        help="Ignore tests entries that are known to fail.",
+        '--dump',
+        dest='spec',
+        help='Dump spec.txt to spec.json'
     )
     args = parser.parse_args()
 
@@ -160,11 +202,12 @@ def main():
     verbose = args.verbose
     quiet = args.quiet
     tests = args.tests
-    known = args.known
+    if args.spec:
+        sys.exit(get_tests(args.spec))
     if args.section is not None:
         start, end = locate_section(args.section, tests)
 
-    if not run_tests(tests, start, end, quiet, verbose, known):
+    if not run_tests(tests, start, end, quiet, verbose):
         sys.exit(1)
 
 

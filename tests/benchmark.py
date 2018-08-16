@@ -6,8 +6,8 @@ from importlib import import_module
 from time import perf_counter
 
 
-TEST_FILE = 'test/samples/syntax.md'
-TIMES = 1000
+TEST_FILE = 'tests/samples/syntax.md'
+TIMES = 100
 
 
 def benchmark(package_name):
@@ -51,6 +51,12 @@ def run_marko(package):
         return package.markdown(fin.read())
 
 
+@benchmark('mistletoe')
+def run_mistletoe(package):
+    with open(TEST_FILE, 'r') as fin:
+        return package.markdown(fin)
+
+
 def run(package_name):
     print(package_name, end=': ')
     print(globals()['run_{}'.format(package_name.lower())]())
@@ -70,7 +76,7 @@ def main(*args):
     if args[1:]:
         run_all(args[1:])
     else:
-        run_all(['markdown', 'mistune', 'commonmark', 'mistletoe'])
+        run_all(['markdown', 'mistune', 'commonmark', 'marko', 'mistletoe'])
 
 
 if __name__ == '__main__':

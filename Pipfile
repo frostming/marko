@@ -1,0 +1,10 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+
+[dev-packages]
+marko = {editable = true, path = "."}
+"backports.html" = {version = "*", python_version = "<'3.4'"}

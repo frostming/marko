@@ -168,4 +168,4 @@ class Source(object):
 
 def normalize_label(label):
     """Return the normalized form of link label."""
-    return re.sub(r'\s+', ' ', label).strip().casefold()
+    return re.sub(r'\s+', ' ', label).strip().lower()

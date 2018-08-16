@@ -4,6 +4,7 @@ Setup.py file
 import io
 import os
 import sys
+import re
 from setuptools import setup, find_packages, Command
 
 AUTHOR = 'Frost Ming'
@@ -11,7 +12,6 @@ EMAIL = 'mianghong@gmail.com'
 URL = 'https://github.com/frostming/marko'
 
 NAME = 'marko'
-VERSION = '0.1.0'
 DESCRIPTION = 'A markdown parser with high extensibility.'
 REQUIRES_PYTHON = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
 REQUIRES = [
@@ -20,6 +20,8 @@ REQUIRES = [
 
 here = os.path.dirname(__file__)
 readme = io.open(os.path.join(here, 'README.md'), encoding='utf-8').read()
+about = io.open(os.path.join(here, 'marko', '__init__.py'), encoding='utf-8').read()
+VERSION = re.findall(r'^__version__ *= *(.+?) *$', about, re.M)[0][1:-1]
 
 
 class UploadCommand(Command):
@@ -74,14 +76,13 @@ setup(
     url=URL,
     license='MIT',
     packages=find_packages(exclude=('tests',)),
-    cmd_class={
+    cmdclass={
         'upload': UploadCommand
     },
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
     ],
 )
