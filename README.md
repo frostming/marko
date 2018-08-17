@@ -4,6 +4,7 @@ Marko
 
 [![Build Status](https://travis-ci.org/frostming/marko.svg?branch=master)](https://travis-ci.org/frostming/marko)
 [![PyPI](https://img.shields.io/pypi/v/marko.svg)](https://pypi.org/project/marko/)
+[![Documentation Status](https://readthedocs.org/projects/marko-py/badge/?version=latest)](https://marko-py.readthedocs.io/en/latest/?badge=latest)
 
 Marko is a markdown parser written in pure Python that complies [CommonMark's spec v0.28][spec].
 It is designed to be highly extensible, see [Extend Marko](#extend-marko) for details.

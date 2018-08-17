@@ -75,7 +75,7 @@ setup(
     author_email=EMAIL,
     url=URL,
     license='MIT',
-    packages=find_packages(exclude=('tests',)),
+    packages=find_packages(exclude=('tests', 'tests.*')),
     cmdclass={
         'upload': UploadCommand
     },
