@@ -21,11 +21,6 @@ class Renderer(object):
 
     If no corresponding render function is found, renderer will fallback to call
     :meth:`Renderer.render_children`.
-
-    Suppose you have a custom renderer called ``MyRenderer``, to use it::
-
-        renderer = MyRenderer()
-        renderer.markdown(text)
     """
 
     def __init__(self, *extras):

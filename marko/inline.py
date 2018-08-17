@@ -25,7 +25,7 @@ class InlineElement(object):
     parse_children = False
     #: which match group to parse.
     parse_group = 1
-    #: if True, it won't be included in parsing process but produced by other elements
+    #: if True, it won't be included in parsing process but produced by
     #: other elements instead.
     virtual = False
 
@@ -44,11 +44,8 @@ class InlineElement(object):
 
 class Literal(InlineElement):
     """Literal escapes need to be parsed at the first."""
-    priority = 9
+    priority = 7
     pattern = re.compile(r'\\([!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~])')
-
-    def __init__(self, match):
-        self.children = match.group(1)
 
     @classmethod
     def strip_backslash(cls, text):
@@ -79,9 +76,6 @@ class InlineHTML(InlineElement):
         r'|<!\[CDATA\[[\s\S]*?\]\]>)'         # CDATA section
         % (patterns.tag_name, patterns.attribute, patterns.tag_name)
     )
-
-    def __init__(self, match):
-        self.children = match.group(0)
 
 
 class LinkOrEmph(InlineElement):
@@ -141,7 +135,7 @@ class Image(InlineElement):
 
 
 class CodeSpan(InlineElement):
-
+    """Inline code span: `code sample`"""
     priority = 7
     pattern = re.compile(r'(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)')
 
@@ -149,18 +143,17 @@ class CodeSpan(InlineElement):
         self.children = ' '.join(match.group(2).split())
 
 
-class Url(InlineElement):
-
-    priority = 1
-
-
 class AutoLink(InlineElement):
+    """Autolinks: <http://example.org>"""
     priority = 7
-    pattern = re.compile(r'(<(?:%s|(%s))>)' % (patterns.uri, patterns.email))
+    pattern = re.compile(r'<(%s|%s)>' % (patterns.uri, patterns.email))
 
     def __init__(self, match):
-        self.link = match.group()[1:-1]
-        self.is_mail = bool(match.group(2))
+        self.dest = match.group(1)
+        if re.match(patterns.email, self.dest):
+            self.dest = 'mailto:' + self.dest
+        self.children = [RawText(match.group(1))]
+        self.title = ''
 
 
 class RawText(InlineElement):

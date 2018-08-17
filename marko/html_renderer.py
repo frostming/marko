@@ -11,8 +11,8 @@ from .renderer import Renderer
 class HTMLRenderer(Renderer):
     """The most common renderer for markdown parser"""
 
-    _charref = re.compile(r'&(#[0-9]+;'
-                          r'|#[xX][0-9a-fA-F]+;'
+    _charref = re.compile(r'&(#[0-9]{1,8};'
+                          r'|#[xX][0-9a-fA-F]{1,8};'
                           r'|[^\t\n\f <&#;]{1,32};)')
 
     def __enter__(self):
@@ -91,7 +91,7 @@ class HTMLRenderer(Renderer):
         return '<strong>{}</strong>'.format(self.render_children(element))
 
     def render_inline_html(self, element):
-        return element.children
+        return self.render_html_block(element)
 
     def render_plain_text(self, element):
         if isinstance(element.children, string_types):
@@ -107,11 +107,7 @@ class HTMLRenderer(Renderer):
         return template.format(url, title, body)
 
     def render_auto_link(self, element):
-        return '<a href="{}{}">{}</a>'.format(
-            'mailto:' if element.is_mail else '',
-            self.escape_url(element.link),
-            self.escape_html(element.link)
-        )
+        return self.render_link(element)
 
     def render_image(self, element):
         template = '<img src="{}" alt="{}"{} />'

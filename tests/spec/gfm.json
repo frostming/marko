@@ -1097,7 +1097,7 @@
   },
   {
     "markdown": "<script type=\"text/javascript\">\n// JavaScript example\n\ndocument.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\";\n</script>\nokay\n",
-    "html": "<script type=\"text/javascript\">\n// JavaScript example\n\ndocument.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\";\n</script>\n<p>okay</p>\n",
+    "html": "&lt;script type=\"text/javascript\">\n// JavaScript example\n\ndocument.getElementById(\"demo\").innerHTML = \"Hello JavaScript!\";\n</script>\n<p>okay</p>\n",
     "example": 138,
     "start_line": 2388,
     "end_line": 2402,
@@ -1105,7 +1105,7 @@
   },
   {
     "markdown": "<style\n  type=\"text/css\">\nh1 {color:red;}\n\np {color:blue;}\n</style>\nokay\n",
-    "html": "<style\n  type=\"text/css\">\nh1 {color:red;}\n\np {color:blue;}\n</style>\n<p>okay</p>\n",
+    "html": "&lt;style\n  type=\"text/css\">\nh1 {color:red;}\n\np {color:blue;}\n</style>\n<p>okay</p>\n",
     "example": 139,
     "start_line": 2407,
     "end_line": 2423,
@@ -1113,7 +1113,7 @@
   },
   {
     "markdown": "<style\n  type=\"text/css\">\n\nfoo\n",
-    "html": "<style\n  type=\"text/css\">\n\nfoo\n",
+    "html": "&lt;style\n  type=\"text/css\">\n\nfoo\n",
     "example": 140,
     "start_line": 2430,
     "end_line": 2440,
@@ -1137,7 +1137,7 @@
   },
   {
     "markdown": "<style>p{color:red;}</style>\n*foo*\n",
-    "html": "<style>p{color:red;}</style>\n<p><em>foo</em></p>\n",
+    "html": "&lt;style>p{color:red;}</style>\n<p><em>foo</em></p>\n",
     "example": 143,
     "start_line": 2472,
     "end_line": 2478,
@@ -1153,7 +1153,7 @@
   },
   {
     "markdown": "<script>\nfoo\n</script>1. *bar*\n",
-    "html": "<script>\nfoo\n</script>1. *bar*\n",
+    "html": "&lt;script>\nfoo\n</script>1. *bar*\n",
     "example": 145,
     "start_line": 2493,
     "end_line": 2501,
@@ -1537,7 +1537,7 @@
   },
   {
     "markdown": "| f\\|oo  |\n| ------ |\n| b `\\|` az |\n| b **\\|** im |\n",
-    "html": "<table>\n<thead>\n<tr>\n<th>f|oo</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>b <code>|</code> az</td>\n</tr>\n<tr>\n<td>b <strong>|</strong> im</td>\n</tr></tbody></table>\n",
+    "html": "<table>\n<thead>\n<tr>\n<th>f|oo</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>b <code>\\|</code> az</td>\n</tr>\n<tr>\n<td>b <strong>|</strong> im</td>\n</tr></tbody></table>\n",
     "example": 193,
     "start_line": 3281,
     "end_line": 3300,
@@ -4744,14 +4744,6 @@
     "section": "Autolinks"
   },
   {
-    "markdown": "< http://foo.bar >\n",
-    "html": "<p>&lt; http://foo.bar &gt;</p>\n",
-    "example": 594,
-    "start_line": 8903,
-    "end_line": 8907,
-    "section": "Autolinks"
-  },
-  {
     "markdown": "<m:abc>\n",
     "html": "<p>&lt;m:abc&gt;</p>\n",
     "example": 595,
@@ -4765,22 +4757,6 @@
     "example": 596,
     "start_line": 8917,
     "end_line": 8921,
-    "section": "Autolinks"
-  },
-  {
-    "markdown": "http://example.com\n",
-    "html": "<p>http://example.com</p>\n",
-    "example": 597,
-    "start_line": 8924,
-    "end_line": 8928,
-    "section": "Autolinks"
-  },
-  {
-    "markdown": "foo@bar.example.com\n",
-    "html": "<p>foo@bar.example.com</p>\n",
-    "example": 598,
-    "start_line": 8931,
-    "end_line": 8935,
     "section": "Autolinks"
   },
   {

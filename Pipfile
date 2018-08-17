@@ -8,3 +8,6 @@ name = "pypi"
 [dev-packages]
 "backports.html" = {version = "*", python_version = "<'3.4'"}
 marko = {editable = true, path = "."}
+twine = "*"
+"flake8" = "*"
+sphinx = "*"

@@ -155,9 +155,11 @@ class Source(object):
             self.match = None
 
     def anchor(self):
+        """Pin the current parsing position."""
         self._anchor = self.pos
 
     def reset(self):
+        """Reset the position to the last anchor."""
         self.pos = self._anchor
 
     def _update_prefix(self):

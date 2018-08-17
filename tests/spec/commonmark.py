@@ -2,19 +2,24 @@ import re
 import sys
 import codecs
 import json
-from marko import markdown
+import importlib
 from traceback import print_tb
 from argparse import ArgumentParser
 from .normalize import normalize_html
 
+SPECS = {
+    'commonmark': ('tests/spec/commonmark.json', 'marko:markdown'),
+    'gfm': ('tests/spec/gfm.json', 'marko.ext.gfm:markdown')
+}
+
 
 def run_tests(
-    test_entries, start=None, end=None, quiet=False, verbose=False
+    test_entries, markdown, start=None, end=None, quiet=False, verbose=False
 ):
     start = start or 0
     end = end or sys.maxsize
     results = [
-        run_test(test_entry, quiet)
+        run_test(test_entry, markdown, quiet)
         for test_entry in test_entries
         if test_entry['example'] >= start
         and test_entry['example'] <= end
@@ -30,7 +35,7 @@ def run_tests(
     return not fails
 
 
-def run_test(test_entry, quiet=False):
+def run_test(test_entry, markdown, quiet=False):
     test_case = test_entry['markdown']
     try:
         output = markdown(test_case)
@@ -44,9 +49,14 @@ def run_test(test_entry, quiet=False):
         return False, test_entry['section']
 
 
-def load_tests(specfile):
-    with codecs.open(specfile, 'r', 'utf-8') as fin:
-        return json.load(fin)
+def load_tests(flavor):
+    assert flavor.lower() in SPECS
+    specfile, parser = SPECS[flavor.lower()]
+    with codecs.open(specfile, 'r', encoding='utf-8') as f:
+        tests = json.load(f)
+    module, func = parser.split(':')
+    parse_func = getattr(importlib.import_module(module), func)
+    return tests, parse_func
 
 
 def get_tests(specfile):
@@ -184,11 +194,11 @@ def main():
     )
     parser.add_argument(
         '-f',
-        '--file',
+        '--flavor',
         dest='tests',
         type=load_tests,
-        default='tests/spec/commonmark.json',
-        help="Specify alternative specfile to run.",
+        default='commonmark',
+        help='Specify markdown flavor name.',
     )
     parser.add_argument(
         '--dump',
@@ -201,13 +211,13 @@ def main():
     end = args.end
     verbose = args.verbose
     quiet = args.quiet
-    tests = args.tests
+    tests, markdown = args.tests
     if args.spec:
         sys.exit(get_tests(args.spec))
     if args.section is not None:
         start, end = locate_section(args.section, tests)
 
-    if not run_tests(tests, start, end, quiet, verbose):
+    if not run_tests(tests, markdown, start, end, quiet, verbose):
         sys.exit(1)
 
 

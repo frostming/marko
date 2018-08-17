@@ -26,7 +26,7 @@ __all__ = (
 
 
 class BlockElement(object):
-
+    """Any block element should inherit this class"""
     #: Use to denote the precedence in parsing
     priority = 5
     #: if True, it won't be included in parsing process but produced by other elements
