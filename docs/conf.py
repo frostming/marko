@@ -15,9 +15,10 @@
 import os
 import io
 import re
-# import sys
+import sys
 # sys.path.insert(0, os.path.abspath('.'))
 base_dir = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(base_dir)
 
 # -- Project information -----------------------------------------------------
 project = 'Marko'
