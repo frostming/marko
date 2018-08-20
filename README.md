@@ -50,6 +50,7 @@ Marko is released under [MIT License](LICENSE)
 
 ## Change Log
 
-* v0.3.0: Footnote, TOC, pangu extensions
+* v0.3.1: Pangu extension.
+* v0.3.0: Change the entry function to a class, add TOC and footnotes extensions.
 * v0.2.0: Github flavored markdown and docs.
 * v0.1.0: Commonmark spec tests.

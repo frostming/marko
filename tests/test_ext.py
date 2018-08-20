@@ -48,5 +48,25 @@ class TestToc(unittest.TestCase):
         self.assertIn('<ul>\n<li><a href="#foobar">Foobar</a></li>', toc)
 
 
+class TestPangu(unittest.TestCase):
+
+    def setUp(self):
+        from marko import Markdown, HTMLRenderer
+        from marko.ext.pangu import PanguRendererMixin
+
+        class MyRenderer(PanguRendererMixin, HTMLRenderer):
+            pass
+
+        self.markdown = Markdown(renderer=MyRenderer)
+
+    def test_render_pangu(self):
+        content = '中国2018年'
+        result = self.markdown(content)
+        self.assertEqual(
+            result,
+            '<p>中国<span class="pangu"></span>2018<span class="pangu"></span>年</p>\n'
+        )
+
+
 if __name__ == '__main__':
     unittest.main()
