@@ -60,9 +60,7 @@ class HTMLRenderer(Renderer):
         )
 
     def render_code_block(self, element):
-        return '<pre><code>{}</code></pre>\n'.format(
-            html.escape(element.children[0].children)
-        )
+        return self.render_fenced_code(element)
 
     def render_html_block(self, element):
         return element.children

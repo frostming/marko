@@ -151,6 +151,7 @@ class CodeBlock(BlockElement):
 
     def __init__(self, lines):
         self.children = [inline.RawText(lines)]
+        self.lang = ''
 
     @classmethod
     def match(cls, source):
