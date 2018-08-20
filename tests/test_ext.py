@@ -28,16 +28,13 @@ class TestFootnote(unittest.TestCase):
 class TestToc(unittest.TestCase):
 
     def setUp(self):
-        from marko import Parser, HTMLRenderer, Markdown
-        from marko.ext.toc import TocParserMixin, TocRendererMixin
-
-        class MyParser(TocParserMixin, Parser):
-            pass
+        from marko import HTMLRenderer, Markdown
+        from marko.ext.toc import TocRendererMixin
 
         class MyRenderer(TocRendererMixin, HTMLRenderer):
             pass
 
-        self.markdown = Markdown(MyParser, MyRenderer)
+        self.markdown = Markdown(renderer=MyRenderer)
 
     def test_render_toc(self):
         content = '# Foo\n## Foobar\n## Foofooz\n# Bar\n'

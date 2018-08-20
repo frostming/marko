@@ -11,3 +11,4 @@ marko = {editable = true, path = "."}
 twine = "*"
 "flake8" = "*"
 sphinx = "*"
+python-slugify = "*"
