@@ -31,8 +31,9 @@ The installation is very simple:
 
 And to use it:
 ```python
-import marko
-marko.markdown('A long text')
+from marko import Markdown
+markdown = Markdown()
+print(markdown(text))
 ```
 Marko also provides a simple CLI, for example, to render a document and output to a html file:
 
@@ -40,15 +41,7 @@ Marko also provides a simple CLI, for example, to render a document and output t
 
 ## Extend Marko
 
-Note that the signature of `marko.markdown()`:
-```python
-def markdown(text, parser=Parser, renderer=HTMLRenderer):
-    ...
-```
-You can supply your own parser or renderer to it.
-
-* A parser is what parses the document into separated elements.
-* A renderer is what renders given element into desired output, which can be HTML in the most common situation.
+Please refer to [Document](https://marko-py.readthedocs.io/en/latest/extend.html)
 
 ## License
 
@@ -57,5 +50,6 @@ Marko is released under [MIT License](LICENSE)
 
 ## Change Log
 
+* v0.3.0: Footnote, TOC, pangu extensions
 * v0.2.0: Github flavored markdown and docs.
 * v0.1.0: Commonmark spec tests.

@@ -139,9 +139,9 @@ class Source(object):
             is not matched.
         """
         if require_prefix:
-            m = self.expect_re(r'[^\n]*?$\n?(?m)')
+            m = self.expect_re(r'(?m)[^\n]*?$\n?')
         else:
-            m = self._expect_re(r'[^\n]*$\n?(?m)', self.pos)
+            m = self._expect_re(r'(?m)[^\n]*$\n?', self.pos)
         self.match = m
         if m:
             return m.group()

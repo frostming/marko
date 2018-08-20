@@ -40,8 +40,9 @@ The installation is very simple::
 
 And to use it::
 
-    import marko
-    marko.markdown('A long text')
+    from marko import Markdown
+    markdown = Markdown()
+    print(markdown(text))
 
 Marko also provides a simple CLI, for example, to render a document and output to a html file::
 
@@ -54,6 +55,7 @@ Other Contents
     :maxdepth: 2
 
     extend
+    extensions
     api
 
 

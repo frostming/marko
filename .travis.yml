@@ -11,6 +11,7 @@ install:
 script:
   - python -m tests.spec
   - python -m tests.spec -f gfm
+  - python -m unittest
 
 notifications:
   email: false

@@ -2,14 +2,15 @@ import re
 import sys
 import codecs
 import json
-import importlib
+from marko import Markdown
+from marko.ext.gfm import GFMarkdown
 from traceback import print_tb
 from argparse import ArgumentParser
 from .normalize import normalize_html
 
 SPECS = {
-    'commonmark': ('tests/spec/commonmark.json', 'marko:markdown'),
-    'gfm': ('tests/spec/gfm.json', 'marko.ext.gfm:markdown')
+    'commonmark': ('tests/spec/commonmark.json', Markdown()),
+    'gfm': ('tests/spec/gfm.json', GFMarkdown())
 }
 
 
@@ -54,9 +55,7 @@ def load_tests(flavor):
     specfile, parser = SPECS[flavor.lower()]
     with codecs.open(specfile, 'r', encoding='utf-8') as f:
         tests = json.load(f)
-    module, func = parser.split(':')
-    parse_func = getattr(importlib.import_module(module), func)
-    return tests, parse_func
+    return tests, parser
 
 
 def get_tests(specfile):

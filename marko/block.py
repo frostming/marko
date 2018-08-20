@@ -276,8 +276,8 @@ class HTMLBlock(BlockElement):
 
     @classmethod
     def match(cls, source):
-        if source.expect_re(r' {,3}<(?:script|pre|style)[>\s](?i)'):
-            cls._end_cond = re.compile(r'</(?:script|pre|style)>(?i)')
+        if source.expect_re(r'(?i) {,3}<(?:script|pre|style)[>\s]'):
+            cls._end_cond = re.compile(r'(?i)</(?:script|pre|style)>')
             return 1
         if source.expect_re(r' {,3}<!--'):
             cls._end_cond = re.compile(r'-->')
@@ -292,11 +292,11 @@ class HTMLBlock(BlockElement):
             cls._end_cond = re.compile(r'\]\]>')
             return 5
         block_tag = r'(?:%s)' % ('|'.join(patterns.tags),)
-        if source.expect_re(r' {,3}</?%s(?: +|/?>|$)(?im)' % block_tag):
+        if source.expect_re(r'(?im) {,3}</?%s(?: +|/?>|$)' % block_tag):
             cls._end_cond = None
             return 6
         if source.expect_re(
-            r' {,3}(<%(tag)s(?:%(attr)s)*[^\n\S]*/?>|</%(tag)s[^\n\S]*>)[^\n\S]*$(?m)'
+            r'(?m) {,3}(<%(tag)s(?:%(attr)s)*[^\n\S]*/?>|</%(tag)s[^\n\S]*>)[^\n\S]*$'
             % {'tag': patterns.tag_name, 'attr': patterns.attribute_no_lf}
         ):
             cls._end_cond = None
@@ -492,7 +492,7 @@ class ListItem(BlockElement):
 
     def __init__(self):
         indent, bullet, mid, tail = self._parse_info
-        self._prefix = ' ' * indent + re.sub(r'([*.+)])', r'\\\1', bullet) + ' ' * mid
+        self._prefix = ' ' * indent + re.escape(bullet) + ' ' * mid
         self._second_prefix = ' ' * (len(bullet) + indent + (mid or 1))
 
     @classmethod

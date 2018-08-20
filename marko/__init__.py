@@ -14,18 +14,41 @@ from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
 
-__version__ = '0.2.1'
+__version__ = '0.3.0'
 
 
-def markdown(text, parser=Parser, renderer=HTMLRenderer):
-    """Parse and render the given text to HTML output with default settings.
+class Markdown(object):
+    """The main class to convert markdown documents.
 
-    :param parser: a Parser class or instance to parse text into AST.
-    :param renderer: a Renderer class or instance to render AST as output.
+    Attributes:
+        parser: an instance of :class:`Parser`
+        renderer: an instance of :class:`Renderer`
+
+    :param parser: a subclass or instance of :class:`Parser`
+    :param renderer: a subclass or instance of :class:`Renderer`
     """
-    if not isinstance(renderer, Renderer):
-        renderer = renderer()
-    if not isinstance(parser, Parser):
-        parser = parser()
-    with renderer as r:
-        return r.render(parser.parse(text))
+    def __init__(self, parser=Parser, renderer=HTMLRenderer):
+        self.parser = parser if isinstance(parser, Parser) else parser()
+        self.renderer = renderer if isinstance(renderer, Renderer) else renderer()
+
+    def convert(self, text):
+        """Parse and render the given text."""
+        return self.render(self.parse(text))
+
+    def __call__(self, text):
+        return self.convert(text)
+
+    def parse(self, text):
+        """Call ``self.parser.parse(text)``.
+
+        Override this to preprocess text or handle parsed result.
+        """
+        return self.parser.parse(text)
+
+    def render(self, parsed):
+        """Call ``self.renderer.render(text)``.
+
+        Override this to handle parsed result.
+        """
+        with self.renderer as r:
+            return r.render(parsed)

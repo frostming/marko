@@ -1,15 +1,21 @@
 """
 Github flavored markdown
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 https://github.github.com/gfm
+
+Unlike other extensions, GFM provides a self-contained subclass of ``Markdown``
+with parser and renderer already set.
+User may also use the parser and renderer as bases for further extension.
 
 Example usage::
 
-    from marko.ext.gfm import markdown
-    print(markdown(text))
+    from marko.ext.gfm import GFMarkdown
+    print(GFMarkdown()(text))
 
 """
 import re
-from marko import HTMLRenderer, Parser, markdown as _markdown
+from marko import HTMLRenderer, Parser, Markdown
 from . import elements
 
 
@@ -73,5 +79,8 @@ class GFMRenderer(HTMLRenderer):
             tag=tag, children=self.render_children(element), align=align)
 
 
-def markdown(text):
-    return _markdown(text, GFMParser, GFMRenderer)
+class GFMarkdown(Markdown):
+
+    def __init__(self):
+        self.parser = GFMParser()
+        self.renderer = GFMRenderer()

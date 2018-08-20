@@ -23,7 +23,7 @@ class Renderer(object):
     :meth:`Renderer.render_children`.
     """
 
-    def __init__(self, *extras):
+    def __init__(self):
         self.root_node = None
 
     def __enter__(self):
@@ -31,7 +31,7 @@ class Renderer(object):
         return self
 
     def __exit__(self, *args):
-        self.root_node = None
+        pass
 
     def render(self, element):
         """Renders the given element to string.

@@ -37,7 +37,8 @@ def parse(args):
 def main():
     namespace = parse(sys.argv[1:])
     content = sys.stdin.read()
-    print(marko.markdown(content, namespace.parser, namespace.renderer))
+    markdown = marko.Markdown(namespace.parser, namespace.renderer)
+    print(markdown(content))
 
 
 if __name__ == '__main__':

@@ -103,7 +103,10 @@ We are done
 
 Let's take all together to parse the text::
 
-    markdown("Some long text", parser=MyParser, renderer=MyRenderer)
+    from marko import Markdown
+
+    markdown = Markdown(parser=MyParser, renderer=MyRenderer)
+    print(markdown(text))
 
 Here ``parser`` and ``renderer`` arguments can be either a subclass of ``Parser`` and ``Renderer``, or an instance of it, respectively.
 For more details, see :doc:`API References <api>`.
