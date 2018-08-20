@@ -14,7 +14,7 @@ from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 
 
 class Markdown(object):
@@ -50,5 +50,6 @@ class Markdown(object):
 
         Override this to handle parsed result.
         """
+        self.renderer.root_node = parsed
         with self.renderer as r:
             return r.render(parsed)
