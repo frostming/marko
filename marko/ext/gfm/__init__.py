@@ -26,10 +26,10 @@ class GFMParser(Parser):
 
         self.add_element(elements.Document, True)
         self.add_element(elements.Paragraph, True)
-        self.add_element(elements.AutoLink, True)
         self.add_element(elements.LinkRefDef, True)
         self.add_element(elements.ListItem, True)
         self.add_element(elements.Strikethrough)
+        self.add_element(elements.Url)
         self.add_element(elements.Table)
         self.add_element(elements.TableRow)
         self.add_element(elements.TableCell)
@@ -77,6 +77,9 @@ class GFMRenderer(HTMLRenderer):
             align = ' align="{}"'.format(element.align)
         return '<{tag}{align}>{children}</{tag}>\n'.format(
             tag=tag, children=self.render_children(element), align=align)
+
+    def render_url(self, element):
+        return self.render_link(element)
 
 
 class GFMarkdown(Markdown):

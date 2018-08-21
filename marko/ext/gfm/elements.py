@@ -53,7 +53,7 @@ class _MatchObj(object):
         return getattr(self._match, name)
 
 
-class AutoLink(inline.AutoLink):
+class Url(inline.AutoLink):
 
     www_pattern = re.compile(
         r'(?:^|(?<=[\s*_~(]))(www\.([\w.\-]*?\.[\w.\-]+)[^<\s]*)')
@@ -62,14 +62,15 @@ class AutoLink(inline.AutoLink):
         r'(?:^|(?<=[\s*_~(]))((?:https?|ftp)://([\w.\-]*?\.[\w.\-]+)[^<\s]*'
         r'|%s(?=[\s.<]|\Z))' % email_pattern
     )
+    priority = 5
 
     def __init__(self, match):
-        super(AutoLink, self).__init__(match)
+        super(Url, self).__init__(match)
         if self.www_pattern.match(self.dest):
             self.dest = 'http://' + self.dest
 
     @classmethod
-    def _find_extra(cls, text):
+    def find(cls, text):
         for match in itertools.chain(
             cls.www_pattern.finditer(text), cls.bare_pattern.finditer(text)
         ):
@@ -87,13 +88,6 @@ class AutoLink(inline.AutoLink):
                 m = re.search(r'&[a-zA-Z]+;$', link_text)
                 if m:
                     match = _MatchObj(match, end_shift=-len(m.group()))
-            yield match
-
-    @classmethod
-    def find(cls, text):
-        for match in cls._find_extra(text):
-            yield match
-        for match in super(AutoLink, cls).find(text):
             yield match
 
 
