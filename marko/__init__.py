@@ -14,7 +14,7 @@ from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
 
-__version__ = '0.3.4'
+__version__ = '0.3.5'
 
 
 class Markdown(object):
