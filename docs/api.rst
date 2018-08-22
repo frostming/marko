@@ -7,6 +7,7 @@ Main Class
 ----------
 
 .. autoclass:: Markdown
+    :inherited-members:
 
 
 Parser Class
@@ -15,6 +16,7 @@ Parser Class
 .. module:: marko.parser
 
 .. autoclass:: Parser
+    :inherited-members:
 
 Renderer Class
 --------------
@@ -22,6 +24,7 @@ Renderer Class
 .. module:: marko.renderer
 
 .. autoclass:: Renderer
+    :inherited-members:
 
 Base Elements
 -------------
