@@ -1,6 +1,7 @@
 """
 AST renderers for inspecting the markdown parsing result.
 """
+from __future__ import unicode_literals
 import json
 from .renderer import Renderer
 from ._compat import string_types

@@ -1,6 +1,7 @@
 """
 Parse inline elements
 """
+from __future__ import unicode_literals
 import re
 import string
 
@@ -237,7 +238,7 @@ def _expect_inline_link(text, start):
             return None
         link_dest = prev, i, text[prev:i]
     link_title = i, i, None
-    tail_re = re.compile(r'(?:\s+%s)?\s*\)' % patterns.link_title)
+    tail_re = re.compile(r'(?:\s+%s)?\s*\)' % patterns.link_title, flags=re.UNICODE)
     m = tail_re.match(text, i)
     if not m:
         return None
@@ -325,7 +326,7 @@ def _nearest_opener(delimiters, higher, lower):
 
 
 class Delimiter(object):
-    whitespace_re = re.compile(r'\s')
+    whitespace_re = re.compile(r'\s', flags=re.UNICODE)
 
     def __init__(self, match, text):
         self.start = match.start()

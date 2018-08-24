@@ -1,6 +1,7 @@
 """
 Extra elements
 """
+from __future__ import unicode_literals
 import re
 import itertools
 from marko import block, inline, patterns

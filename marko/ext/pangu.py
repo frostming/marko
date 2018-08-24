@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Pangu Extension
 ~~~~~~~~~~~~~~~
@@ -19,6 +20,7 @@ Example::
     markdown = Markdown(renderer=MyRenderer)
     print(markdown(text))
 """
+from __future__ import unicode_literals
 import re
 
 CJK_RE = (r'\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f'

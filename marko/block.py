@@ -2,6 +2,7 @@
 """
 Block level elements
 """
+from __future__ import unicode_literals
 import re
 from . import inline, patterns
 from .helpers import Source, is_paired, normalize_label

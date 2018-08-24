@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+from __future__ import print_function
 import re
 import sys
 import codecs
@@ -124,7 +127,8 @@ def print_exception(exception, test_entry):
     print_test_entry(test_entry, '-- exception --', fout=sys.stderr)
     print(exception.__class__.__name__ + ':', exception, file=sys.stderr)
     print('Traceback: ', file=sys.stderr)
-    print_tb(exception.__traceback__)
+    tb = sys.exc_info()[2]
+    print_tb(tb)
 
 
 def print_test_entry(test_entry, output, fout=sys.stdout):

@@ -1,9 +1,10 @@
 language: python
 
 python:
-  - 3.4
+  - 2.7
   - 3.5
   - 3.6
+  - "nightly"
 
 install:
   - pip install -e .
@@ -12,7 +13,7 @@ install:
 script:
   - python -m tests.spec
   - python -m tests.spec -f gfm
-  - python -m unittest
+  - python -m unittest discover
 
 notifications:
   email: false

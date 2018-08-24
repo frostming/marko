@@ -2,6 +2,7 @@
 """
 HTML renderer
 """
+from __future__ import unicode_literals
 import re
 
 from ._compat import string_types, html, quote

@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
-from html.parser import HTMLParser
-import urllib
-
 try:
-    from html.parser import HTMLParseError
+    from html.parser import HTMLParser
+    from html.entities import name2codepoint
 except ImportError:
-    # HTMLParseError was removed in Python 3.5. It could never be
-    # thrown, so we define a placeholder instead.
-    class HTMLParseError(Exception):
-        pass
-
-
-from html.entities import name2codepoint
+    from backports.html.parser import HTMLParser
+    from backports.html.entities import name2codepoint
+import urllib
 import sys
 import re
 import cgi
+
+
+class HTMLParseError(Exception):
+    pass
+
 
 # Normalization code, adapted from
 # https://github.com/karlcow/markdown-testsuite/

@@ -14,6 +14,7 @@ Example usage::
     print(GFMarkdown()(text))
 
 """
+from __future__ import unicode_literals
 import re
 from marko import HTMLRenderer, Parser, Markdown
 from . import elements
@@ -59,7 +60,7 @@ class GFMRenderer(HTMLRenderer):
         return self.tagfilter.sub(r'&lt;\1', element.children)
 
     def render_table(self, element):
-        (header, *body) = element.children
+        header, body = element.children[0], element.children[1:]
         theader = '<thead>\n{}</thead>'.format(self.render(header))
         tbody = ''
         if body:

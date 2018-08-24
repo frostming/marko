@@ -4,12 +4,13 @@ Marko
 
 [![Build Status](https://travis-ci.org/frostming/marko.svg?branch=master)](https://travis-ci.org/frostming/marko)
 [![PyPI](https://img.shields.io/pypi/v/marko.svg)](https://pypi.org/project/marko/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/marko.svg)](https://pypi.org/project/marko/)
 [![Documentation Status](https://readthedocs.org/projects/marko-py/badge/?version=latest)](https://marko-py.readthedocs.io/en/latest/?badge=latest)
 
 Marko is a markdown parser written in pure Python that complies [CommonMark's spec v0.28][spec].
 It is designed to be highly extensible, see [Extend Marko](#extend-marko) for details.
 
-Marko requires Python 3.4 or higher, Python 2.7 support is still in plan but I guess it is not needed.
+Marko requires Python2.7, Python 3.5 or higher.
 
 ## Why Marko
 
@@ -50,6 +51,7 @@ Marko is released under [MIT License](LICENSE)
 
 ## Change Log
 
+* v0.4.0: Support Python 2.7
 * v0.3.4: Fix bugs about extensions.
 * v0.3.1: Pangu extension.
 * v0.3.0: Change the entry function to a class, add TOC and footnotes extensions.

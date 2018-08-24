@@ -29,7 +29,7 @@ link_title = (r'(?P<title>"(?:\\\\|\\"|[^"])*"|\'(?:\\\\|\\\'|[^\'])*\''
               r'|\((?:\\\\|\\\)|[^\(\)])*\))')
 
 link_dest_1 = re.compile(r'<(?:\\\\|\\[<>]|[^\s<>])*>')
-whitespace = re.compile(r'\s+')
+whitespace = re.compile(r'\s+', flags=re.UNICODE)
 optional_label = re.compile(r'\[(?:\\\\|\\[\[\]]|[^\[\]])*\]')
 uri = r'[A-Za-z][A-Za-z\-.+]{1,31}:[^\s<>]*?'
 email = (r'[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9]'

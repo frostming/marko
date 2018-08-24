@@ -2,6 +2,7 @@
 """
 Inline(span) level elements
 """
+from __future__ import unicode_literals
 import re
 from .helpers import string_types
 from . import inline_parser, patterns
@@ -140,7 +141,7 @@ class CodeSpan(InlineElement):
     pattern = re.compile(r'(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)')
 
     def __init__(self, match):
-        self.children = ' '.join(match.group(2).split())
+        self.children = re.sub(r'\s+', ' ', match.group(2).strip())
 
 
 class AutoLink(InlineElement):

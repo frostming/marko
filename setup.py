@@ -14,7 +14,7 @@ URL = 'https://github.com/frostming/marko'
 
 NAME = 'marko'
 DESCRIPTION = 'A markdown parser with high extensibility.'
-REQUIRES_PYTHON = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*"
+REQUIRES_PYTHON = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*"
 REQUIRES = [
     'backports.html;python_version<"3.4"'
 ]
@@ -84,7 +84,14 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
+        'Operating System :: OS Independent',
         "License :: OSI Approved :: MIT License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7"
     ],
 )

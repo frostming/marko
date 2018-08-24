@@ -2,6 +2,7 @@
 """
 Base renderer class
 """
+from __future__ import unicode_literals
 import itertools
 
 from .helpers import camel_to_snake_case
