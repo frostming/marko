@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 TOC extension
 ~~~~~~~~~~~~~
@@ -15,6 +16,7 @@ Usage::
     print(markdown(text))
     print(markdown.renderer.render_toc())
 """
+from __future__ import unicode_literals
 from slugify import slugify
 import re
 
@@ -23,7 +25,7 @@ class TocRendererMixin(object):
 
     def __enter__(self):
         self.headings = []
-        return super().__enter__()
+        return super(TocRendererMixin, self).__enter__()
 
     def render_toc(self, maxlevel=3):
         if not self.headings:
