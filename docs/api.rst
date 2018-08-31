@@ -32,7 +32,15 @@ Base Elements
 .. module:: marko
 
 .. autoclass:: marko.block.BlockElement
+    :members:
     :inherited-members:
 
 .. autoclass:: marko.inline.InlineElement
+    :members:
     :inherited-members:
+
+Helper Classes
+--------------
+
+.. autoclass:: marko.helpers.Source
+    :members:
