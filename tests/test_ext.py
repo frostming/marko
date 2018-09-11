@@ -66,6 +66,11 @@ class TestPangu(unittest.TestCase):
             '<p>中国<span class="pangu"></span>2018<span class="pangu"></span>年</p>\n'
         )
 
+    def test_chinese_punctuations(self):
+        content = '你好：中国。'
+        result = self.markdown(content)
+        self.assertEqual(result, '<p>你好：中国。</p>\n')
+
 
 if __name__ == '__main__':
     unittest.main()
