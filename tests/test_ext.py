@@ -72,5 +72,19 @@ class TestPangu(unittest.TestCase):
         self.assertEqual(result, '<p>你好：中国。</p>\n')
 
 
+class TestGFM(unittest.TestCase):
+
+    def setUp(self):
+        from marko.ext.gfm import GFMarkdown
+
+        self.markdown = GFMarkdown()
+
+    def test_gfm_autolink(self):
+        content = '地址：https://google.com'
+        self.assertEqual(self.markdown(content).strip(), '<p>地址：<a href="https://google.com">https://google.com</a></p>')
+        content = '地址：www.baidu.com'
+        self.assertEqual(self.markdown(content).strip(), '<p>地址：<a href="http://www.baidu.com">www.baidu.com</a></p>')
+
+
 if __name__ == '__main__':
     unittest.main()

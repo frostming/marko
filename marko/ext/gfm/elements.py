@@ -57,11 +57,11 @@ class _MatchObj(object):
 class Url(inline.AutoLink):
 
     www_pattern = re.compile(
-        r'(?:^|(?<=[\s*_~(]))(www\.([\w.\-]*?\.[\w.\-]+)[^<\s]*)')
+        r'(?:^|(?<=[\s*_~(\uff00-\uffef]))(www\.([\w.\-]*?\.[\w.\-]+)[^<\s]*)')
     email_pattern = r'[\w.\-+]+@[\w.\-]*?\.[\w.\-]*[a-zA-Z0-9]'
     bare_pattern = re.compile(
-        r'(?:^|(?<=[\s*_~(]))((?:https?|ftp)://([\w.\-]*?\.[\w.\-]+)[^<\s]*'
-        r'|%s(?=[\s.<]|\Z))' % email_pattern
+        r'(?:^|(?<=[\s*_~(\uff00-\uffef]))((?:https?|ftp)://([\w.\-]*?\.[\w.\-]+)'
+        r'[^<\s]*|%s(?=[\s.<]|\Z))' % email_pattern
     )
     priority = 5
 
