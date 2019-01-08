@@ -27,7 +27,7 @@ class TestCli(unittest.TestCase):
         )
         self.assertTrue(c.ok)
         self.assertIn('<?xml version="1.0" encoding="UTF-8"?>', c.out)
-        self.assertIn('<link dest="#overview" title="None">', c.out)
+        self.assertIn('dest="#overview"', c.out)
 
     def test_ast_renderer(self):
         from marko.ast_renderer import ASTRenderer

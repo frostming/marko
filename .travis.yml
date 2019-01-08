@@ -2,13 +2,13 @@ language: python
 sudo: false
 cache: pip
 dist: trusty
+env: TOXENV=py,codecov
 
 install: pip install tox-travis
 script: tox
 
 jobs:
   include:
-    - stage: test
     - python: "3.7"
       dist: xenial
       sudo: required
