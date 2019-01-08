@@ -51,7 +51,9 @@ Marko is released under [MIT License](LICENSE)
 
 ## Change Log
 
-* v0.4.0: Support Python 2.7
+* v0.4.3: Fix TOC rendering when heading level exceeds the max depth.
+* v0.4.2: Fix CJK regexp for pangu extension.
+* v0.4.0: Support Python 2.7.
 * v0.3.4: Fix bugs about extensions.
 * v0.3.1: Pangu extension.
 * v0.3.0: Change the entry function to a class, add TOC and footnotes extensions.

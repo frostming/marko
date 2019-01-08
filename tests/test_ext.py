@@ -46,6 +46,16 @@ class TestToc(unittest.TestCase):
         self.assertIn('<ul>\n<li><a href="#foo">Foo</a></li>', toc)
         self.assertIn('<ul>\n<li><a href="#foobar">Foobar</a></li>', toc)
 
+    def test_render_toc_exceeding_maxdepth(self):
+        content = '#### Foobar\n'
+        self.markdown(content)
+        toc = self.markdown.renderer.render_toc()
+        self.assertIn('<li><a href="#foobar">Foobar</a></li>', toc)
+        content = '# Foo\n#### Foobar\n'
+        self.markdown(content)
+        toc = self.markdown.renderer.render_toc()
+        self.assertIn('<li><a href="#foo">Foo</a></li>', toc)
+        self.assertNotIn('<li><a href="#foobar">Foobar</a></li>', toc)
 
 class TestPangu(unittest.TestCase):
 

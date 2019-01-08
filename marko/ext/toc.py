@@ -27,14 +27,14 @@ class TocRendererMixin(object):
         self.headings = []
         return super(TocRendererMixin, self).__enter__()
 
-    def render_toc(self, maxlevel=3):
+    def render_toc(self, maxdepth=3):
         if not self.headings:
             return ''
         first_level = None
         last_level = None
         rv = []
         for level, slug, text in self.headings:
-            if level > maxlevel:
+            if first_level is not None and level >= first_level + maxdepth:
                 continue
 
             if first_level is None:
