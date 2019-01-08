@@ -6,9 +6,10 @@ name = "pypi"
 [packages]
 
 [dev-packages]
-"backports.html" = {version = "*", python_version = "<'3.4'"}
-marko = {editable = true, path = "."}
+"backports.html" = {version = "*",python_version = "<'3.4'"}
+marko = {editable = true,path = ".",extras = ["toc", "tests"]}
 twine = "*"
-"flake8" = "*"
+flake8 = "*"
 sphinx = "*"
 python-slugify = "*"
+tox = "*"

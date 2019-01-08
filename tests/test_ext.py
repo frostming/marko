@@ -57,6 +57,7 @@ class TestToc(unittest.TestCase):
         self.assertIn('<li><a href="#foo">Foo</a></li>', toc)
         self.assertNotIn('<li><a href="#foobar">Foobar</a></li>', toc)
 
+
 class TestPangu(unittest.TestCase):
 
     def setUp(self):

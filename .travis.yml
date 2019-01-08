@@ -1,19 +1,17 @@
 language: python
+sudo: false
+cache: pip
+dist: trusty
 
-python:
-  - 2.7
-  - 3.5
-  - 3.6
-  - "nightly"
+install: pip install tox-travis
+script: tox
 
-install:
-  - pip install -e .
-  - pip install python-slugify
-
-script:
-  - python -m tests.spec
-  - python -m tests.spec -f gfm
-  - python -m unittest discover
-
-notifications:
-  email: false
+jobs:
+  include:
+    - stage: test
+    - python: "3.7"
+      dist: xenial
+      sudo: required
+    - python: "3.6"
+    - python: "3.5"
+    - python: "2.7"
