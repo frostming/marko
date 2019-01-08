@@ -15,3 +15,6 @@ jobs:
     - python: "3.6"
     - python: "3.5"
     - python: "2.7"
+    - stage: packaging
+      python: 3.6
+      env: TOXENV=packaging

@@ -1,5 +1,6 @@
 #! -*- coding: utf-8 -*-
 import os
+import sys
 import unittest
 import delegator
 
@@ -13,7 +14,11 @@ class TestCli(unittest.TestCase):
     def test_version(self):
         c = delegator.run('marko --version')
         self.assertTrue(c.ok)
-        self.assertEqual(c.out.strip(), marko.__version__)
+        if sys.version_info[:2] == (2, 7):
+            out = c.err.strip()
+        else:
+            out = c.out.strip()
+        self.assertEqual(out, marko.__version__)
 
     def test_default_render(self):
         c = delegator.run('marko < {}'.format(SYNTAX_FILE))

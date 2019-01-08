@@ -1,2 +1,6 @@
 include README.md LICENSE
-recursive-exclude tests *
+exclude tox.ini .coveragerc
+exclude Pipfile*
+
+prune docs
+prune tests
