@@ -2,6 +2,8 @@
 branch = True
 parallel = True
 source = marko/
+omit =
+    marko/cli.py
 
 [report]
 # Regexes for lines to exclude from consideration

@@ -71,7 +71,7 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=REQUIRES,
     python_requires=REQUIRES_PYTHON,
-    extras_require={'toc': ['python-slugify'], 'tests': ['delegator.py']},
+    extras_require={'toc': ['python-slugify']},
     include_package_data=True,
     author=AUTHOR,
     author_email=EMAIL,

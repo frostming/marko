@@ -2,10 +2,12 @@ Marko
 =====
 > A markdown parser with high extensibility.
 
-[![Build Status](https://travis-ci.org/frostming/marko.svg?branch=master)](https://travis-ci.org/frostming/marko)
-[![PyPI](https://img.shields.io/pypi/v/marko.svg)](https://pypi.org/project/marko/)
-[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/marko.svg)](https://pypi.org/project/marko/)
-[![Documentation Status](https://readthedocs.org/projects/marko-py/badge/?version=latest)](https://marko-py.readthedocs.io/en/latest/?badge=latest)
+[![PyPI](https://img.shields.io/pypi/v/marko.svg?logo=python&logoColor=white)](https://pypi.org/project/marko/)
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/marko.svg?logo=python&logoColor=white)](https://pypi.org/project/marko/)
+[![Documentation Status](https://img.shields.io/readthedocs/marko-py.svg?logo=readthedocs)](https://marko-py.readthedocs.io/en/latest/?badge=latest)
+
+[![Build Status](https://img.shields.io/travis/frostming/marko/master.svg?label=Travis&logo=travis)](https://travis-ci.org/frostming/marko)
+[![AppVeyor Status](https://img.shields.io/appveyor/ci/frostming/marko/master.svg?logo=appveyor)](https://ci.appveyor.com/project/frostming/marko/branch/master)
 [![codecov](https://codecov.io/gh/frostming/marko/branch/master/graph/badge.svg)](https://codecov.io/gh/frostming/marko)
 
 Marko is a markdown parser written in pure Python that complies [CommonMark's spec v0.28][spec].

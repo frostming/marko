@@ -1,0 +1,20 @@
+build: false
+
+environment:
+  PYTHONIOENCODING: "UTF-8"
+
+  matrix:
+    - PYTHON: "C:/Python27-x64"
+    - PYTHON: "C:/Python35-x64"
+    - PYTHON: "C:/Python36-x64"
+    - PYTHON: "C:/Python37-x64"
+
+
+install:
+  - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
+  - "python -m pip install -e .[toc]"
+
+test_script:
+  - "python -m tests.spec"
+  - "python -m tests.spec -f gfm"
+  - "python -m unittest discover"
