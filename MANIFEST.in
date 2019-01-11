@@ -1,5 +1,5 @@
 include README.md LICENSE
-exclude tox.ini .coveragerc
+exclude tox.ini .coveragerc appveyor.yml
 exclude Pipfile*
 
 prune docs
