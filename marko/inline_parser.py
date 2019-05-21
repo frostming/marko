@@ -60,7 +60,7 @@ def make_elements(tokens, text, start=0, end=None, fallback=None):
     prev_end = start
     for token in tokens:
         if prev_end < token.start:
-            result.append(fallback(text[prev_end:token.start]))
+            result.append(fallback(text[prev_end : token.start]))
         result.append(token.as_element())
         prev_end = token.end
     if prev_end < end:
@@ -72,6 +72,7 @@ class Token(object):
     """An intermediate class to wrap the match object.
     It can be converted to element by :meth:`as_element()`
     """
+
     PRECEDE = 0
     INTERSECT = 1
     CONTAIN = 2
@@ -108,13 +109,16 @@ class Token(object):
         if e.parse_children:
             self.children = _resolve_overlap(self.children)
             e.children = make_elements(
-                self.children, self.text, self.inner_start,
-                self.inner_end, self.fallback
+                self.children,
+                self.text,
+                self.inner_start,
+                self.inner_end,
+                self.fallback,
             )
         return e
 
     def __repr__(self):
-        return '<{}: {} start={} end={}>'.format(
+        return "<{}: {} start={} end={}>".format(
             self.__class__.__name__, self.etype.__name__, self.start, self.end
         )
 
@@ -129,23 +133,23 @@ def find_links_or_emphs(text, root_node):
     :param root_node: a reference to the root node of the AST.
     :returns: an iterable of match object.
     """
-    delimiters_re = re.compile(r'(?:!?\[|\*+|_+)')
+    delimiters_re = re.compile(r"(?:!?\[|\*+|_+)")
     i = 0
     delimiters = []
     escape = False
     matches = []
-    code_pattern = re.compile(r'(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)')
+    code_pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
     while i < len(text):
         if escape:
             escape = False
             i += 1
-        elif text[i] == '\\':
+        elif text[i] == "\\":
             escape = True
             i += 1
         elif code_pattern.match(text, i):
             i = code_pattern.match(text, i).end()
-        elif text[i] == ']':
+        elif text[i] == "]":
             node = look_for_image_or_link(text, delimiters, i, root_node, matches)
             if node:
                 i = node.end()
@@ -165,27 +169,24 @@ def find_links_or_emphs(text, root_node):
 
 def look_for_image_or_link(text, delimiters, close, root_node, matches):
     for i, d in list(enumerate(delimiters))[::-1]:
-        if d.content not in ('[', '!['):
+        if d.content not in ("[", "!["):
             continue
         if not d.active:
-            break   # break to remove the delimiter and return None
-        if not _is_legal_link_text(text[d.end:close]):
+            break  # break to remove the delimiter and return None
+        if not _is_legal_link_text(text[d.end : close]):
             break
-        link_text = (d.end, close, text[d.end:close])
-        etype = 'Image' if d.content == '![' else 'Link'
-        match = (
-            _expect_inline_link(text, close + 1) or
-            _expect_reference_link(text, close + 1, link_text[2], root_node)
+        link_text = (d.end, close, text[d.end : close])
+        etype = "Image" if d.content == "![" else "Link"
+        match = _expect_inline_link(text, close + 1) or _expect_reference_link(
+            text, close + 1, link_text[2], root_node
         )
-        if not match:   # not a link
+        if not match:  # not a link
             break
-        rv = MatchObj(
-            etype, text, d.start, match[2], link_text, match[0], match[1]
-        )
+        rv = MatchObj(etype, text, d.start, match[2], link_text, match[0], match[1])
         process_emphasis(text, delimiters, i, matches)
-        if etype == 'Link':
+        if etype == "Link":
             for d in delimiters[:i]:
-                if d.content == '[':
+                if d.content == "[":
                     d.active = False
         del delimiters[i]
         return rv
@@ -199,12 +200,12 @@ def look_for_image_or_link(text, delimiters, close, root_node, matches):
 
 
 def _is_legal_link_text(text):
-    return is_paired(text, '[', ']')
+    return is_paired(text, "[", "]")
 
 
 def _expect_inline_link(text, start):
     """(link_dest "link_title")"""
-    if start >= len(text) or text[start] != '(':
+    if start >= len(text) or text[start] != "(":
         return None
     i = start + 1
     m = patterns.whitespace.match(text, i)
@@ -222,13 +223,13 @@ def _expect_inline_link(text, start):
             c = text[i]
             if escaped:
                 escaped = False
-            elif c == '\\':
+            elif c == "\\":
                 escaped = True
-            elif c == '(':
+            elif c == "(":
                 open_num += 1
             elif c in string.whitespace:
                 break
-            elif c == ')':
+            elif c == ")":
                 if open_num > 0:
                     open_num -= 1
                 else:
@@ -238,12 +239,12 @@ def _expect_inline_link(text, start):
             return None
         link_dest = prev, i, text[prev:i]
     link_title = i, i, None
-    tail_re = re.compile(r'(?:\s+%s)?\s*\)' % patterns.link_title, flags=re.UNICODE)
+    tail_re = re.compile(r"(?:\s+%s)?\s*\)" % patterns.link_title, flags=re.UNICODE)
     m = tail_re.match(text, i)
     if not m:
         return None
-    if m.group('title'):
-        link_title = m.start('title'), m.end('title'), m.group('title')
+    if m.group("title"):
+        link_title = m.start("title"), m.end("title"), m.group("title")
     return (link_dest, link_title, m.end())
 
 
@@ -270,20 +271,20 @@ def process_emphasis(text, delimiters, stack_bottom, matches):
     cur = _next_closer(delimiters, stack_bottom)
     while cur is not None:
         d_closer = delimiters[cur]
-        bottom = star_bottom if d_closer.content[0] == '*' else underscore_bottom
+        bottom = star_bottom if d_closer.content[0] == "*" else underscore_bottom
         opener = _nearest_opener(delimiters, cur, bottom)
         if opener is not None:
             d_opener = delimiters[opener]
             n = 2 if len(d_opener.content) >= 2 and len(d_closer.content) >= 2 else 1
             match = MatchObj(
-                'StrongEmphasis' if n == 2 else 'Emphasis',
+                "StrongEmphasis" if n == 2 else "Emphasis",
                 text,
                 d_opener.end - n,
                 d_closer.start + n,
-                (d_opener.end, d_closer.start, text[d_opener.end:d_closer.start])
+                (d_opener.end, d_closer.start, text[d_opener.end : d_closer.start]),
             )
             matches.append(match)
-            del delimiters[opener + 1:cur]
+            del delimiters[opener + 1 : cur]
             cur -= cur - opener - 1
             if d_opener.remove(n):
                 delimiters.remove(d_opener)
@@ -293,7 +294,7 @@ def process_emphasis(text, delimiters, stack_bottom, matches):
             cur = cur - 1 if cur > 0 else None
         else:
             bottom = cur - 1 if cur > 1 else None
-            if d_closer.content[0] == '*':
+            if d_closer.content[0] == "*":
                 star_bottom = bottom
             else:
                 underscore_bottom = bottom
@@ -308,7 +309,7 @@ def _next_closer(delimiters, bound):
     i = bound + 1 if bound is not None else 0
     while i < len(delimiters):
         d = delimiters[i]
-        if hasattr(d, 'can_close') and d.can_close:
+        if hasattr(d, "can_close") and d.can_close:
             return i
         i += 1
     return None
@@ -319,14 +320,14 @@ def _nearest_opener(delimiters, higher, lower):
     lower = lower if lower is not None else -1
     while i > lower:
         d = delimiters[i]
-        if hasattr(d, 'can_open') and d.can_open and d.closed_by(delimiters[higher]):
+        if hasattr(d, "can_open") and d.can_open and d.closed_by(delimiters[higher]):
             return i
         i -= 1
     return None
 
 
 class Delimiter(object):
-    whitespace_re = re.compile(r'\s', flags=re.UNICODE)
+    whitespace_re = re.compile(r"\s", flags=re.UNICODE)
 
     def __init__(self, match, text):
         self.start = match.start()
@@ -334,30 +335,28 @@ class Delimiter(object):
         self.content = match.group()
         self.text = text
         self.active = True
-        if self.content[0] in ('*', '_'):
+        if self.content[0] in ("*", "_"):
             self.can_open = self._can_open()
             self.can_close = self._can_close()
 
     def _can_open(self):
-        if self.content[0] == '*':
+        if self.content[0] == "*":
             return self.is_left_flanking()
         return self.is_left_flanking() and (
-            not self.is_right_flanking()
-            or self.preceded_by(string.punctuation)
+            not self.is_right_flanking() or self.preceded_by(string.punctuation)
         )
 
     def _can_close(self):
-        if self.content[0] == '*':
+        if self.content[0] == "*":
             return self.is_right_flanking()
         return self.is_right_flanking() and (
-            not self.is_left_flanking()
-            or self.followed_by(string.punctuation)
+            not self.is_left_flanking() or self.followed_by(string.punctuation)
         )
 
     def is_left_flanking(self):
         return (
-            self.end < len(self.text) and
-            self.whitespace_re.match(self.text, self.end) is None
+            self.end < len(self.text)
+            and self.whitespace_re.match(self.text, self.end) is None
         ) and (
             not self.followed_by(string.punctuation)
             or self.start == 0
@@ -367,8 +366,8 @@ class Delimiter(object):
 
     def is_right_flanking(self):
         return (
-            self.start > 0 and
-            self.whitespace_re.match(self.text, self.start - 1) is None
+            self.start > 0
+            and self.whitespace_re.match(self.text, self.start - 1) is None
         ) and (
             not self.preceded_by(string.punctuation)
             or self.end == len(self.text)
@@ -400,12 +399,14 @@ class Delimiter(object):
         return False
 
     def __repr__(self):
-        return '<Delimiter {!r} start={} end={}>'.format(
-            self.content, self.start, self.end)
+        return "<Delimiter {!r} start={} end={}>".format(
+            self.content, self.start, self.end
+        )
 
 
 class MatchObj(object):
     """A fake match object that memes re.match methods"""
+
     def __init__(self, etype, text, start, end, *groups):
         self._text = text
         self._start = start
@@ -415,7 +416,7 @@ class MatchObj(object):
 
     def group(self, n=0):
         if n == 0:
-            return self._text[self._start:self._end]
+            return self._text[self._start : self._end]
         return self._groups[n - 1][2]
 
     def start(self, n=0):

@@ -27,7 +27,6 @@ from marko import block, inline, helpers
 
 
 class Document(block.Document):
-
     def __init__(self, text):
         self.footnotes = {}
         super(Document, self).__init__(text)
@@ -35,13 +34,13 @@ class Document(block.Document):
 
 class FootnoteDef(block.BlockElement):
 
-    pattern = re.compile(r' {,3}\[\^([^\]]+)\]:[^\n\S]*(?=\S| {4})')
+    pattern = re.compile(r" {,3}\[\^([^\]]+)\]:[^\n\S]*(?=\S| {4})")
     priority = 6
 
     def __init__(self, match):
         self.label = helpers.normalize_label(match.group(1))
         self._prefix = re.escape(match.group())
-        self._second_prefix = r' {1,4}'
+        self._second_prefix = r" {1,4}"
 
     @classmethod
     def match(cls, source):
@@ -58,7 +57,7 @@ class FootnoteDef(block.BlockElement):
 
 class FootnoteRef(inline.InlineElement):
 
-    pattern = re.compile(r'\[\^([^\]]+)\]')
+    pattern = re.compile(r"\[\^([^\]]+)\]")
     priority = 6
 
     def __init__(self, match):
@@ -73,7 +72,6 @@ class FootnoteRef(inline.InlineElement):
 
 
 class FootnoteParserMixin(object):
-
     def __init__(self, *extras):
         super(FootnoteParserMixin, self).__init__(*extras)
         self.add_element(Document, True)
@@ -82,7 +80,6 @@ class FootnoteParserMixin(object):
 
 
 class FootnoteRendererMixin(object):
-
     def __init__(self):
         super(FootnoteRendererMixin, self).__init__()
         self.footnotes = []
@@ -93,23 +90,23 @@ class FootnoteRendererMixin(object):
         idx = self.footnotes.index(element.label) + 1
         return (
             '<sup class="footnote-ref" id="fnref-{lab}">'
-            '<a href="#fn-{lab}">{id}</a></sup>'
-            .format(lab=self.escape_url(element.label), id=idx)
+            '<a href="#fn-{lab}">{id}</a></sup>'.format(
+                lab=self.escape_url(element.label), id=idx
+            )
         )
 
     def render_footnote_def(self, element):
-        return ''
+        return ""
 
     def _render_footnote_def(self, element):
         children = self.render_children(element).rstrip()
         back = '<a href="#fnref-{}" class="footnote">&#8617;</a>'.format(element.label)
-        if children.endswith('</p>'):
-            children = re.sub(r'</p>$', '{}</p>'.format(back), children)
+        if children.endswith("</p>"):
+            children = re.sub(r"</p>$", "{}</p>".format(back), children)
         else:
-            children = '{}<p>{}</p>\n'.format(children, back)
+            children = "{}<p>{}</p>\n".format(children, back)
         return '<li id="fn-{}">\n{}</li>\n'.format(
-            self.escape_url(element.label),
-            children
+            self.escape_url(element.label), children
         )
 
     def render_document(self, element):
@@ -117,7 +114,7 @@ class FootnoteRendererMixin(object):
         items = [self.root_node.footnotes[label] for label in self.footnotes]
         if not items:
             return text
-        children = ''.join(self._render_footnote_def(item) for item in items)
+        children = "".join(self._render_footnote_def(item) for item in items)
         footnotes = '<div class="footnotes">\n<ol>\n{}</ol>\n</div>\n'.format(children)
         self.footnotes = []
         return text + footnotes

@@ -43,8 +43,7 @@ class Renderer(object):
         # Store the root node to provide some context to render functions
         if not self.root_node:
             self.root_node = element
-        render_func = getattr(
-            self, self._cls_to_func_name(element.__class__), None)
+        render_func = getattr(self, self._cls_to_func_name(element.__class__), None)
         if not render_func:
             render_func = self.render_children
         return render_func(element)
@@ -62,16 +61,16 @@ class Renderer(object):
         :param element: a branch node who has children attribute.
         """
         rendered = [self.render(child) for child in element.children]
-        return ''.join(rendered)
+        return "".join(rendered)
 
     def _cls_to_func_name(self, klass):
         from .block import parser
+
         element_types = itertools.chain(
-            parser.block_elements.items(),
-            parser.inline_elements.items()
+            parser.block_elements.items(), parser.inline_elements.items()
         )
         for name, cls in element_types:
             if cls is klass:
-                return 'render_' + camel_to_snake_case(name)
+                return "render_" + camel_to_snake_case(name)
 
-        return 'render_children'
+        return "render_children"

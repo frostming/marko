@@ -11,8 +11,19 @@ from . import inline_parser, patterns
 parser = None
 _root_node = None
 
-__all__ = ('LineBreak', 'Literal', 'LinkOrEmph', 'InlineHTML', 'CodeSpan',
-           'Emphasis', 'StrongEmphasis', 'Link', 'Image', 'AutoLink', 'RawText')
+__all__ = (
+    "LineBreak",
+    "Literal",
+    "LinkOrEmph",
+    "InlineHTML",
+    "CodeSpan",
+    "Emphasis",
+    "StrongEmphasis",
+    "Link",
+    "Image",
+    "AutoLink",
+    "RawText",
+)
 
 
 class InlineElement(object):
@@ -45,12 +56,13 @@ class InlineElement(object):
 
 class Literal(InlineElement):
     """Literal escapes need to be parsed at the first."""
+
     priority = 7
     pattern = re.compile(r'\\([!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~])')
 
     @classmethod
     def strip_backslash(cls, text):
-        return cls.pattern.sub(r'\1', text)
+        return cls.pattern.sub(r"\1", text)
 
 
 class LineBreak(InlineElement):
@@ -58,23 +70,24 @@ class LineBreak(InlineElement):
     Soft: '\n'
     Hard: '  \n'
     """
+
     priority = 2
-    pattern = re.compile(r'( *|\\)\n(?!\Z)')
+    pattern = re.compile(r"( *|\\)\n(?!\Z)")
 
     def __init__(self, match):
-        self.soft = not match.group(1).startswith(('  ', '\\'))
+        self.soft = not match.group(1).startswith(("  ", "\\"))
 
 
 class InlineHTML(InlineElement):
 
     priority = 7
     pattern = re.compile(
-        r'(<%s(?:%s)* */?>'    # open tag
-        r'|</%s *>'              # closing tag
-        r'|<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?(?<!-)-->'   # HTML comment
-        r'|<\?[\s\S]*?\?>'       # processing instruction
-        r'|<![A-Z]+ +[\s\S]*?>'  # declaration
-        r'|<!\[CDATA\[[\s\S]*?\]\]>)'         # CDATA section
+        r"(<%s(?:%s)* */?>"  # open tag
+        r"|</%s *>"  # closing tag
+        r"|<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?(?<!-)-->"  # HTML comment
+        r"|<\?[\s\S]*?\?>"  # processing instruction
+        r"|<![A-Z]+ +[\s\S]*?>"  # declaration
+        r"|<!\[CDATA\[[\s\S]*?\]\]>)"  # CDATA section
         % (patterns.tag_name, patterns.attribute, patterns.tag_name)
     )
 
@@ -83,6 +96,7 @@ class LinkOrEmph(InlineElement):
     """This is a special element, whose parsing is done specially.
     And it produces Link or Emphasis elements.
     """
+
     parse_children = True
 
     def __new__(cls, match):
@@ -95,70 +109,79 @@ class LinkOrEmph(InlineElement):
 
 class StrongEmphasis(InlineElement):
     """Strong emphasis: **sample text**"""
+
     virtual = True
     parse_children = True
 
 
 class Emphasis(InlineElement):
     """Emphasis: *sample text*"""
+
     virtual = True
     parse_children = True
 
 
 class Link(InlineElement):
     """Link: [text](/link/destination)"""
+
     virtual = True
     parse_children = True
 
     def __init__(self, match):
-        if match.group(2) and match.group(2)[0] == '<' and match.group(2)[-1] == '>':
+        if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
-            self.dest = match.group(2) or ''
+            self.dest = match.group(2) or ""
         self.dest = Literal.strip_backslash(self.dest)
-        self.title = Literal.strip_backslash(
-            match.group(3)[1:-1]) if match.group(3) else None
+        self.title = (
+            Literal.strip_backslash(match.group(3)[1:-1]) if match.group(3) else None
+        )
 
 
 class Image(InlineElement):
     """Image: ![alt](/src/address)"""
+
     virtual = True
     parse_children = True
 
     def __init__(self, match):
-        if match.group(2) and match.group(2)[0] == '<' and match.group(2)[-1] == '>':
+        if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
-            self.dest = match.group(2) or ''
+            self.dest = match.group(2) or ""
         self.dest = Literal.strip_backslash(self.dest)
-        self.title = Literal.strip_backslash(
-            match.group(3)[1:-1]) if match.group(3) else None
+        self.title = (
+            Literal.strip_backslash(match.group(3)[1:-1]) if match.group(3) else None
+        )
 
 
 class CodeSpan(InlineElement):
     """Inline code span: `code sample`"""
+
     priority = 7
-    pattern = re.compile(r'(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)')
+    pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
     def __init__(self, match):
-        self.children = re.sub(r'\s+', ' ', match.group(2).strip())
+        self.children = re.sub(r"\s+", " ", match.group(2).strip())
 
 
 class AutoLink(InlineElement):
     """Autolinks: <http://example.org>"""
+
     priority = 7
-    pattern = re.compile(r'<(%s|%s)>' % (patterns.uri, patterns.email))
+    pattern = re.compile(r"<(%s|%s)>" % (patterns.uri, patterns.email))
 
     def __init__(self, match):
         self.dest = match.group(1)
         if re.match(patterns.email, self.dest):
-            self.dest = 'mailto:' + self.dest
+            self.dest = "mailto:" + self.dest
         self.children = [RawText(match.group(1))]
-        self.title = ''
+        self.title = ""
 
 
 class RawText(InlineElement):
     """The raw text is the fallback for all holes that doesn't match any others."""
+
     virtual = True
 
     def __init__(self, match):

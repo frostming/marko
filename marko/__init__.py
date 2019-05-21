@@ -27,6 +27,7 @@ class Markdown(object):
     :param parser: a subclass or instance of :class:`Parser`
     :param renderer: a subclass or instance of :class:`Renderer`
     """
+
     def __init__(self, parser=Parser, renderer=HTMLRenderer):
         self.parser = parser if isinstance(parser, Parser) else parser()
         self.renderer = renderer if isinstance(renderer, Renderer) else renderer()

@@ -9,11 +9,11 @@ from ._compat import string_types
 
 def camel_to_snake_case(name):
     """Takes a camelCased string and converts to snake_case."""
-    pattern = r'[A-Z][a-z]+|[A-Z]+(?![a-z])'
-    return '_'.join(map(str.lower, re.findall(pattern, name)))
+    pattern = r"[A-Z][a-z]+|[A-Z]+(?![a-z])"
+    return "_".join(map(str.lower, re.findall(pattern, name)))
 
 
-def is_paired(text, open='(', close=')'):
+def is_paired(text, open="(", close=")"):
     """Check if the text only contains:
     1. blackslash escaped parentheses, or
     2. parentheses paired.
@@ -23,7 +23,7 @@ def is_paired(text, open='(', close=')'):
     for c in text:
         if escape:
             escape = False
-        elif c == '\\':
+        elif c == "\\":
             escape = True
         elif c == open:
             count += 1
@@ -35,7 +35,7 @@ def is_paired(text, open='(', close=')'):
 
 
 def _preprocess_text(text):
-    return text.replace('\r\n', '\n')
+    return text.replace("\r\n", "\n")
 
 
 class Source(object):
@@ -85,12 +85,12 @@ class Source(object):
     @property
     def prefix(self):
         """The prefix of each line when parsing."""
-        return ''.join(s._prefix for s in self._states)
+        return "".join(s._prefix for s in self._states)
 
     @property
     def rest(self):
         """The remaining source unparsed."""
-        return self._buffer[self.pos:]
+        return self._buffer[self.pos :]
 
     def _expect_re(self, regexp, pos):
         if isinstance(regexp, string_types):
@@ -105,7 +105,7 @@ class Source(object):
         """
         m = re.match(prefix, line.expandtabs(4))
         if not m:
-            if re.match(prefix, line.expandtabs(4).replace('\n', ' ' * 99 + '\n')):
+            if re.match(prefix, line.expandtabs(4).replace("\n", " " * 99 + "\n")):
                 return len(line) - 1
             return -1
         pos = m.end()
@@ -139,9 +139,9 @@ class Source(object):
             is not matched.
         """
         if require_prefix:
-            m = self.expect_re(r'(?m)[^\n]*?$\n?')
+            m = self.expect_re(r"(?m)[^\n]*?$\n?")
         else:
-            m = self._expect_re(r'(?m)[^\n]*$\n?', self.pos)
+            m = self._expect_re(r"(?m)[^\n]*$\n?", self.pos)
         self.match = m
         if m:
             return m.group()
@@ -150,7 +150,7 @@ class Source(object):
         """Consume the body of source. ``pos`` will move forward."""
         if self.match:
             self.pos = self.match.end()
-            if self.match.group()[-1] == '\n':
+            if self.match.group()[-1] == "\n":
                 self._update_prefix()
             self.match = None
 
@@ -164,10 +164,10 @@ class Source(object):
 
     def _update_prefix(self):
         for s in self._states:
-            if hasattr(s, '_second_prefix'):
+            if hasattr(s, "_second_prefix"):
                 s._prefix = s._second_prefix
 
 
 def normalize_label(label):
     """Return the normalized form of link label."""
-    return re.sub(r'\s+', ' ', label).strip().lower()
+    return re.sub(r"\s+", " ", label).strip().lower()

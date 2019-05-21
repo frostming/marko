@@ -21,7 +21,6 @@ from . import elements
 
 
 class GFMParser(Parser):
-
     def __init__(self, *extras):
         super(GFMParser, self).__init__(*extras)
 
@@ -37,54 +36,56 @@ class GFMParser(Parser):
 
 
 class GFMRenderer(HTMLRenderer):
-    tagfilter = re.compile(r'<(title|texarea|style|xmp|iframe|noembed|noframes'
-                           r'|script|plaintext)', flags=re.I)
+    tagfilter = re.compile(
+        r"<(title|texarea|style|xmp|iframe|noembed|noframes" r"|script|plaintext)",
+        flags=re.I,
+    )
 
     def render_paragraph(self, element):
         children = self.render_children(element)
         template = '<input{} disabled="" type="checkbox">{}'
-        if hasattr(element, 'checked'):
+        if hasattr(element, "checked"):
             children = template.format(
-                ' checked=""' if element.checked else '',
-                children
+                ' checked=""' if element.checked else "", children
             )
         if element._tight:
             return children
         else:
-            return '<p>{}</p>\n'.format(children)
+            return "<p>{}</p>\n".format(children)
 
     def render_strikethrough(self, element):
-        return '<del>{}</del>'.format(self.render_children(element))
+        return "<del>{}</del>".format(self.render_children(element))
 
     def render_html_block(self, element):
-        return self.tagfilter.sub(r'&lt;\1', element.children)
+        return self.tagfilter.sub(r"&lt;\1", element.children)
 
     def render_table(self, element):
         header, body = element.children[0], element.children[1:]
-        theader = '<thead>\n{}</thead>'.format(self.render(header))
-        tbody = ''
+        theader = "<thead>\n{}</thead>".format(self.render(header))
+        tbody = ""
         if body:
-            tbody = '\n<tbody>\n{}</tbody>'.format(
-                ''.join(self.render(row) for row in body))
-        return '<table>\n{}{}</table>'.format(theader, tbody)
+            tbody = "\n<tbody>\n{}</tbody>".format(
+                "".join(self.render(row) for row in body)
+            )
+        return "<table>\n{}{}</table>".format(theader, tbody)
 
     def render_table_row(self, element):
-        return '<tr>\n{}</tr>\n'.format(self.render_children(element))
+        return "<tr>\n{}</tr>\n".format(self.render_children(element))
 
     def render_table_cell(self, element):
-        tag = 'th' if element.header else 'td'
-        align = ''
+        tag = "th" if element.header else "td"
+        align = ""
         if element.align:
             align = ' align="{}"'.format(element.align)
-        return '<{tag}{align}>{children}</{tag}>\n'.format(
-            tag=tag, children=self.render_children(element), align=align)
+        return "<{tag}{align}>{children}</{tag}>\n".format(
+            tag=tag, children=self.render_children(element), align=align
+        )
 
     def render_url(self, element):
         return self.render_link(element)
 
 
 class GFMarkdown(Markdown):
-
     def __init__(self):
         self.parser = GFMParser()
         self.renderer = GFMRenderer()

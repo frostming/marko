@@ -9,25 +9,24 @@ from marko import block, inline, patterns
 
 class Paragraph(block.Paragraph):
 
-    _task_list_item_pattern = re.compile(r'(\[[\sxX]\])\s+\S')
+    _task_list_item_pattern = re.compile(r"(\[[\sxX]\])\s+\S")
 
     def __init__(self, lines):
         super(Paragraph, self).__init__(lines)
         m = self._task_list_item_pattern.match(self.children)
         if m:
-            self.checked = m.group(1)[1:-1].lower() == 'x'
-            self.children = self.children[m.end(1):]
+            self.checked = m.group(1)[1:-1].lower() == "x"
+            self.children = self.children[m.end(1) :]
 
 
 class Strikethrough(inline.InlineElement):
 
-    pattern = re.compile(r'~~([^~]+)~~')
+    pattern = re.compile(r"~~([^~]+)~~")
     priority = 4
     parse_children = True
 
 
 class _MatchObj(object):
-
     def __init__(self, match, start_shift=0, end_shift=0):
         self._match = match
         self._start_shift = start_shift
@@ -57,18 +56,19 @@ class _MatchObj(object):
 class Url(inline.AutoLink):
 
     www_pattern = re.compile(
-        r'(?:^|(?<=[\s*_~(\uff00-\uffef]))(www\.([\w.\-]*?\.[\w.\-]+)[^<\s]*)')
-    email_pattern = r'[\w.\-+]+@[\w.\-]*?\.[\w.\-]*[a-zA-Z0-9]'
+        r"(?:^|(?<=[\s*_~(\uff00-\uffef]))(www\.([\w.\-]*?\.[\w.\-]+)[^<\s]*)"
+    )
+    email_pattern = r"[\w.\-+]+@[\w.\-]*?\.[\w.\-]*[a-zA-Z0-9]"
     bare_pattern = re.compile(
-        r'(?:^|(?<=[\s*_~(\uff00-\uffef]))((?:https?|ftp)://([\w.\-]*?\.[\w.\-]+)'
-        r'[^<\s]*|%s(?=[\s.<]|\Z))' % email_pattern
+        r"(?:^|(?<=[\s*_~(\uff00-\uffef]))((?:https?|ftp)://([\w.\-]*?\.[\w.\-]+)"
+        r"[^<\s]*|%s(?=[\s.<]|\Z))" % email_pattern
     )
     priority = 5
 
     def __init__(self, match):
         super(Url, self).__init__(match)
         if self.www_pattern.match(self.dest):
-            self.dest = 'http://' + self.dest
+            self.dest = "http://" + self.dest
 
     @classmethod
     def find(cls, text):
@@ -77,23 +77,23 @@ class Url(inline.AutoLink):
         ):
             domain = match.group(2)
             if domain:
-                parts = domain.split('.')
-                if len(parts) < 2 or any('_' in p for p in parts[-2:]):
+                parts = domain.split(".")
+                if len(parts) < 2 or any("_" in p for p in parts[-2:]):
                     continue
             link_text = match.group()
-            if link_text[-1] in ('?', '!', '.', ',', ':', '*', '_', '~'):
+            if link_text[-1] in ("?", "!", ".", ",", ":", "*", "_", "~"):
                 match = _MatchObj(match, end_shift=-1)
-            elif link_text[-1] == ')' and link_text.count(')') > link_text.count('('):
+            elif link_text[-1] == ")" and link_text.count(")") > link_text.count("("):
                 match = _MatchObj(match, end_shift=-1)
             else:
-                m = re.search(r'&[a-zA-Z]+;$', link_text)
+                m = re.search(r"&[a-zA-Z]+;$", link_text)
                 if m:
                     match = _MatchObj(match, end_shift=-len(m.group()))
             yield match
 
 
 class Document(block.Document):
-    link_dest_1 = re.compile(r'<(?:\\\\|\\[<>]|[^\n<>])*>')
+    link_dest_1 = re.compile(r"<(?:\\\\|\\[<>]|[^\n<>])*>")
 
     def __init__(self, text):
         _link_dest_1 = patterns.link_dest_1
@@ -106,22 +106,25 @@ class LinkRefDef(block.LinkRefDef):
     """Link reference definition:
     [label]: destination "title"
     """
-    link_dest = r'(?P<dest><(?:\\\\|\\[<>]|[^\n<>])*>|\S+)'
+
+    link_dest = r"(?P<dest><(?:\\\\|\\[<>]|[^\n<>])*>|\S+)"
     pattern = re.compile(
-        r' {,3}%s:(?P<s1>\s*)%s(?P<s2>\s*)(?:(?<=\s)%s)?[^\n\S]*$\n?'
-        % (patterns.link_label, link_dest, patterns.link_title), flags=re.M
+        r" {,3}%s:(?P<s1>\s*)%s(?P<s2>\s*)(?:(?<=\s)%s)?[^\n\S]*$\n?"
+        % (patterns.link_label, link_dest, patterns.link_title),
+        flags=re.M,
     )
 
 
 class ListItem(block.ListItem):
 
-    pattern = re.compile(r' {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]')
+    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
 
 
 class Table(block.BlockElement):
     """A table element."""
+
     _num_of_cols = None
-    _prefix = ''
+    _prefix = ""
 
     @classmethod
     def match(cls, source):
@@ -132,7 +135,8 @@ class Table(block.BlockElement):
             source.pos = source.match.end()
             num_of_cols = len(TableRow._cells)
             if (
-                TableRow.match(source) and TableRow._is_delimiter
+                TableRow.match(source)
+                and TableRow._is_delimiter
                 and num_of_cols == len(TableRow._cells)
             ):
                 cls._num_of_cols = num_of_cols
@@ -156,12 +160,12 @@ class Table(block.BlockElement):
             for d, th in zip(delimiters, header.children):
                 stripped_d = d.strip()
                 th.header = True
-                if stripped_d[0] == ':' and stripped_d[-1] == ':':
-                    th.align = 'center'
-                elif stripped_d[0] == ':':
-                    th.align = 'left'
-                elif stripped_d[-1] == ':':
-                    th.align = 'right'
+                if stripped_d[0] == ":" and stripped_d[-1] == ":":
+                    th.align = "center"
+                elif stripped_d[0] == ":":
+                    th.align = "left"
+                elif stripped_d[-1] == ":":
+                    th.align = "right"
             while not source.exhausted:
                 for e in block.parser._build_block_element_list():
                     if issubclass(e, (Table, block.Paragraph)):
@@ -178,8 +182,9 @@ class Table(block.BlockElement):
 
 class TableRow(block.BlockElement):
     """A table row element."""
-    splitter = re.compile(r'\s*(?<!\\)\|\s*')
-    delimiter = re.compile(r':?-+:?')
+
+    splitter = re.compile(r"\s*(?<!\\)\|\s*")
+    delimiter = re.compile(r":?-+:?")
     virtual = True
     _cells = None
     _is_delimiter = False
@@ -190,7 +195,7 @@ class TableRow(block.BlockElement):
     @classmethod
     def match(cls, source):
         line = source.next_line()
-        if not line or not re.match(r' {,3}\S', line):
+        if not line or not re.match(r" {,3}\S", line):
             return False
         parts = cls.splitter.split(line.strip())
         if parts and not parts[0]:
@@ -209,9 +214,9 @@ class TableRow(block.BlockElement):
         parent = source.state
         cells = cls._cells[:]
         if len(cells) < parent._num_of_cols:
-            cells.extend('' for _ in range(parent._num_of_cols - len(cells)))
+            cells.extend("" for _ in range(parent._num_of_cols - len(cells)))
         elif len(cells) > parent._num_of_cols:
-            cells = cells[:parent._num_of_cols]
+            cells = cells[: parent._num_of_cols]
         cells = [TableCell(cell) for cell in cells]
         if parent.children:
             for head, cell in zip(parent.children[0].children, cells):
@@ -221,6 +226,7 @@ class TableRow(block.BlockElement):
 
 class TableCell(block.BlockElement):
     """A table cell element."""
+
     virtual = True
     inline_children = True
 

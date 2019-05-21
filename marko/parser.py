@@ -22,6 +22,7 @@ class Parser(object):
 
     :param \*extras: extra elements to be included in parsing process.
     """
+
     def __init__(self, *extras):
         self.block_elements = {}
         self.inline_elements = {}
@@ -30,7 +31,7 @@ class Parser(object):
         for element in itertools.chain(
             (getattr(block, name) for name in block.__all__),
             (getattr(inline, name) for name in inline.__all__),
-            extras
+            extras,
         ):
             self.add_element(element)
 
@@ -49,8 +50,8 @@ class Parser(object):
             dest = self.block_elements
         else:
             raise TypeError(
-                'The element should be a subclass of either `BlockElement` or '
-                '`InlineElement`.'
+                "The element should be a subclass of either `BlockElement` or "
+                "`InlineElement`."
             )
         if not override:
             dest[element.__name__] = element
@@ -73,14 +74,14 @@ class Parser(object):
         if isinstance(source_or_text, string_types):
             block.parser = self
             inline.parser = self
-            return self.block_elements['Document'](source_or_text)
+            return self.block_elements["Document"](source_or_text)
         element_list = self._build_block_element_list()
         ast = []
         while not source_or_text.exhausted:
             for ele_type in element_list:
                 if ele_type.match(source_or_text):
                     result = ele_type.parse(source_or_text)
-                    if not hasattr(result, 'priority'):
+                    if not hasattr(result, "priority"):
                         result = ele_type(result)
                     ast.append(result)
                     break
@@ -99,7 +100,7 @@ class Parser(object):
         """
         element_list = self._build_inline_element_list()
         return inline_parser.parse(
-            text, element_list, fallback=self.inline_elements['RawText']
+            text, element_list, fallback=self.inline_elements["RawText"]
         )
 
     def _build_block_element_list(self):
@@ -108,7 +109,7 @@ class Parser(object):
         return sorted(
             [e for e in self.block_elements.values() if not e.virtual],
             key=lambda e: e.priority,
-            reverse=True
+            reverse=True,
         )
 
     def _build_inline_element_list(self):

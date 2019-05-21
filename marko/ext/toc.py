@@ -22,14 +22,13 @@ import re
 
 
 class TocRendererMixin(object):
-
     def __enter__(self):
         self.headings = []
         return super(TocRendererMixin, self).__enter__()
 
     def render_toc(self, maxdepth=3):
         if not self.headings:
-            return ''
+            return ""
         first_level = None
         last_level = None
         rv = []
@@ -53,23 +52,19 @@ class TocRendererMixin(object):
         for _ in range(first_level, last_level + 1):
             rv.append(self._close_heading_group())
 
-        return ''.join(rv)
+        return "".join(rv)
 
     def _open_heading_group(self):
-        return '<ul>\n'
+        return "<ul>\n"
 
     def _close_heading_group(self):
-        return '</ul>\n'
+        return "</ul>\n"
 
     def _render_toc_item(self, slug, text):
-        return '<li><a href="#{}">{}</a></li>\n'.format(
-            slug, self.escape_html(text)
-        )
+        return '<li><a href="#{}">{}</a></li>\n'.format(slug, self.escape_html(text))
 
     def render_heading(self, element):
         children = self.render_children(element)
-        slug = slugify(re.sub(r'<.+?>', '', children))
+        slug = slugify(re.sub(r"<.+?>", "", children))
         self.headings.append((int(element.level), slug, children))
-        return '<h{0} id="{1}">{2}</h{0}>\n'.format(
-            element.level, slug, children
-        )
+        return '<h{0} id="{1}">{2}</h{0}>\n'.format(element.level, slug, children)
