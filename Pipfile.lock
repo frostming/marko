@@ -265,10 +265,9 @@
         },
         "snowballstemmer": {
             "hashes": [
-                "sha256:919f26a68b2c17a7634da993d91339e288964f93c274f1343e3bbbe2096e1128",
-                "sha256:9f3bcd3c401c3e862ec0ebe6d2c069ebc012ce142cce209c098ccb5b09136e89"
+                "sha256:9f3b9ffe0809d174f7047e121431acf99c89a7040f0ca84f94ba53a498e6d0c9"
             ],
-            "version": "==1.2.1"
+            "version": "==1.9.0"
         },
         "sphinx": {
             "hashes": [
@@ -336,11 +335,11 @@
         },
         "tox": {
             "hashes": [
-                "sha256:f5c8e446b51edd2ea97df31d4ded8c8b72e7d6c619519da6bb6084b9dd5770f9",
-                "sha256:f87fd33892a2df0950e5e034def9468988b8d008c7e9416be665fcc0dd45b14f"
+                "sha256:45a265e953368fb372cca3eac33b69fdb1b1453e5b114be231c84fc3dfadceed",
+                "sha256:f5cb0b5b8d14f2100982b0981c750d840228180a348e6bad355aa38e949fbc3f"
             ],
             "index": "pypi",
-            "version": "==3.12.1"
+            "version": "==3.13.1"
         },
         "tqdm": {
             "hashes": [
