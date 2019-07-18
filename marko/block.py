@@ -208,7 +208,7 @@ class FencedCode(BlockElement):
     """Fenced code block: (```python\nhello\n```\n)"""
 
     priority = 7
-    pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(\S*)(.*?)$", re.M)
+    pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
     _parse_info = None
 
     def __init__(self, match):
@@ -220,10 +220,10 @@ class FencedCode(BlockElement):
         m = source.expect_re(cls.pattern)
         if not m:
             return False
-        prefix, leading, lang, tail = m.groups()
-        if leading[0] in lang or leading[0] in tail:
+        prefix, leading, info = m.groups()
+        if leading[0] == '`' and '`' in info:
             return False
-        cls._parse_info = prefix, leading, lang
+        cls._parse_info = prefix, leading, (info.split() + [''])[0]
         return m
 
     @classmethod
@@ -492,7 +492,7 @@ class ListItem(BlockElement):
     _parse_info = None
     virtual = True
     _tight = False
-    pattern = re.compile(r"[^\n\S]*(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
 
     def __init__(self):
         indent, bullet, mid, tail = self._parse_info

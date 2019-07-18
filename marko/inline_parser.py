@@ -216,6 +216,8 @@ def _expect_inline_link(text, start):
         link_dest = m.start(), m.end(), m.group()
         i = m.end()
     else:
+        if text[i] == '<':
+            return None
         open_num = 0
         escaped = False
         prev = i
@@ -309,7 +311,7 @@ def _next_closer(delimiters, bound):
     i = bound + 1 if bound is not None else 0
     while i < len(delimiters):
         d = delimiters[i]
-        if hasattr(d, "can_close") and d.can_close:
+        if getattr(d, "can_close", False):
             return i
         i += 1
     return None
@@ -320,7 +322,7 @@ def _nearest_opener(delimiters, higher, lower):
     lower = lower if lower is not None else -1
     while i > lower:
         d = delimiters[i]
-        if hasattr(d, "can_open") and d.can_open and d.closed_by(delimiters[higher]):
+        if getattr(d, "can_open", False) and d.closed_by(delimiters[higher]):
             return i
         i -= 1
     return None
@@ -386,6 +388,7 @@ class Delimiter(object):
             self.content[0] != other.content[0]
             or (self.can_open and self.can_close or other.can_open and other.can_close)
             and len(self.content + other.content) % 3 == 0
+            and not all(len(d.content) % 3 == 0 for d in [self, other])
         )
 
     def remove(self, n, left=False):
