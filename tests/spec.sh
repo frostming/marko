@@ -11,20 +11,20 @@ if [ -z "$VERSION" ]; then
 fi
 
 function main {
-    echo "Downloading spec file $VERSION..."
+	echo "Downloading spec file $VERSION..."
 	curl "https://raw.githubusercontent.com/commonmark/commonmark-spec/$VERSION/spec.txt" -o spec.txt
 	# No corresponding tag on GFM spec, use master anyway
 	curl "https://raw.githubusercontent.com/github/cmark-gfm/master/test/spec.txt" -o gfm.txt
 
-    echo "Dumping tests file..."
-    python3 -m spec --dump spec.txt > spec/commonmark.json
+	echo "Dumping tests file..."
+	python3 -m spec --dump spec.txt > spec/commonmark.json
 	python3 -m spec --dump gfm.txt > spec/gfm.json
 
-    echo "Cleaning up..."
-    rm -rf spec.txt
+	echo "Cleaning up..."
+	rm -rf spec.txt
 	rm -fr gfm.txt
 
-    echo "Done."
+	echo "Done."
 }
 
 main
