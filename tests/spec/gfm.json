@@ -4921,7 +4921,7 @@
   },
   {
     "markdown": "< http://foo.bar >\n",
-    "html": "<p>&lt; http://foo.bar &gt;</p>\n",
+    "html": "<p>&lt; <a href=\"http://foo.bar\">http://foo.bar</a> &gt;</p>\n",
     "example": 616,
     "start_line": 9159,
     "end_line": 9163,
@@ -4945,7 +4945,7 @@
   },
   {
     "markdown": "http://example.com\n",
-    "html": "<p>http://example.com</p>\n",
+    "html": "<p><a href=\"http://example.com\">http://example.com</a></p>\n",
     "example": 619,
     "start_line": 9180,
     "end_line": 9184,
@@ -4953,7 +4953,7 @@
   },
   {
     "markdown": "foo@bar.example.com\n",
-    "html": "<p>foo@bar.example.com</p>\n",
+    "html": "<p><a href=\"mailto:foo@bar.example.com\">foo@bar.example.com</a></p>\n",
     "example": 620,
     "start_line": 9187,
     "end_line": 9191,
