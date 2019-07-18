@@ -162,7 +162,9 @@ class CodeSpan(InlineElement):
     pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
     def __init__(self, match):
-        self.children = re.sub(r"\s+", " ", match.group(2).strip())
+        self.children = match.group(2).replace('\n', ' ')
+        if self.children.strip() and self.children[0] == self.children[-1] == ' ':
+            self.children = self.children[1:-1]
 
 
 class AutoLink(InlineElement):
