@@ -79,10 +79,10 @@ def get_tests(specfile):
     with open(specfile, 'r', encoding='utf-8', newline='\n') as specf:
         for line in specf:
             line_number = line_number + 1
-            line = line.strip()
-            if line.startswith("`" * 32 + " example"):
+            l = line.strip()
+            if l.startswith("`" * 32 + " example"):
                 state = 1
-            elif state == 2 and line == "`" * 32:
+            elif state == 2 and l == "`" * 32:
                 state = 0
                 example_number = example_number + 1
                 end_line = line_number
@@ -99,7 +99,7 @@ def get_tests(specfile):
                 start_line = 0
                 markdown_lines = []
                 html_lines = []
-            elif line == ".":
+            elif l == ".":
                 state = 2
             elif state == 1:
                 if start_line == 0:
@@ -109,8 +109,7 @@ def get_tests(specfile):
                 html_lines.append(line)
             elif state == 0 and re.match(header_re, line):
                 headertext = header_re.sub('', line).strip()
-    print(json.dumps(tests, ensure_ascii=True, indent=2))
-    return 0
+    return tests
 
 
 def locate_section(section, tests):
@@ -217,7 +216,8 @@ def main():
     quiet = args.quiet
     tests, markdown = args.tests
     if args.spec:
-        sys.exit(get_tests(args.spec))
+        print(json.dumps(get_tests(args.spec), indent=2))
+        exit(0)
     if args.section is not None:
         start, end = locate_section(args.section, tests)
 
