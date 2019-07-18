@@ -5,28 +5,29 @@ import re
 import sys
 import codecs
 import json
-from marko import Markdown
-from marko.ext.gfm import GFMarkdown
 from traceback import print_tb
 from argparse import ArgumentParser
 from .normalize import normalize_html
 
-SPECS = {
-    'commonmark': ('tests/spec/commonmark.json', Markdown()),
-    'gfm': ('tests/spec/gfm.json', GFMarkdown())
-}
+try:
+    from marko import Markdown
+    from marko.ext.gfm import GFMarkdown
+except ImportError:
+    SPECS = {}
+else:
+    SPECS = {
+        'commonmark': ('tests/spec/commonmark.json', Markdown()),
+        'gfm': ('tests/spec/gfm.json', GFMarkdown()),
+    }
 
 
-def run_tests(
-    test_entries, markdown, start=None, end=None, quiet=False, verbose=False
-):
+def run_tests(test_entries, markdown, start=None, end=None, quiet=False, verbose=False):
     start = start or 0
     end = end or sys.maxsize
     results = [
         run_test(test_entry, markdown, quiet)
         for test_entry in test_entries
-        if test_entry['example'] >= start
-        and test_entry['example'] <= end
+        if test_entry['example'] >= start and test_entry['example'] <= end
     ]
     if verbose:
         print_failure_in_sections(results)
@@ -54,7 +55,8 @@ def run_test(test_entry, markdown, quiet=False):
 
 
 def load_tests(flavor):
-    assert flavor.lower() in SPECS
+    if flavor.lower() not in SPECS:
+        return None, None
     specfile, parser = SPECS[flavor.lower()]
     with codecs.open(specfile, 'r', encoding='utf-8') as f:
         tests = json.load(f)
@@ -77,24 +79,27 @@ def get_tests(specfile):
     with open(specfile, 'r', encoding='utf-8', newline='\n') as specf:
         for line in specf:
             line_number = line_number + 1
-            l = line.strip()
-            if l.startswith("`" * 32 + " example"):
+            line = line.strip()
+            if line.startswith("`" * 32 + " example"):
                 state = 1
-            elif state == 2 and l == "`" * 32:
+            elif state == 2 and line == "`" * 32:
                 state = 0
                 example_number = example_number + 1
                 end_line = line_number
-                tests.append({
-                    "markdown": ''.join(markdown_lines).replace('→', "\t"),
-                    "html": ''.join(html_lines).replace('→', "\t"),
-                    "example": example_number,
-                    "start_line": start_line,
-                    "end_line": end_line,
-                    "section": headertext})
+                tests.append(
+                    {
+                        "markdown": ''.join(markdown_lines).replace('→', "\t"),
+                        "html": ''.join(html_lines).replace('→', "\t"),
+                        "example": example_number,
+                        "start_line": start_line,
+                        "end_line": end_line,
+                        "section": headertext,
+                    }
+                )
                 start_line = 0
                 markdown_lines = []
                 html_lines = []
-            elif l == ".":
+            elif line == ".":
                 state = 2
             elif state == 1:
                 if start_line == 0:
@@ -203,11 +208,7 @@ def main():
         default='commonmark',
         help='Specify markdown flavor name.',
     )
-    parser.add_argument(
-        '--dump',
-        dest='spec',
-        help='Dump spec.txt to spec.json'
-    )
+    parser.add_argument('--dump', dest='spec', help='Dump spec.txt to spec.json')
     args = parser.parse_args()
 
     start = args.start

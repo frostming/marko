@@ -71,7 +71,7 @@ class MyHTMLParser(HTMLParser):
                     self.output += (
                         "=" + '"' + urllib.quote(urllib.unquote(v), safe='/') + '"'
                     )
-                elif v != None:
+                elif v is not None:
                     self.output += "=" + '"' + cgi.escape(v, quote=True) + '"'
         self.output += ">"
         self.last_tag = tag
@@ -128,7 +128,7 @@ class MyHTMLParser(HTMLParser):
             self.output += "&amp;"
         elif c == '"':
             self.output += "&quot;"
-        elif c == None:
+        elif c is None:
             self.output += fallback
         else:
             self.output += c
