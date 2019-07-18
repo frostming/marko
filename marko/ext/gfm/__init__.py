@@ -24,9 +24,7 @@ class GFMParser(Parser):
     def __init__(self, *extras):
         super(GFMParser, self).__init__(*extras)
 
-        self.add_element(elements.Document, True)
         self.add_element(elements.Paragraph, True)
-        self.add_element(elements.LinkRefDef, True)
         self.add_element(elements.ListItem, True)
         self.add_element(elements.Strikethrough)
         self.add_element(elements.Url)
@@ -37,7 +35,11 @@ class GFMParser(Parser):
 
 class GFMRenderer(HTMLRenderer):
     tagfilter = re.compile(
-        r"<(title|texarea|style|xmp|iframe|noembed|noframes" r"|script|plaintext)",
+        r"<(title|texarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
+        flags=re.I,
+    )
+    tagfilter_no_open = re.compile(
+        r"(?<!^)( *)<(title|texarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
         flags=re.I,
     )
 
@@ -56,8 +58,11 @@ class GFMRenderer(HTMLRenderer):
     def render_strikethrough(self, element):
         return "<del>{}</del>".format(self.render_children(element))
 
-    def render_html_block(self, element):
+    def render_inline_html(self, element):
         return self.tagfilter.sub(r"&lt;\1", element.children)
+
+    def render_html_block(self, element):
+        return self.tagfilter_no_open.sub(r"\1&lt;\2", element.children)
 
     def render_table(self, element):
         header, body = element.children[0], element.children[1:]

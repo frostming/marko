@@ -1,5 +1,7 @@
-import marko
+from marko.ext.gfm import GFMarkdown
+from marko import Markdown
+from marko.ast_renderer import ASTRenderer
 
-a = '[link](</my uri>)\n'
+a = '<blockquote>\n  <xmp> is disallowed.  <XMP> is also disallowed.\n</blockquote>\n'
 
-print(marko.Markdown()(a))
+print(GFMarkdown()(a))

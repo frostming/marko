@@ -84,35 +84,13 @@ class Url(inline.AutoLink):
             if link_text[-1] in ("?", "!", ".", ",", ":", "*", "_", "~"):
                 match = _MatchObj(match, end_shift=-1)
             elif link_text[-1] == ")" and link_text.count(")") > link_text.count("("):
-                match = _MatchObj(match, end_shift=-1)
+                shift = link_text.count(")") - link_text.count("(")
+                match = _MatchObj(match, end_shift=-shift)
             else:
                 m = re.search(r"&[a-zA-Z]+;$", link_text)
                 if m:
                     match = _MatchObj(match, end_shift=-len(m.group()))
             yield match
-
-
-class Document(block.Document):
-    link_dest_1 = re.compile(r"<(?:\\\\|\\[<>]|[^\n<>])*>")
-
-    def __init__(self, text):
-        _link_dest_1 = patterns.link_dest_1
-        patterns.link_dest_1 = self.link_dest_1
-        super(Document, self).__init__(text)
-        patterns.link_dest_1 = _link_dest_1
-
-
-class LinkRefDef(block.LinkRefDef):
-    """Link reference definition:
-    [label]: destination "title"
-    """
-
-    link_dest = r"(?P<dest><(?:\\\\|\\[<>]|[^\n<>])*>|\S+)"
-    pattern = re.compile(
-        r" {,3}%s:(?P<s1>\s*)%s(?P<s2>\s*)(?:(?<=\s)%s)?[^\n\S]*$\n?"
-        % (patterns.link_label, link_dest, patterns.link_title),
-        flags=re.M,
-    )
 
 
 class ListItem(block.ListItem):
@@ -231,6 +209,6 @@ class TableCell(block.BlockElement):
     inline_children = True
 
     def __init__(self, text):
-        self.children = text.strip()
+        self.children = text.strip().replace('\\', '')
         self.header = False
         self.align = None
