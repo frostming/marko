@@ -16,13 +16,13 @@ Example usage::
 """
 from __future__ import unicode_literals
 import re
-from marko import HTMLRenderer, Parser, Markdown
+from marko import Markdown
 from . import elements
 
 
-class GFMParser(Parser):
+class GFMParserMixin(object):
     def __init__(self, *extras):
-        super(GFMParser, self).__init__(*extras)
+        super(GFMParserMixin, self).__init__(*extras)
 
         self.add_element(elements.Paragraph, True)
         self.add_element(elements.ListItem, True)
@@ -33,7 +33,7 @@ class GFMParser(Parser):
         self.add_element(elements.TableCell)
 
 
-class GFMRenderer(HTMLRenderer):
+class GFMRendererMixin(object):
     tagfilter = re.compile(
         r"<(title|texarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
         flags=re.I,
@@ -90,7 +90,10 @@ class GFMRenderer(HTMLRenderer):
         return self.render_link(element)
 
 
-class GFMarkdown(Markdown):
-    def __init__(self):
-        self.parser = GFMParser()
-        self.renderer = GFMRenderer()
+class GFMExtension:
+    parser_mixins = [GFMParserMixin]
+    renderer_mixins = [GFMRendererMixin]
+
+
+gfm = Markdown()
+gfm.use(GFMExtension)

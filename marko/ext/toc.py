@@ -68,3 +68,7 @@ class TocRendererMixin(object):
         slug = slugify(re.sub(r"<.+?>", "", children))
         self.headings.append((int(element.level), slug, children))
         return '<h{0} id="{1}">{2}</h{0}>\n'.format(element.level, slug, children)
+
+
+class TocExtension:
+    renderer_mixins = [TocRendererMixin]

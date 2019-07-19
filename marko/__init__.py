@@ -17,6 +17,11 @@ from .parser import Parser
 __version__ = '0.4.4-dev'
 
 
+class SetupDone(Exception):
+    def __str__(self):
+        return 'Unable to register more extensions after setup done.'
+
+
 class Markdown(object):
     """The main class to convert markdown documents.
 
@@ -29,8 +34,43 @@ class Markdown(object):
     """
 
     def __init__(self, parser=Parser, renderer=HTMLRenderer):
-        self.parser = parser if isinstance(parser, Parser) else parser()
-        self.renderer = renderer if isinstance(renderer, Renderer) else renderer()
+        assert issubclass(parser, Parser)
+        self._base_parser = parser
+        self._parser_mixins = []
+
+        assert issubclass(renderer, Renderer)
+        self._base_renderer = renderer
+        self._renderer_mixins = []
+
+        self._setup_done = False
+
+    def use(self, *extensions):
+        """Register extensions to Markdown object.
+        An extension should be an object providing ``parser_mixins`` or
+        ``renderer_mixins`` attributes or both.
+        Note that Marko uses a mixin based extension system, the order of extensions
+        matters: An extension preceding in order will have higher priorty.
+
+        :param extensions: one or many extension objects.
+        """
+        if self._setup_done:
+            raise SetupDone()
+        for extension in extensions:
+            self._parser_mixins.extend(getattr(extension, 'parser_mixins', []))
+            self._renderer_mixins.extend(getattr(extension, 'renderer_mixins', []))
+
+    def _setup_extensions(self):
+        """Install all extensions and set things up."""
+        if self._setup_done:
+            return
+        self.parser = type(
+            "MarkdownParser", tuple(self._parser_mixins) + (self._base_parser,), {}
+        )()
+        self.renderer = type(
+            "MarkdownRenderer",
+            tuple(self._renderer_mixins) + (self._base_renderer,),
+            {},
+        )()
 
     def convert(self, text):
         """Parse and render the given text."""
@@ -44,6 +84,7 @@ class Markdown(object):
 
         Override this to preprocess text or handle parsed result.
         """
+        self._setup_extensions()
         return self.parser.parse(text)
 
     def render(self, parsed):
@@ -54,3 +95,34 @@ class Markdown(object):
         self.renderer.root_node = parsed
         with self.renderer as r:
             return r.render(parsed)
+
+
+# Inner instance, use the bare convert/parse/render function instead
+_markdown = Markdown()
+
+
+def convert(text):
+    """Parse and render the given text.
+
+    :param text: text to convert.
+    :returns: The rendered result.
+    """
+    return _markdown.convert(text)
+
+
+def parse(text):
+    """Parse the text to a structured data object.
+
+    :param text: text to parse.
+    :returns: the parsed object
+    """
+    return _markdown.parse(text)
+
+
+def render(parsed):
+    """Render the parsed object to text.
+
+    :param parsed: the parsed object
+    :returns: the rendered result.
+    """
+    return _markdown.render(parsed)

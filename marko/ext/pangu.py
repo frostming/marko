@@ -39,3 +39,7 @@ class PanguRendererMixin(object):
     def render_raw_text(self, element):
         rv = super(PanguRendererMixin, self).render_raw_text(element)
         return PANGU_RE.sub('<span class="pangu"></span>', rv)
+
+
+class PanguExtension:
+    renderer_mixins = [PanguRendererMixin]
