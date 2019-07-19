@@ -121,5 +121,5 @@ class FootnoteRendererMixin(object):
 
 
 class FootnoteExtension:
-    parser_mixins = [FootnoteDef]
+    parser_mixins = [FootnoteParserMixin]
     renderer_mixins = [FootnoteRendererMixin]
