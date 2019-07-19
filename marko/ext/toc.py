@@ -7,12 +7,10 @@ Renders the TOC(Table Of Content) for a markdown document.
 
 Usage::
 
-    from marko import HTMLRenderer, Markdown
+    from marko import Markdown
 
-    class MyRenderer(TocRendererMixin, HTMLRenderer):
-        pass
+    markdown = Markdown(extensions=[TocExtension])
 
-    markdown = Markdown(renderer=MyRenderer)
     print(markdown(text))
     print(markdown.renderer.render_toc())
 """

@@ -6,20 +6,13 @@ Enable footnotes parsing and renderering in Marko.
 
 Usage::
 
-    from marko import Parser, HTMLRenderer, Markdown
-
-    class MyParser(FootnoteParserMixin, Parser):
-        pass
-
-    class MyRenderer(FootnoteRendererMixin, HTMLRenderer):
-        pass
+    from marko import Markdown
 
     text = 'Foo[^1]\\n\\n[^1]: This is a footnote.\\n'
 
-    markdown = Markdown(MyParser, MyRenderer)
-    print(markdown(text))
+    markdown = Markdown(extensions=[FootnoteExtension])
 
-.. note:: The mixin classes should be placed before Parser/Renderer for MRO.
+    print(markdown(text))
 
 """
 import re

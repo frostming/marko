@@ -46,22 +46,24 @@ If we set a higher priority, it will be first parsed instead::
 
     *This is an <a href="target">emphasis*</a>
 
-Register the element in parser
+Define your parser mixin class
 ------------------------------
 
+Marko uses mixins to add functionalities to the existing parser.
 Now let's add the element to parser processing::
 
-    from marko import Parser
-
-    parser = Parser(GithubWiki)
-
-This will register ``GithubWiki`` element to the parser other than default elements. Alternatively, you can subclass ``Parser`` and register any extra element inside::
-
-    class MyParser(Parser):
+    class WikiParserMixin(object):
 
         def __init__(self, *extras):
             super(MyParser, self).__init__(*extras)
             self.add_element(GithubWiki)
+
+This will register ``GithubWiki`` element to the parser besides default elements.
+
+.. note::
+
+    For Python 2 compatibility, mixin classes should explicitly inhert from ``object``, so that ``super``
+    function can work correctly.
 
 About overriding default elements
 +++++++++++++++++++++++++++++++++
@@ -69,7 +71,7 @@ About overriding default elements
 Sometimes you modify the functionality of existing elements, like changing the parsing process or providing more attributes, and want to replace the old one.
 In this case, you should use the second approach to register the element and call ``add_element`` with a second argument ``override=True``::
 
-    class MyParser(Parser):
+    class MyParserMixin(object):
 
         def __init__(self, *extras):
             super(MyParser, self).__init__(*extras)
@@ -80,33 +82,54 @@ Please note that super class's ``__init__`` should be called before the registra
 Create a new renderer
 ---------------------
 
-``marko.Renderer`` controlls how to represent the elements by the element name, in snake-cased form. In our case::
+Renderer mixins controll how to represent the elements by the element name, in snake-cased form. In our case::
 
-    from marko import HTMLRenderer
-
-    class MyRenderer(HTMLRenderer):
+    class WikiRendererMixin(object):
 
         def render_github_wiki(self, element):
             return '<a href="{}">{}</a>'.format(
                 self.escape_url(element.target), self.render_children(element)
             )
 
-Here I subclass ``HTMLRenderer`` to inherit all other HTML render functions.
+The renderer mixins will be combined together with marko's default base renderer: ``HTMLRenderer``,
+which you need in most cases, to create a :class:`marko.renderer.Renderer` instance.
 
-Besides HTML renderer, Marko also provides AST renderers to inspect the parsed AST. It is useful when developing your own parsing algorithm:
+Besides HTML renderer, Marko also provides AST renderers to inspect the parsed AST.
+They are useful to develop your own parsing algorithm:
 
 * ``marko.ast_renderer.ASTRenderer``: renders elements as JSON objects.
 * ``marko.ast_renderer.XMLRenderer``: renders elements as XML format AST.
 
-We are done
------------
+Create an extension object
+--------------------------
 
-Let's take all together to parse the text::
+We need an additional extension object to sum these mixins up. It should have ``parser_mixins`` or ``renderer_mixins``
+or both attributes to contain corresponding mixin classes in a list. It is typically a simple class,
+and other Python objects may also work::
+
+    class GithubWikiExtension:
+        parser_mixins = [WikiParserMixin]
+        renderer_mixins = [WikiRendererMixin]
+
+Register the extension
+----------------------
+
+Now you have your own extension ready, let's register it to the markdown parser::
 
     from marko import Markdown
 
-    markdown = Markdown(parser=MyParser, renderer=MyRenderer)
+    markdown = Markdown(extensions=[GithubWikiExtension])
+    # Alternatively, you can register extensions later.
+    markdown = Markdown()
+    markdown.use(GithubWikiExtension)
     print(markdown(text))
 
-Here ``parser`` and ``renderer`` arguments can be either a subclass of ``Parser`` and ``Renderer``, or an instance of it, respectively.
-For more details, see :doc:`API References <api>`.
+.. note::
+
+    The ``extensions`` argument, or ``use()`` accepts multiple extension objects.
+    You can alsow call it multiple times. The registration order matters in the way that
+    the first registered has the highest priority in the MRO.
+
+    You can also choose a different base parser or renderer by::
+
+        markdown = Markdown(renderer=marko.ast_renderer.ASTRenderer)

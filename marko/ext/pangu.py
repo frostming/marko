@@ -12,12 +12,9 @@ Example::
     input: 中国有13亿人口
     output: 中国有<span class="pangu"></span>13<span class="pangu"></span>亿人口
 
-    from marko import HTMLRenderer, Markdown
+    from marko import Markdown
 
-    class MyRenderer(PanguRendererMixin, HTMLRenderer):
-        pass
-
-    markdown = Markdown(renderer=MyRenderer)
+    markdown = Markdown(extensions=[PanguExtension])
     print(markdown(text))
 """
 from __future__ import unicode_literals

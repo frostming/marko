@@ -36,9 +36,9 @@ The installation is very simple:
 
 And to use it:
 ```python
-from marko import Markdown
-markdown = Markdown()
-print(markdown(text))
+import marko
+
+print(marko.convert(text))
 ```
 Marko also provides a simple CLI, for example, to render a document and output to a html file:
 
@@ -55,6 +55,7 @@ Marko is released under [MIT License](LICENSE)
 
 ## Change Log
 
+* v0.5.0: Update to comply commonmark spec 0.29; Change the extension system.
 * v0.4.3: Fix TOC rendering when heading level exceeds the max depth.
 * v0.4.2: Fix CJK regexp for pangu extension.
 * v0.4.0: Support Python 2.7.
