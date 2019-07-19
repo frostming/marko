@@ -26,14 +26,15 @@ class Markdown(object):
     """The main class to convert markdown documents.
 
     Attributes:
-        parser: an instance of :class:`Parser`
-        renderer: an instance of :class:`Renderer`
+        * parser: an instance of :class:`marko.parser.Parser`
+        * renderer: an instance of :class:`marko.renderer.Renderer`
 
-    :param parser: a subclass or instance of :class:`Parser`
-    :param renderer: a subclass or instance of :class:`Renderer`
+    :param parser: a subclass :class:`marko.parser.Parser`.
+    :param renderer: a subclass :class:`marko.renderer.Renderer`.
+    :param extensions: a list of extensions to register on the object.
     """
 
-    def __init__(self, parser=Parser, renderer=HTMLRenderer):
+    def __init__(self, parser=Parser, renderer=HTMLRenderer, extensions=None):
         assert issubclass(parser, Parser)
         self._base_parser = parser
         self._parser_mixins = []
@@ -44,6 +45,9 @@ class Markdown(object):
 
         self._setup_done = False
 
+        if extensions:
+            self.use(*extensions)
+
     def use(self, *extensions):
         """Register extensions to Markdown object.
         An extension should be an object providing ``parser_mixins`` or
@@ -51,7 +55,7 @@ class Markdown(object):
         Note that Marko uses a mixin based extension system, the order of extensions
         matters: An extension preceding in order will have higher priorty.
 
-        :param extensions: one or many extension objects.
+        :param \*extensions: one or many extension objects.
         """
         if self._setup_done:
             raise SetupDone()

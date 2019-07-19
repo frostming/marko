@@ -44,9 +44,9 @@ The installation is very simple::
 
 And to use it::
 
-    from marko import Markdown
-    markdown = Markdown()
-    print(markdown(text))
+    import marko
+
+    print(marko.convert(text))
 
 Marko also provides a simple CLI, for example, to render a document and output to a html file::
 

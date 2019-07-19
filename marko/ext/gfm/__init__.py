@@ -10,8 +10,8 @@ User may also use the parser and renderer as bases for further extension.
 
 Example usage::
 
-    from marko.ext.gfm import GFMarkdown
-    print(GFMarkdown()(text))
+    from marko.ext.gfm import gfm
+    print(gfm(text))
 
 """
 from __future__ import unicode_literals
