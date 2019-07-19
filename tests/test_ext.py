@@ -6,16 +6,11 @@ import unittest
 class TestFootnote(unittest.TestCase):
 
     def setUp(self):
-        from marko import Parser, HTMLRenderer, Markdown
-        from marko.ext.footnote import FootnoteParserMixin, FootnoteRendererMixin
+        from marko import Markdown
+        from marko.ext.footnote import FootnoteExtension
 
-        class MyParser(FootnoteParserMixin, Parser):
-            pass
-
-        class MyRenderer(FootnoteRendererMixin, HTMLRenderer):
-            pass
-
-        self.markdown = Markdown(MyParser, MyRenderer)
+        self.markdown = Markdown()
+        self.markdown.use(FootnoteExtension)
 
     def test_footnote(self):
         result = self.markdown('this is a footnote[^1].\n\n[^1]: foo\n')
@@ -30,13 +25,11 @@ class TestFootnote(unittest.TestCase):
 class TestToc(unittest.TestCase):
 
     def setUp(self):
-        from marko import HTMLRenderer, Markdown
-        from marko.ext.toc import TocRendererMixin
+        from marko import Markdown
+        from marko.ext.toc import TocExtension
 
-        class MyRenderer(TocRendererMixin, HTMLRenderer):
-            pass
-
-        self.markdown = Markdown(renderer=MyRenderer)
+        self.markdown = Markdown()
+        self.markdown.use(TocExtension)
 
     def test_render_toc(self):
         content = '# Foo\n## Foobar\n## Foofooz\n# Bar\n'
@@ -61,13 +54,11 @@ class TestToc(unittest.TestCase):
 class TestPangu(unittest.TestCase):
 
     def setUp(self):
-        from marko import Markdown, HTMLRenderer
-        from marko.ext.pangu import PanguRendererMixin
+        from marko import Markdown
+        from marko.ext.pangu import PanguExtension
 
-        class MyRenderer(PanguRendererMixin, HTMLRenderer):
-            pass
-
-        self.markdown = Markdown(renderer=MyRenderer)
+        self.markdown = Markdown()
+        self.markdown.use(PanguExtension)
 
     def test_render_pangu(self):
         content = '中国2018年'
@@ -86,9 +77,9 @@ class TestPangu(unittest.TestCase):
 class TestGFM(unittest.TestCase):
 
     def setUp(self):
-        from marko.ext.gfm import GFMarkdown
+        from marko.ext.gfm import gfm
 
-        self.markdown = GFMarkdown()
+        self.markdown = gfm
 
     def test_gfm_autolink(self):
         content = '地址：https://google.com'

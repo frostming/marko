@@ -71,6 +71,7 @@ class Markdown(object):
             tuple(self._renderer_mixins) + (self._base_renderer,),
             {},
         )()
+        self._setup_done = True
 
     def convert(self, text):
         """Parse and render the given text."""
