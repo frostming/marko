@@ -118,3 +118,8 @@ class FootnoteRendererMixin(object):
         footnotes = '<div class="footnotes">\n<ol>\n{}</ol>\n</div>\n'.format(children)
         self.footnotes = []
         return text + footnotes
+
+
+class FootnoteExtension:
+    parser_mixins = [FootnoteDef]
+    renderer_mixins = [FootnoteRendererMixin]

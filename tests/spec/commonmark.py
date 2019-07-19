@@ -10,14 +10,14 @@ from argparse import ArgumentParser
 from .normalize import normalize_html
 
 try:
-    from marko import Markdown
-    from marko.ext.gfm import GFMarkdown
+    import marko
+    from marko.ext.gfm import gfm
 except ImportError:
     SPECS = {}
 else:
     SPECS = {
-        'commonmark': ('tests/spec/commonmark.json', Markdown()),
-        'gfm': ('tests/spec/gfm.json', GFMarkdown()),
+        'commonmark': ('tests/spec/commonmark.json', marko.convert),
+        'gfm': ('tests/spec/gfm.json', gfm.convert),
     }
 
 
