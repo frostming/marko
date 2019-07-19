@@ -111,6 +111,9 @@ and other Python objects may also work::
         parser_mixins = [WikiParserMixin]
         renderer_mixins = [WikiRendererMixin]
 
+The extension exposes a single object so that it can be distributed as a standalone package. Read the following section about
+how to use it.
+
 Register the extension
 ----------------------
 

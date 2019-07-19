@@ -29,7 +29,7 @@ It is a good reason for me to develop a new markdown parser and use it.
 
 Respecting that Marko complies CommonMark's spec at the same time, which is a super complicated spec, Marko's performance will be affected.
 A benchmark result shows that Marko is 3 times slower than `Python-Markdown`_, but a bit faster than `Commonmark-py`_,
-much slower than `mistune`_. If performance is a bigger concern to you than spec compliance, you's better choose another parser.
+much slower than `mistune`_. If performance is a bigger concern to you than spec compliance, you'd better choose another parser.
 
 .. _Python-Markdown: https://github.com/waylan/Python-Markdown
 .. _mistune: https://github.com/lepture/mistune

@@ -14,7 +14,7 @@ from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
 
-__version__ = '0.5.0'
+__version__ = '0.5.1-dev'
 
 
 class SetupDone(Exception):
