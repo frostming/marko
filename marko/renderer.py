@@ -5,7 +5,15 @@ Base renderer class
 from __future__ import unicode_literals
 import itertools
 
-from .helpers import camel_to_snake_case
+from .helpers import camel_to_snake_case, is_type_check
+
+if is_type_check():
+    from typing import Any, Union
+    from .inline import InlineElement
+    from .block import BlockElement
+    from .parser import ElementType
+
+    Element = Union[BlockElement, InlineElement]
 
 
 class Renderer(object):
@@ -24,17 +32,17 @@ class Renderer(object):
     :meth:`Renderer.render_children`.
     """
 
-    def __init__(self):
+    def __init__(self):  # type: () -> None
         self.root_node = None
 
-    def __enter__(self):
+    def __enter__(self):  # type: () -> Renderer
         """Provide a context so that root_node can be reset after render."""
         return self
 
-    def __exit__(self, *args):
+    def __exit__(self, *args):  # type: (Any) -> None
         pass
 
-    def render(self, element):
+    def render(self, element):  # type: (Element) -> str
         """Renders the given element to string.
 
         :param element: a element to be rendered.
@@ -42,13 +50,13 @@ class Renderer(object):
         """
         # Store the root node to provide some context to render functions
         if not self.root_node:
-            self.root_node = element
+            self.root_node = element  # type: ignore
         render_func = getattr(self, self._cls_to_func_name(element.__class__), None)
         if not render_func:
             render_func = self.render_children
         return render_func(element)
 
-    def render_children(self, element):
+    def render_children(self, element):  # type: (Element) -> str
         """
         Recursively renders child elements. Joins the rendered
         strings with no space in between.
@@ -60,14 +68,15 @@ class Renderer(object):
 
         :param element: a branch node who has children attribute.
         """
-        rendered = [self.render(child) for child in element.children]
+        rendered = [self.render(child) for child in element.children]  # type: ignore
         return "".join(rendered)
 
-    def _cls_to_func_name(self, klass):
+    def _cls_to_func_name(self, klass):  # type: (ElementType) -> str
         from .block import parser
 
         element_types = itertools.chain(
-            parser.block_elements.items(), parser.inline_elements.items()
+            parser.block_elements.items(),  # type: ignore
+            parser.inline_elements.items(),  # type: ignore
         )
         for name, cls in element_types:
             if cls is klass:

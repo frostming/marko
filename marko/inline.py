@@ -4,12 +4,12 @@ Inline(span) level elements
 """
 from __future__ import unicode_literals
 import re
-from .helpers import string_types
+from .helpers import string_types, is_type_check
 from . import inline_parser, patterns
 
-# backrefs to avoid cylic  import
-parser = None
-_root_node = None
+if is_type_check():
+    from typing import Pattern, Match, Iterator
+    from .inline_parser import _Match
 
 __all__ = (
     "LineBreak",
@@ -32,7 +32,7 @@ class InlineElement(object):
     #: Use to denote the precedence in parsing.
     priority = 5
     #: element regex pattern.
-    pattern = None
+    pattern = None  # type: Pattern
     #: whether to parse children.
     parse_children = False
     #: which match group to parse.
@@ -41,13 +41,13 @@ class InlineElement(object):
     #: other elements instead.
     virtual = False
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (_Match) -> None
         """Parses the matched object into an element"""
         if not self.parse_children:
             self.children = match.group(self.parse_group)
 
     @classmethod
-    def find(cls, text):
+    def find(cls, text):  # type: (str) -> Iterator[Match]
         """This method should return an iterable containing matches of this element."""
         if isinstance(cls.pattern, string_types):
             cls.pattern = re.compile(cls.pattern)
@@ -61,7 +61,7 @@ class Literal(InlineElement):
     pattern = re.compile(r'\\([!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~])')
 
     @classmethod
-    def strip_backslash(cls, text):
+    def strip_backslash(cls, text):  # type: (str) -> str
         return cls.pattern.sub(r"\1", text)
 
 
@@ -74,7 +74,7 @@ class LineBreak(InlineElement):
     priority = 2
     pattern = re.compile(r"( *|\\)\n(?!\Z)")
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (_Match) -> None
         self.soft = not match.group(1).startswith(("  ", "\\"))
 
 
@@ -99,12 +99,12 @@ class LinkOrEmph(InlineElement):
 
     parse_children = True
 
-    def __new__(cls, match):
-        return parser.inline_elements[match.etype](match)
+    def __new__(cls, match):  # type: (_Match) -> InlineElement
+        return parser.inline_elements[match.etype](match)  # type: ignore
 
     @classmethod
-    def find(cls, text):
-        return inline_parser.find_links_or_emphs(text, _root_node)
+    def find(cls, text):  # type: (str) -> Iterator[Match]
+        return inline_parser.find_links_or_emphs(text, _root_node)  # type: ignore
 
 
 class StrongEmphasis(InlineElement):
@@ -127,7 +127,7 @@ class Link(InlineElement):
     virtual = True
     parse_children = True
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (_Match) -> None
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
@@ -144,7 +144,7 @@ class Image(InlineElement):
     virtual = True
     parse_children = True
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (_Match) -> None
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
@@ -161,9 +161,9 @@ class CodeSpan(InlineElement):
     priority = 7
     pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
-    def __init__(self, match):
-        self.children = match.group(2).replace('\n', ' ')
-        if self.children.strip() and self.children[0] == self.children[-1] == ' ':
+    def __init__(self, match):  # type: (_Match) -> None
+        self.children = match.group(2).replace("\n", " ")
+        if self.children.strip() and self.children[0] == self.children[-1] == " ":
             self.children = self.children[1:-1]
 
 
@@ -173,7 +173,7 @@ class AutoLink(InlineElement):
     priority = 7
     pattern = re.compile(r"<(%s|%s)>" % (patterns.uri, patterns.email))
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (_Match) -> None
         self.dest = match.group(1)
         if re.match(patterns.email, self.dest):
             self.dest = "mailto:" + self.dest
@@ -186,5 +186,10 @@ class RawText(InlineElement):
 
     virtual = True
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (str) -> None
         self.children = match
+
+
+# backrefs to avoid cylic  import
+parser = None
+_root_node = None

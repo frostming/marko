@@ -20,7 +20,8 @@ Now subclass ``marko.inline.InlinElement`` to a new element type::
 
 Inline elements use the ``pattern`` attribute to look for the matches in the text. To get more control of the scan process,
 consider overriding ``find()`` method to return an iterable of matches. If ``parse_children`` is ``True``, parser will parse the group
-given by ``parse_group``, which is 1 by default, of the match, as inline elements.
+given by ``parse_group`` of the match to produce inline elements, the default group is 1. See :ref:`elements` for available attributes
+and methods to change the parsing behavior.
 
 Now, write the ``__init__()`` method to control how the parsed result should map to element attributes.
 You don't need to provide the parsed content since it is handled by parser automatically::

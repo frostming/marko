@@ -16,8 +16,8 @@ except ImportError:
     SPECS = {}
 else:
     SPECS = {
-        'commonmark': ('tests/spec/commonmark.json', marko.convert),
-        'gfm': ('tests/spec/gfm.json', gfm.convert),
+        "commonmark": ("tests/spec/commonmark.json", marko.convert),
+        "gfm": ("tests/spec/gfm.json", gfm.convert),
     }
 
 
@@ -27,38 +27,38 @@ def run_tests(test_entries, markdown, start=None, end=None, quiet=False, verbose
     results = [
         run_test(test_entry, markdown, quiet)
         for test_entry in test_entries
-        if test_entry['example'] >= start and test_entry['example'] <= end
+        if test_entry["example"] >= start and test_entry["example"] <= end
     ]
     if verbose:
         print_failure_in_sections(results)
     fails = len(list(filter(lambda x: not x[0], results)))
     if fails:
-        print('failed:', fails)
-        print(' total:', len(results))
+        print("failed:", fails)
+        print(" total:", len(results))
     else:
-        print('All tests passing.')
+        print("All tests passing.")
     return not fails
 
 
 def run_test(test_entry, markdown, quiet=False):
-    test_case = test_entry['markdown']
+    test_case = test_entry["markdown"]
     try:
         output = markdown(test_case)
-        success = normalize_html(test_entry['html']) == normalize_html(output)
+        success = normalize_html(test_entry["html"]) == normalize_html(output)
         if not success and not quiet:
             print_test_entry(test_entry, output)
-        return success, test_entry['section']
+        return success, test_entry["section"]
     except Exception as exception:
         if not quiet:
             print_exception(exception, test_entry)
-        return False, test_entry['section']
+        return False, test_entry["section"]
 
 
 def load_tests(flavor):
     if flavor.lower() not in SPECS:
         return None, None
     specfile, parser = SPECS[flavor.lower()]
-    with codecs.open(specfile, 'r', encoding='utf-8') as f:
+    with codecs.open(specfile, "r", encoding="utf-8") as f:
         tests = json.load(f)
     return tests, parser
 
@@ -71,12 +71,12 @@ def get_tests(specfile):
     markdown_lines = []
     html_lines = []
     state = 0  # 0 regular text, 1 markdown example, 2 html output
-    headertext = ''
+    headertext = ""
     tests = []
 
-    header_re = re.compile('#+ ')
+    header_re = re.compile("#+ ")
 
-    with open(specfile, 'r', encoding='utf-8', newline='\n') as specf:
+    with open(specfile, "r", encoding="utf-8", newline="\n") as specf:
         for line in specf:
             line_number = line_number + 1
             l = line.strip()
@@ -88,8 +88,8 @@ def get_tests(specfile):
                 end_line = line_number
                 tests.append(
                     {
-                        "markdown": ''.join(markdown_lines).replace('→', "\t"),
-                        "html": ''.join(html_lines).replace('→', "\t"),
+                        "markdown": "".join(markdown_lines).replace("→", "\t"),
+                        "html": "".join(html_lines).replace("→", "\t"),
                         "example": example_number,
                         "start_line": start_line,
                         "end_line": end_line,
@@ -108,7 +108,7 @@ def get_tests(specfile):
             elif state == 2:
                 html_lines.append(line)
             elif state == 0 and re.match(header_re, line):
-                headertext = header_re.sub('', line).strip()
+                headertext = header_re.sub("", line).strip()
     return tests
 
 
@@ -116,30 +116,30 @@ def locate_section(section, tests):
     start = None
     end = None
     for test in tests:
-        if re.search(section, test['section'], re.IGNORECASE):
+        if re.search(section, test["section"], re.IGNORECASE):
             if start is None:
-                start = test['example']
+                start = test["example"]
         elif start is not None and end is None:
-            end = test['example'] - 1
+            end = test["example"] - 1
             return start, end
     if start:
-        return start, tests[-1]['example'] - 1
+        return start, tests[-1]["example"] - 1
     raise RuntimeError("Section '{}' not found, aborting.".format(section))
 
 
 def print_exception(exception, test_entry):
-    print_test_entry(test_entry, '-- exception --', fout=sys.stderr)
-    print(exception.__class__.__name__ + ':', exception, file=sys.stderr)
-    print('Traceback: ', file=sys.stderr)
+    print_test_entry(test_entry, "-- exception --", fout=sys.stderr)
+    print(exception.__class__.__name__ + ":", exception, file=sys.stderr)
+    print("Traceback: ", file=sys.stderr)
     tb = sys.exc_info()[2]
     print_tb(tb)
 
 
 def print_test_entry(test_entry, output, fout=sys.stdout):
-    print('example: ', repr(test_entry['example']), file=fout)
-    print('markdown:', repr(test_entry['markdown']), file=fout)
-    print('html:    ', repr(test_entry['html']), file=fout)
-    print('output:  ', repr(output), file=fout)
+    print("example: ", repr(test_entry["example"]), file=fout)
+    print("markdown:", repr(test_entry["markdown"]), file=fout)
+    print("html:    ", repr(test_entry["html"]), file=fout)
+    print("output:  ", repr(output), file=fout)
     print(file=fout)
 
 
@@ -152,7 +152,7 @@ def print_failure_in_sections(results):
             if failed:
                 section_str = "Failed in section '{}':".format(section)
                 result_str = "{:>3} / {:>3}".format(failed, total)
-                print('{:70} {}'.format(section_str, result_str))
+                print("{:70} {}".format(section_str, result_str))
             section = result[1]
             failed = 0
             total = 0
@@ -162,52 +162,52 @@ def print_failure_in_sections(results):
     if failed:
         section_str = "Failed in section '{}':".format(section)
         result_str = "{:>3} / {:>3}".format(failed, total)
-        print('{:70} {}'.format(section_str, result_str))
+        print("{:70} {}".format(section_str, result_str))
     print()
 
 
 def main():
     parser = ArgumentParser(description="Custom script for running Commonmark tests.")
     parser.add_argument(
-        'start',
+        "start",
         type=int,
-        nargs='?',
+        nargs="?",
         default=None,
         help="Run tests starting from this position.",
     )
     parser.add_argument(
-        'end', type=int, nargs='?', default=None, help="Run tests until this position."
+        "end", type=int, nargs="?", default=None, help="Run tests until this position."
     )
     parser.add_argument(
-        '-v',
-        '--verbose',
-        dest='verbose',
-        action='store_true',
+        "-v",
+        "--verbose",
+        dest="verbose",
+        action="store_true",
         help="Output failure count in every section.",
     )
     parser.add_argument(
-        '-q',
-        '--quiet',
-        dest='quiet',
-        action='store_true',
+        "-q",
+        "--quiet",
+        dest="quiet",
+        action="store_true",
         help="Suppress failed test entry output.",
     )
     parser.add_argument(
-        '-s',
-        '--section',
-        dest='section',
+        "-s",
+        "--section",
+        dest="section",
         default=None,
         help="Only run tests in specified section.",
     )
     parser.add_argument(
-        '-f',
-        '--flavor',
-        dest='tests',
+        "-f",
+        "--flavor",
+        dest="tests",
         type=load_tests,
-        default='commonmark',
-        help='Specify markdown flavor name.',
+        default="commonmark",
+        help="Specify markdown flavor name.",
     )
-    parser.add_argument('--dump', dest='spec', help='Dump spec.txt to spec.json')
+    parser.add_argument("--dump", dest="spec", help="Dump spec.txt to spec.json")
     args = parser.parse_args()
 
     start = args.start
@@ -225,5 +225,5 @@ def main():
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
