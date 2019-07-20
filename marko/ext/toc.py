@@ -15,7 +15,7 @@ Usage::
     print(markdown.renderer.render_toc())
 """
 from __future__ import unicode_literals
-from slugify import slugify
+from slugify import slugify  # type: ignore
 import re
 
 

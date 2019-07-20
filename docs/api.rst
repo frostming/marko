@@ -26,6 +26,8 @@ Renderer Class
 .. autoclass:: Renderer
     :inherited-members:
 
+.. _elements:
+
 Base Elements
 -------------
 

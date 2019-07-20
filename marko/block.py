@@ -5,9 +5,10 @@ Block level elements
 from __future__ import unicode_literals
 import re
 from . import inline, patterns
-from .helpers import Source, is_paired, normalize_label
+from .helpers import Source, is_paired, normalize_label, is_type_check
 
-parser = None
+if is_type_check():
+    from typing import Any, Optional, Match, Dict, Union, Tuple, List as _List
 
 __all__ = (
     "Document",
@@ -36,9 +37,10 @@ class BlockElement(object):
     virtual = False
     #: Whether children are parsed as inline elements.
     inline_children = False
+    _prefix = ""
 
     @classmethod
-    def match(self, source):
+    def match(self, source):  # type: (Source) -> Any
         """Test if the source matches the element at current position.
         The source should not be consumed in the method unless you have to.
 
@@ -47,7 +49,7 @@ class BlockElement(object):
         raise NotImplementedError()
 
     @classmethod
-    def parse(self, source):
+    def parse(self, source):  # type: (Source) -> Any
         """Parses the source. This is a proper place to consume the source body and
         return an element or information to build one. The information tuple will be
         passed to ``__init__`` method afterwards. Inline parsing, if any, should also
@@ -57,18 +59,18 @@ class BlockElement(object):
         """
         raise NotImplementedError()
 
-    def parse_inline(self):
+    def parse_inline(self):  # type: () -> None
         """Inline parsing is postponed so that all link references
         are seen before that.
         """
         if self.inline_children:
-            self.children = parser.parse_inline(self.children)
+            self.children = parser.parse_inline(self.children)  # type: ignore
         elif isinstance(getattr(self, "children", None), list):
             for child in self.children:
                 if isinstance(child, BlockElement):
                     child.parse_inline()
 
-    def __lt__(self, o):
+    def __lt__(self, o):  # type: (BlockElement) -> bool
         return self.priority < o.priority
 
 
@@ -78,12 +80,12 @@ class Document(BlockElement):
     _prefix = ""
     virtual = True
 
-    def __init__(self, text):
-        self.link_ref_defs = {}
+    def __init__(self, text):  # type: (str) -> None
+        self.link_ref_defs = {}   # type: Dict[str, Tuple[str, str]]
         source = Source(text)
-        inline._root_node = self
+        inline._root_node = self  # type: ignore
         with source.under_state(self):
-            self.children = parser.parse(source)
+            self.children = parser.parse(source)  # type: ignore
         self.parse_inline()
 
 
@@ -92,16 +94,16 @@ class BlankLine(BlockElement):
 
     priority = 5
 
-    def __init__(self, start):
+    def __init__(self, start):  # type: (int) -> None
         self._anchor = start
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> bool
         line = source.next_line()
         return line is not None and not line.strip()
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> int
         start = source.pos
         while not source.exhausted and cls.match(source):
             source.consume()
@@ -118,16 +120,16 @@ class Heading(BlockElement):
     )
     inline_children = True
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (Match) -> None
         self.level = len(match.group(1))
         self.children = match.group(2).strip()
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> Optional[Match]
         return source.expect_re(cls.pattern)
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> Optional[Match]
         m = source.match
         source.consume()
         return m
@@ -141,7 +143,7 @@ class SetextHeading(BlockElement):
     virtual = True
     inline_children = True
 
-    def __init__(self, lines):
+    def __init__(self, lines):  # type: (_List[str]) -> None
         self.level = 1 if lines.pop().strip()[0] == "=" else 2
         self.children = "".join(line.lstrip() for line in lines).strip()
 
@@ -151,21 +153,21 @@ class CodeBlock(BlockElement):
 
     priority = 4
 
-    def __init__(self, lines):
+    def __init__(self, lines):  # type: (str) -> None
         self.children = [inline.RawText(lines)]
         self.lang = ""
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> str
         line = source.next_line(False)
         prefix = source.prefix + " {4}"
         if isinstance(source.state, Quote):
             # requires five spaces to prefix
             prefix = source.prefix[:-1] + " {4}"
-        return cls.strip_prefix(line, prefix)
+        return cls.strip_prefix(line, prefix)   # type: ignore
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> str
         prefix = source.prefix + " {4}"
         lines = [cls.match(source)]
         source.consume()
@@ -189,10 +191,10 @@ class CodeBlock(BlockElement):
         return "".join(lines).rstrip("\n") + "\n"
 
     @staticmethod
-    def strip_prefix(line, prefix):
+    def strip_prefix(line, prefix):  # type: (str, str) -> str
         match = re.match(prefix, line.expandtabs(4))
         if not match:
-            return False
+            return ""
         end = match.end()
         for i in range(len(line)):
             expanded = line[: i + 1].expandtabs(4)
@@ -202,6 +204,7 @@ class CodeBlock(BlockElement):
             if d == 0:
                 return line[i + 1 :]
             return expanded[-d:] + line[i + 1 :]
+        return ""
 
 
 class FencedCode(BlockElement):
@@ -209,25 +212,25 @@ class FencedCode(BlockElement):
 
     priority = 7
     pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
-    _parse_info = None
+    _parse_info = ("", "", "")  # type: Tuple[str, str, str]
 
-    def __init__(self, match):
+    def __init__(self, match):  # type: (Tuple[str, str]) -> None
         self.lang = inline.Literal.strip_backslash(match[0])
         self.children = [inline.RawText(match[1])]
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> Optional[Match]
         m = source.expect_re(cls.pattern)
         if not m:
-            return False
+            return None
         prefix, leading, info = m.groups()
         if leading[0] == '`' and '`' in info:
-            return False
+            return None
         cls._parse_info = prefix, leading, (info.split() + [''])[0]
         return m
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> Tuple[str, str]
         source.next_line()
         source.consume()
         lines = []
@@ -256,14 +259,14 @@ class ThematicBreak(BlockElement):
     pattern = re.compile(r" {,3}([-_*][^\n\S]*){3,}$\n?", flags=re.M)
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> bool
         m = source.expect_re(cls.pattern)
         if not m:
             return False
         return len(set(re.sub(r"\s+", "", m.group()))) == 1
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> ThematicBreak
         source.consume()
         return cls()
 
@@ -272,13 +275,13 @@ class HTMLBlock(BlockElement):
     """HTML blocks, parsed as it is"""
 
     priority = 5
-    _end_cond = None
+    _end_cond = None    # Optional[Match]
 
-    def __init__(self, lines):
+    def __init__(self, lines):  # type: (str) -> None
         self.children = lines
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> Union[int, bool]
         if source.expect_re(r"(?i) {,3}<(?:script|pre|style)[>\s]"):
             cls._end_cond = re.compile(r"(?i)</(?:script|pre|style)>")
             return 1
@@ -308,7 +311,7 @@ class HTMLBlock(BlockElement):
         return False
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> str
         lines = []
         while not source.exhausted:
             line = source.next_line()
@@ -333,21 +336,22 @@ class Paragraph(BlockElement):
     pattern = re.compile(r"[^\n]+$\n?", flags=re.M)
     inline_children = True
 
-    def __init__(self, lines):
-        lines = "".join(line.lstrip() for line in lines).rstrip("\n")
-        self.children = lines
+    def __init__(self, lines):  # type: (_List[str]) -> None
+        str_lines = "".join(line.lstrip() for line in lines).rstrip("\n")
+        self.children = str_lines
         self._tight = False
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> bool
         return source.expect_re(cls.pattern) is not None
 
     @staticmethod
-    def is_setext_heading(line):
+    def is_setext_heading(line):  # type: (str) -> bool
         return re.match(r" {,3}(=+|-+)[^\n\S]*$", line) is not None
 
     @classmethod
-    def break_paragraph(cls, source, lazy=False):
+    def break_paragraph(cls, source, lazy=False):  # type: (Source, bool) -> bool
+        assert isinstance(parser, Parser)
         if (
             parser.block_elements["Quote"].match(source)
             or parser.block_elements["Heading"].match(source)
@@ -375,7 +379,7 @@ class Paragraph(BlockElement):
         return False
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> _List[str]
         lines = [source.next_line()]
         source.consume()
         end_parse = False
@@ -388,7 +392,7 @@ class Paragraph(BlockElement):
                 lines.append(line)
                 source.consume()
                 if cls.is_setext_heading(line):
-                    return parser.block_elements["SetextHeading"](lines)
+                    return parser.block_elements["SetextHeading"](lines)  # type: ignore
             else:
                 # check lazy continuation, store the previous state stack
                 states = source._states[:]
@@ -404,7 +408,7 @@ class Paragraph(BlockElement):
                             source.consume()
                         break
                 source._states = states
-        return lines
+        return lines  # type: ignore
 
 
 class Quote(BlockElement):
@@ -414,14 +418,14 @@ class Quote(BlockElement):
     _prefix = r" {,3}>[^\n\S]?"
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> Optional[Match]
         return source.expect_re(r" {,3}>")
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> Quote
         state = cls()
         with source.under_state(state):
-            state.children = parser.parse(source)
+            state.children = parser.parse(source)  # type: ignore
         return state
 
 
@@ -431,15 +435,15 @@ class List(BlockElement):
     priority = 6
     _prefix = ""
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
-    _parse_info = None
+    _parse_info = ("", False, 0)
 
-    def __init__(self):
+    def __init__(self):  # type: () -> None
         self.bullet, self.ordered, self.start = self._parse_info
         self.start = int(self.start)
         self.tight = True
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> bool
         m = source.expect_re(cls.pattern)
         if not m:
             return False
@@ -448,20 +452,20 @@ class List(BlockElement):
             ordered = True
             start = bullet[:-1]
         cls._parse_info = (bullet, ordered, start)
-        return m
+        return m is not None
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> List
         state = cls()
         children = []
         tight = True
         has_blank_line = False
         with source.under_state(state):
             while not source.exhausted:
-                if parser.block_elements["ListItem"].match(source):
-                    el = parser.block_elements["ListItem"].parse(source)
+                if parser.block_elements["ListItem"].match(source):  # type: ignore
+                    el = parser.block_elements["ListItem"].parse(source)  # type: ignore
                     if not isinstance(el, BlockElement):
-                        el = parser.block_elements["ListItem"](el)
+                        el = parser.block_elements["ListItem"](el)  # type: ignore
                     children.append(el)
                     source.anchor()
                     if has_blank_line:
@@ -489,18 +493,18 @@ class List(BlockElement):
 class ListItem(BlockElement):
     """List item element. It can only be created by List.parse"""
 
-    _parse_info = None
+    _parse_info = (0, "", 0, "")
     virtual = True
     _tight = False
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
 
-    def __init__(self):
+    def __init__(self):  # type: () -> None
         indent, bullet, mid, tail = self._parse_info
         self._prefix = " " * indent + re.escape(bullet) + " " * mid
         self._second_prefix = " " * (len(bullet) + indent + (mid or 1))
 
     @classmethod
-    def parse_leading(cls, line):
+    def parse_leading(cls, line):  # type: (str) -> Tuple[int, str, int, str]
         line = line.expandtabs(4)
         stripped_line = line.lstrip()
         indent = len(line) - len(stripped_line)
@@ -517,13 +521,14 @@ class ListItem(BlockElement):
         return indent, bullet, mid, tail
 
     @classmethod
-    def match(cls, source):
-        if parser.block_elements["ThematicBreak"].match(source):
+    def match(cls, source):  # type: (Source) -> bool
+        if parser.block_elements["ThematicBreak"].match(source):  # type: ignore
             return False
         if not source.expect_re(cls.pattern):
             return False
-        indent, bullet, mid, tail = cls.parse_leading(source.next_line())
+        indent, bullet, mid, tail = cls.parse_leading(source.next_line())  # type: ignore
         parent = source.state
+        assert isinstance(parent, List)
         if (
             parent.ordered
             and not bullet[:-1].isdigit()
@@ -536,15 +541,15 @@ class ListItem(BlockElement):
         return True
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> ListItem
         state = cls()
         state.children = []
         with source.under_state(state):
-            if not source.next_line().strip():
+            if not source.next_line().strip():  # type: ignore
                 source.consume()
-                if not source.next_line() or not source.next_line().strip():
+                if not source.next_line() or not source.next_line().strip():  # type: ignore
                     return state
-            state.children = parser.parse(source)
+            state.children = parser.parse(source)  # type: ignore
         if isinstance(state.children[-1], BlankLine):
             # Remove the last blank line from list item
             blankline = state.children.pop()
@@ -563,10 +568,10 @@ class LinkRefDef(BlockElement):
         % (patterns.link_label, patterns.link_dest, patterns.link_title),
         flags=re.M,
     )
-    _parse_info = None
+    _parse_info = ("", "", "")
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source):  # type: (Source) -> bool
         m = source.expect_re(cls.pattern)
         if not m:
             return False
@@ -584,13 +589,19 @@ class LinkRefDef(BlockElement):
         if title and re.search(r"^$", title, re.M):
             return False
         cls._parse_info = label, dest, title
-        return m
+        return m is not None
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source):  # type: (Source) -> LinkRefDef
         label, dest, title = cls._parse_info
         normalized_label = normalize_label(label[1:-1])
+        assert isinstance(source.root, Document)
         if normalized_label not in source.root.link_ref_defs:
             source.root.link_ref_defs[normalized_label] = (dest, title)
         source.consume()
         return cls()
+
+
+parser = None
+if is_type_check():
+    from .parser import Parser

@@ -9,6 +9,9 @@ script: tox
 
 jobs:
   include:
+    - stage: lint
+      python: 3.6
+      env: TOXENV=lint
     - python: "3.7"
       dist: xenial
       sudo: required

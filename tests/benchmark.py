@@ -6,7 +6,7 @@ from importlib import import_module
 from time import perf_counter
 
 
-TEST_FILE = 'tests/samples/syntax.md'
+TEST_FILE = "tests/samples/syntax.md"
 TIMES = 100
 
 
@@ -16,7 +16,7 @@ def benchmark(package_name):
             try:
                 package = import_module(package_name)
             except ImportError:
-                return 'not available.'
+                return "not available."
 
             start = perf_counter()
             for i in range(TIMES):
@@ -24,60 +24,63 @@ def benchmark(package_name):
             end = perf_counter()
 
             return end - start
+
         return inner
+
     return decorator
 
 
-@benchmark('markdown')
+@benchmark("markdown")
 def run_markdown(package):
-    with open(TEST_FILE, 'r') as fin:
-        return package.markdown(fin.read(), ['extra'])
+    with open(TEST_FILE, "r") as fin:
+        return package.markdown(fin.read(), ["extra"])
 
-@benchmark('mistune')
+
+@benchmark("mistune")
 def run_mistune(package):
-    with open(TEST_FILE, 'r') as fin:
+    with open(TEST_FILE, "r") as fin:
         return package.markdown(fin.read())
 
 
-@benchmark('CommonMark')
+@benchmark("CommonMark")
 def run_commonmark(package):
-    with open(TEST_FILE, 'r') as fin:
+    with open(TEST_FILE, "r") as fin:
         return package.commonmark(fin.read())
 
 
-@benchmark('marko')
+@benchmark("marko")
 def run_marko(package):
-    with open(TEST_FILE, 'r') as fin:
+    with open(TEST_FILE, "r") as fin:
         return package.markdown(fin.read())
 
 
-@benchmark('mistletoe')
+@benchmark("mistletoe")
 def run_mistletoe(package):
-    with open(TEST_FILE, 'r') as fin:
+    with open(TEST_FILE, "r") as fin:
         return package.markdown(fin)
 
 
 def run(package_name):
-    print(package_name, end=': ')
-    print(globals()['run_{}'.format(package_name.lower())]())
+    print(package_name, end=": ")
+    print(globals()["run_{}".format(package_name.lower())]())
 
 
 def run_all(package_names):
-    prompt = 'Running tests with {}...'.format(', '.join(package_names))
+    prompt = "Running tests with {}...".format(", ".join(package_names))
     print(prompt)
-    print('='*len(prompt))
+    print("=" * len(prompt))
     for package_name in package_names:
         run(package_name)
 
 
 def main(*args):
-    print('Test document: {}'.format(TEST_FILE))
-    print('Test iterations: {}'.format(TIMES))
+    print("Test document: {}".format(TEST_FILE))
+    print("Test iterations: {}".format(TIMES))
     if args[1:]:
         run_all(args[1:])
     else:
-        run_all(['markdown', 'mistune', 'commonmark', 'marko', 'mistletoe'])
+        run_all(["markdown", "mistune", "commonmark", "marko", "mistletoe"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(*sys.argv)

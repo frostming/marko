@@ -11,7 +11,7 @@ if PY2:
     import backports.html as html
     from urllib import quote as _quote
 
-    def quote(s, safe="/"):
+    def quote(s, safe="/"):  # type: (str, str) -> str
         safe = safe.encode("utf-8")
         s = s.encode("utf-8")
         return _quote(s, safe)
