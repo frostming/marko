@@ -2,15 +2,7 @@
 Base parser
 """
 import itertools
-from . import block, inline, inline_parser
 from .helpers import string_types, is_type_check, Source
-
-if is_type_check():
-    from typing import Type, Union, Dict, AnyStr, List
-
-    BlockElementType = Type[block.BlockElement]
-    InlineElementType = Type[inline.InlineElement]
-    ElementType = Union[BlockElementType, InlineElementType]
 
 
 class Parser(object):
@@ -130,3 +122,13 @@ class Parser(object):
         with the same priority.
         """
         return [e for e in self.inline_elements.values() if not e.virtual]
+
+
+from . import block, inline, inline_parser  # noqa
+
+if is_type_check():
+    from typing import Type, Union, Dict, AnyStr, List
+
+    BlockElementType = Type[block.BlockElement]
+    InlineElementType = Type[inline.InlineElement]
+    ElementType = Union[BlockElementType, InlineElementType]

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import re
 from . import inline, patterns
 from .helpers import Source, is_paired, normalize_label, is_type_check
+from .parser import Parser
 
 if is_type_check():
     from typing import Any, Optional, Match, Dict, Union, Tuple, List as _List
@@ -603,5 +604,3 @@ class LinkRefDef(BlockElement):
 
 
 parser = None
-if is_type_check():
-    from .parser import Parser
