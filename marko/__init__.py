@@ -14,12 +14,12 @@ from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
 
-__version__ = '0.5.1-dev'
+__version__ = "0.5.1"
 
 
 class SetupDone(Exception):
     def __str__(self):
-        return 'Unable to register more extensions after setup done.'
+        return "Unable to register more extensions after setup done."
 
 
 class Markdown(object):
@@ -60,8 +60,8 @@ class Markdown(object):
         if self._setup_done:
             raise SetupDone()
         for extension in extensions:
-            self._parser_mixins.extend(getattr(extension, 'parser_mixins', []))
-            self._renderer_mixins.extend(getattr(extension, 'renderer_mixins', []))
+            self._parser_mixins.extend(getattr(extension, "parser_mixins", []))
+            self._renderer_mixins.extend(getattr(extension, "renderer_mixins", []))
 
     def _setup_extensions(self):
         """Install all extensions and set things up."""
