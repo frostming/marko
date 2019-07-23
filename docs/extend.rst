@@ -9,11 +9,11 @@ Create a new element
 Github wiki link is an inline level element. For the difference between block elements and inline elements,
 please refer to `corresponding section <https://spec.commonmark.org/0.28/#container-blocks-and-leaf-blocks>`_ of Commonmark's spec.
 
-Now subclass ``marko.inline.InlinElement`` to a new element type::
+Now subclass ``marko.inline.InlineElement`` to a new element type::
 
     from marko import inline
 
-    class GithubWiki(inline.InlinElement):
+    class GithubWiki(inline.InlineElement):
 
         pattern = r'\[\[ *(.+?) *| *(.+?) *\]\]'
         parse_children = True
@@ -26,7 +26,7 @@ and methods to change the parsing behavior.
 Now, write the ``__init__()`` method to control how the parsed result should map to element attributes.
 You don't need to provide the parsed content since it is handled by parser automatically::
 
-    class GithubWiki(inline.InlinElement):
+    class GithubWiki(inline.InlineElement):
 
         pattern = r'\[\[ *(.+?) *| *(.+?) *\]\]'
         parse_children = True
@@ -131,7 +131,7 @@ Now you have your own extension ready, let's register it to the markdown parser:
 .. note::
 
     The ``extensions`` argument, or ``use()`` accepts multiple extension objects.
-    You can alsow call it multiple times. The registration order matters in the way that
+    You can also call it multiple times. The registration order matters in the way that
     the first registered has the highest priority in the MRO.
 
     You can also choose a different base parser or renderer by::
