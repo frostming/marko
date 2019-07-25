@@ -10,6 +10,7 @@ from marko import block, inline
 class Paragraph(block.Paragraph):
 
     _task_list_item_pattern = re.compile(r"(\[[\sxX]\])\s+\S")
+    override = True
 
     def __init__(self, lines):
         super(Paragraph, self).__init__(lines)
@@ -96,6 +97,7 @@ class Url(inline.AutoLink):
 class ListItem(block.ListItem):
 
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+    override = True
 
 
 class Table(block.BlockElement):

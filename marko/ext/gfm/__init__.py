@@ -20,19 +20,6 @@ from marko import Markdown
 from . import elements
 
 
-class GFMParserMixin(object):
-    def __init__(self, *extras):
-        super(GFMParserMixin, self).__init__(*extras)
-
-        self.add_element(elements.Paragraph, True)
-        self.add_element(elements.ListItem, True)
-        self.add_element(elements.Strikethrough)
-        self.add_element(elements.Url)
-        self.add_element(elements.Table)
-        self.add_element(elements.TableRow)
-        self.add_element(elements.TableCell)
-
-
 class GFMRendererMixin(object):
     tagfilter = re.compile(
         r"<(title|texarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
@@ -91,7 +78,15 @@ class GFMRendererMixin(object):
 
 
 class GFMExtension:
-    parser_mixins = [GFMParserMixin]
+    elements = [
+        elements.Paragraph,
+        elements.ListItem,
+        elements.Strikethrough,
+        elements.Url,
+        elements.Table,
+        elements.TableRow,
+        elements.TableCell,
+    ]
     renderer_mixins = [GFMRendererMixin]
 
 

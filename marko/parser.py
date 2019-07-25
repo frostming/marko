@@ -8,12 +8,7 @@ from .helpers import string_types, is_type_check, Source
 class Parser(object):
     """
     All elements defined in CommonMark's spec are included in the parser
-    by default. To add your custom elements, you can either:
-
-    1. pass the element classes as ``extras`` arguments to the constructor.
-    2. or subclass to your own parser and call :meth:`Parser.add_element`
-       inside the ``__init__`` body, especially when you want to override
-       the default element.
+    by default.
 
     Attributes:
         block_elements(dict): a dict of name: block_element pairs
@@ -22,23 +17,20 @@ class Parser(object):
     :param \*extras: extra elements to be included in parsing process.
     """
 
-    def __init__(self, *extras):  # type: (ElementType) -> None
+    def __init__(self):  # type: () -> None
         self.block_elements = {}  # type: Dict[str, BlockElementType]
         self.inline_elements = {}  # type: Dict[str, InlineElementType]
-        # Create references in block and inline modules to avoid cyclic import.
 
         for element in itertools.chain(
             (getattr(block, name) for name in block.__all__),
             (getattr(inline, name) for name in inline.__all__),
-            extras,
         ):
             self.add_element(element)
 
-    def add_element(self, element, override=False):  # type: (ElementType, bool) -> None
+    def add_element(self, element):  # type: (ElementType) -> None
         """Add an element to the parser.
 
         :param element: the element class.
-        :param override: whether to replace the default element based on.
 
         .. note:: If one needs to call it inside ``__init__()``, please call it after
              ``super().__init__()`` is called.
@@ -53,11 +45,11 @@ class Parser(object):
                 "The element should be a subclass of either `BlockElement` or "
                 "`InlineElement`."
             )
-        if not override:
+        if not element.override:
             dest[element.__name__] = element
         else:
             for cls in element.__bases__:
-                if cls in dest.values():
+                if cls.__name__ in dest:
                     dest[cls.__name__] = element
                     break
             else:

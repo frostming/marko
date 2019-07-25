@@ -38,6 +38,8 @@ class BlockElement(object):
     virtual = False
     #: Whether children are parsed as inline elements.
     inline_children = False
+    #: If true, will replace the element which it derives from.
+    override = False
     _prefix = ""
 
     @classmethod
