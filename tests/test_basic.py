@@ -35,7 +35,7 @@ class TestExtension(unittest.TestCase):
 
         self.assertEqual(len(markdown._parser_mixins), 1)
         self.assertEqual(len(markdown._renderer_mixins), 2)
-        self.assertTrue(hasattr(markdown._renderer_mixins[0], 'render_footnote_def'))
+        self.assertTrue(hasattr(markdown._renderer_mixins[1], 'render_footnote_def'))
 
     def test_extension_setup(self):
         from marko.ext.footnote import FootnoteExtension
@@ -49,3 +49,17 @@ class TestExtension(unittest.TestCase):
             markdown.use(TocExtension)
 
         self.assertTrue(hasattr(markdown.renderer, 'render_footnote_def'))
+
+    def test_extension_override(self):
+        from marko.ext.gfm import GFMExtension
+
+        class MyRendererMixin:
+            def render_paragraph(self, element):
+                return 'foo bar'
+
+        class MyExtension:
+            renderer_mixins = [MyRendererMixin]
+
+        markdown = marko.Markdown(extensions=[GFMExtension, MyExtension])
+        out = markdown.convert('hello world\n')
+        self.assertEqual(out, 'foo bar')

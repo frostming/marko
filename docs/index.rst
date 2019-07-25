@@ -24,10 +24,10 @@ Why Marko?
 ----------
 
 Among all implementations of Python's markdown parser, it is a common issue that user can't easily extend it to add his own features.
-Furthermore, `Python-Markdown`_ and `mistune`_ don't comply CommonMark's spec.
-It is a good reason for me to develop a new markdown parser and use it.
+Furthermore, `Python-Markdown`_ and `mistune`_ don't comply CommonMark's spec. It is a good reason for me to develop a new markdown parser.
 
 Respecting that Marko complies CommonMark's spec at the same time, which is a super complicated spec, Marko's performance will be affected.
+However, using a parser which doesn't comply the CommonMark spec may give you unexpected rendered results from time to time.
 A benchmark result shows that Marko is 3 times slower than `Python-Markdown`_, but a bit faster than `Commonmark-py`_,
 much slower than `mistune`_. If performance is a bigger concern to you than spec compliance, you'd better choose another parser.
 

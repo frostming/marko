@@ -13,8 +13,13 @@
 from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
+from .helpers import is_type_check
 
-__version__ = "0.5.1"
+if is_type_check():
+    from typing import Type, List, Any, Optional
+    from .block import Document
+
+__version__ = "0.5.2dev"
 
 
 class SetupDone(Exception):
@@ -35,20 +40,21 @@ class Markdown(object):
     """
 
     def __init__(self, parser=Parser, renderer=HTMLRenderer, extensions=None):
+        # type: (Type[Parser], Type[Renderer], Optional[Any]) -> None
         assert issubclass(parser, Parser)
         self._base_parser = parser
-        self._parser_mixins = []
+        self._parser_mixins = []  # type: List[Any]
 
         assert issubclass(renderer, Renderer)
         self._base_renderer = renderer
-        self._renderer_mixins = []
+        self._renderer_mixins = []  # type: List[Any]
 
         self._setup_done = False
 
         if extensions:
             self.use(*extensions)
 
-    def use(self, *extensions):
+    def use(self, *extensions):  # type: (Any) -> None
         """Register extensions to Markdown object.
         An extension should be an object providing ``parser_mixins`` or
         ``renderer_mixins`` attributes or both.
@@ -60,10 +66,14 @@ class Markdown(object):
         if self._setup_done:
             raise SetupDone()
         for extension in extensions:
-            self._parser_mixins.extend(getattr(extension, "parser_mixins", []))
-            self._renderer_mixins.extend(getattr(extension, "renderer_mixins", []))
+            self._parser_mixins = (
+                getattr(extension, "parser_mixins", []) + self._parser_mixins
+            )
+            self._renderer_mixins = (
+                getattr(extension, "renderer_mixins", []) + self._renderer_mixins
+            )
 
-    def _setup_extensions(self):
+    def _setup_extensions(self):  # type: () -> None
         """Install all extensions and set things up."""
         if self._setup_done:
             return
@@ -77,14 +87,14 @@ class Markdown(object):
         )()
         self._setup_done = True
 
-    def convert(self, text):
+    def convert(self, text):  # type: (str) -> str
         """Parse and render the given text."""
         return self.render(self.parse(text))
 
-    def __call__(self, text):
+    def __call__(self, text):  # type: (str) -> str
         return self.convert(text)
 
-    def parse(self, text):
+    def parse(self, text):  # type: (str) -> Document
         """Call ``self.parser.parse(text)``.
 
         Override this to preprocess text or handle parsed result.
@@ -92,7 +102,7 @@ class Markdown(object):
         self._setup_extensions()
         return self.parser.parse(text)
 
-    def render(self, parsed):
+    def render(self, parsed):  # type: (Document) -> str
         """Call ``self.renderer.render(text)``.
 
         Override this to handle parsed result.
@@ -106,7 +116,7 @@ class Markdown(object):
 _markdown = Markdown()
 
 
-def convert(text):
+def convert(text):  # type: (str) -> str
     """Parse and render the given text.
 
     :param text: text to convert.
@@ -115,7 +125,7 @@ def convert(text):
     return _markdown.convert(text)
 
 
-def parse(text):
+def parse(text):  # type: (str) -> Document
     """Parse the text to a structured data object.
 
     :param text: text to parse.
@@ -124,7 +134,7 @@ def parse(text):
     return _markdown.parse(text)
 
 
-def render(parsed):
+def render(parsed):  # type: (Document) -> str
     """Render the parsed object to text.
 
     :param parsed: the parsed object
