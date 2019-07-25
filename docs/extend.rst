@@ -132,7 +132,7 @@ Now you have your own extension ready, let's register it to the markdown parser:
 
     The ``extensions`` argument, or ``use()`` accepts multiple extension objects.
     You can also call it multiple times. The registration order matters in the way that
-    the first registered has the highest priority in the MRO.
+    the last registered has the highest priority in the MRO.
 
     You can also choose a different base parser or renderer by::
 
