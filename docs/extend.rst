@@ -47,43 +47,18 @@ If we set a higher priority, it will be first parsed instead::
 
     *This is an <a href="target">emphasis*</a>
 
-Define your parser mixin class
-------------------------------
-
-Marko uses mixins to add functionalities to the existing parser.
-Now let's add the element to parser processing::
-
-    class WikiParserMixin(object):
-
-        def __init__(self, *extras):
-            super(MyParser, self).__init__(*extras)
-            self.add_element(GithubWiki)
-
-This will register ``GithubWiki`` element to the parser besides default elements.
-
-.. note::
-
-    For Python 2 compatibility, mixin classes should explicitly inhert from ``object``, so that ``super``
-    function can work correctly.
-
 About overriding default elements
 +++++++++++++++++++++++++++++++++
 
 Sometimes you modify the functionality of existing elements, like changing the parsing process or providing more attributes, and want to replace the old one.
-In this case, you should use the second approach to register the element and call ``add_element`` with a second argument ``override=True``::
+In this case, you should add ``override = True`` to the element attribute.
 
-    class MyParserMixin(object):
+Add a new render function
+-------------------------
 
-        def __init__(self, *extras):
-            super(MyParser, self).__init__(*extras)
-            self.add_element(MyLink, True)
-
-Please note that super class's ``__init__`` should be called before the registration to ensure all default elements are ready.
-
-Create a new renderer
----------------------
-
-Renderer mixins controll how to represent the elements by the element name, in snake-cased form. In our case::
+Marko uses mixins to add functionalities to renderer or parser. Parser controls the parsing logic which you don't need
+to change at the most of time. Renderer mixins controll how to represent the elements by the element name, in snake-cased form.
+In our case::
 
     class WikiRendererMixin(object):
 
@@ -104,14 +79,14 @@ They are useful to develop your own parsing algorithm:
 Create an extension object
 --------------------------
 
-We need an additional extension object to sum these mixins up. It should have ``parser_mixins`` or ``renderer_mixins``
-or both attributes to contain corresponding mixin classes in a list. It is typically a simple class,
+We need an additional extension object to sum these mixins up. It is typically a simple class,
 and other Python objects may also work::
 
     class GithubWikiExtension:
-        parser_mixins = [WikiParserMixin]
+        elements = [GithubWiki]
         renderer_mixins = [WikiRendererMixin]
 
+An optional ``parser_mixins`` can be also given if you have (a) custom parser class(es).
 The extension exposes a single object so that it can be distributed as a standalone package. Read the following section about
 how to use it.
 

@@ -18,6 +18,7 @@ from .helpers import is_type_check
 if is_type_check():
     from typing import Type, List, Any, Optional
     from .block import Document
+    from .parser import ElementType
 
 __version__ = "0.5.2dev"
 
@@ -49,6 +50,8 @@ class Markdown(object):
         self._base_renderer = renderer
         self._renderer_mixins = []  # type: List[Any]
 
+        self._extra_elements = []  # type: List[ElementType]
+
         self._setup_done = False
 
         if extensions:
@@ -57,7 +60,8 @@ class Markdown(object):
     def use(self, *extensions):  # type: (Any) -> None
         """Register extensions to Markdown object.
         An extension should be an object providing ``parser_mixins`` or
-        ``renderer_mixins`` attributes or both.
+        ``renderer_mixins`` attributes or both. The extension can also provide elements
+        attribute to contain all elements to be added.
         Note that Marko uses a mixin based extension system, the order of extensions
         matters: An extension preceding in order will have higher priorty.
 
@@ -72,6 +76,7 @@ class Markdown(object):
             self._renderer_mixins = (
                 getattr(extension, "renderer_mixins", []) + self._renderer_mixins
             )
+            self._extra_elements.extend(getattr(extension, "elements", []))
 
     def _setup_extensions(self):  # type: () -> None
         """Install all extensions and set things up."""
@@ -80,6 +85,8 @@ class Markdown(object):
         self.parser = type(
             "MarkdownParser", tuple(self._parser_mixins) + (self._base_parser,), {}
         )()
+        for e in self._extra_elements:
+            self.parser.add_element(e)
         self.renderer = type(
             "MarkdownRenderer",
             tuple(self._renderer_mixins) + (self._base_renderer,),

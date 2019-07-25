@@ -64,14 +64,6 @@ class FootnoteRef(inline.InlineElement):
                 yield match
 
 
-class FootnoteParserMixin(object):
-    def __init__(self, *extras):
-        super(FootnoteParserMixin, self).__init__(*extras)
-        self.add_element(Document, True)
-        self.add_element(FootnoteDef)
-        self.add_element(FootnoteRef)
-
-
 class FootnoteRendererMixin(object):
     def __init__(self):
         super(FootnoteRendererMixin, self).__init__()
@@ -114,5 +106,5 @@ class FootnoteRendererMixin(object):
 
 
 class FootnoteExtension:
-    parser_mixins = [FootnoteParserMixin]
+    elements = [Document, FootnoteDef, FootnoteRef]
     renderer_mixins = [FootnoteRendererMixin]

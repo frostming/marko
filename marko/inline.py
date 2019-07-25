@@ -40,6 +40,8 @@ class InlineElement(object):
     #: if True, it won't be included in parsing process but produced by
     #: other elements instead.
     virtual = False
+    #: If true, will replace the element which it derives from.
+    override = False
 
     def __init__(self, match):  # type: (_Match) -> None
         """Parses the matched object into an element"""

@@ -33,7 +33,7 @@ class TestExtension(unittest.TestCase):
 
         markdown = marko.Markdown(extensions=[FootnoteExtension, TocExtension])
 
-        self.assertEqual(len(markdown._parser_mixins), 1)
+        self.assertEqual(len(markdown._extra_elements), 3)
         self.assertEqual(len(markdown._renderer_mixins), 2)
         self.assertTrue(hasattr(markdown._renderer_mixins[1], 'render_footnote_def'))
 
