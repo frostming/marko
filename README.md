@@ -55,15 +55,4 @@ Please refer to [Document](https://marko-py.readthedocs.io/en/latest/extend.html
 
 Marko is released under [MIT License](LICENSE)
 
-## Change Log
-
-- v0.5.1: Add type hints for all primary functions.
-- v0.5.0: Update to comply commonmark spec 0.29; Change the extension system.
-- v0.4.3: Fix TOC rendering when heading level exceeds the max depth.
-- v0.4.2: Fix CJK regexp for pangu extension.
-- v0.4.0: Support Python 2.7.
-- v0.3.4: Fix bugs about extensions.
-- v0.3.1: Pangu extension.
-- v0.3.0: Change the entry function to a class, add TOC and footnotes extensions.
-- v0.2.0: Github flavored markdown and docs.
-- v0.1.0: Commonmark spec tests.
+## [Change Log](CHANGELOG.md)
