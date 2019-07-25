@@ -1,4 +1,4 @@
-include README.md LICENSE
+include README.md LICENSE CHANGELOG.md
 exclude tox.ini .coveragerc appveyor.yml
 exclude Pipfile*
 
