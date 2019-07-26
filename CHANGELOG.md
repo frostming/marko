@@ -1,4 +1,4 @@
-## v0.5.2-dev
+## v0.6.0
 
 - Reverse the extension order.
 - Add a new extension attribute `elements`.

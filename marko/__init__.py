@@ -20,7 +20,7 @@ if is_type_check():
     from .block import Document
     from .parser import ElementType
 
-__version__ = "0.5.2dev"
+__version__ = "0.6.0"
 
 
 class SetupDone(Exception):
