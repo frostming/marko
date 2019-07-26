@@ -5,6 +5,7 @@ Command line interfaces
 import sys
 import importlib
 import marko
+import codecs
 from argparse import ArgumentParser
 
 
@@ -40,14 +41,33 @@ def parse(args):
         default="marko.HTMLRenderer",
         help="Specify another renderer class",
     )
+    parser.add_argument(
+        "-o",
+        "--output",
+        help="Ouput to a file"
+    )
+    parser.add_argument(
+        "document",
+        nargs="?",
+        help="The document to convert, will use stdin if not given."
+    )
     return parser.parse_args(args)
 
 
 def main():
     namespace = parse(sys.argv[1:])
-    content = sys.stdin.read()
+    if namespace.document:
+        with codecs.open(namespace.document, encoding="utf-8") as f:
+            content = f.read()
+    else:
+        content = sys.stdin.read()
     markdown = marko.Markdown(namespace.parser, namespace.renderer)
-    print(markdown(content))
+    result = markdown(content)
+    if namespace.output:
+        with codecs.open(namespace.output, "w", encoding="utf-8") as f:
+            f.write(result)
+    else:
+        print(result)
 
 
 if __name__ == "__main__":

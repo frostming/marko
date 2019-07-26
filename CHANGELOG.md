@@ -2,6 +2,7 @@
 
 - Reverse the extension order.
 - Add a new extension attribute `elements`.
+- Improve the CLI, add more options.
 
 ## v0.5.1(2018-7-20)
 - Add type hints for all primary functions.

@@ -52,6 +52,23 @@ Marko also provides a simple CLI, for example, to render a document and output t
 
     $ cat my_article.md | marko > my_article.html
 
+Other CLI usage::
+
+    usage: marko [-h] [-v] [-p PARSER] [-r RENDERER] [-o OUTPUT] [document]
+
+    positional arguments:
+    document              The document to convert, will use stdin if not given.
+
+    optional arguments:
+    -h, --help            show this help message and exit
+    -v, --version         show program's version number and exit
+    -p PARSER, --parser PARSER
+                            Specify another parser class
+    -r RENDERER, --renderer RENDERER
+                            Specify another renderer class
+    -o OUTPUT, --output OUTPUT
+                            Ouput to a file
+
 Other Contents
 --------------
 
