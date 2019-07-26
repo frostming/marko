@@ -1,10 +1,10 @@
-## v0.6.0
+## v0.6.0(2019-7-26)
 
 - Reverse the extension order.
 - Add a new extension attribute `elements`.
 - Improve the CLI, add more options.
 
-## v0.5.1(2018-7-20)
+## v0.5.1(2019-7-20)
 - Add type hints for all primary functions.
 
 ## v0.5.0(2019-7-19)
