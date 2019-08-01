@@ -1,4 +1,4 @@
-# Marko
+# 𝓜𝓪𝓻𝓴𝓸
 
 > A markdown parser with high extensibility.
 
