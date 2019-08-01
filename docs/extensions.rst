@@ -6,3 +6,5 @@ Reference Extensions
 .. automodule:: marko.ext.toc
 
 .. automodule:: marko.ext.footnote
+
+.. automodule:: marko.ext.pangu
