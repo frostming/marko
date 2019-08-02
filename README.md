@@ -10,6 +10,7 @@
 [![Build Status](https://img.shields.io/travis/frostming/marko/master.svg?label=Travis&logo=travis)](https://travis-ci.org/frostming/marko)
 [![AppVeyor Status](https://img.shields.io/appveyor/ci/frostming/marko/master.svg?logo=appveyor)](https://ci.appveyor.com/project/frostming/marko/branch/master)
 [![codecov](https://codecov.io/gh/frostming/marko/branch/master/graph/badge.svg)](https://codecov.io/gh/frostming/marko)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/b785f5b3fa7c4d93a02372d31b3f73b1)](https://www.codacy.com/app/frostming/marko?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=frostming/marko&amp;utm_campaign=Badge_Grade)
 
 Marko is a markdown parser written in pure Python that complies [CommonMark's spec v0.29][spec].
 It is designed to be highly extensible, see [Extend Marko](#extend-marko) for details.
