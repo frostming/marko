@@ -231,7 +231,7 @@ class FencedCode(BlockElement):
         prefix, leading, info = m.groups()
         if leading[0] == '`' and '`' in info:
             return None
-        lang, extra = (info.split() + [''] * 2)[:2]
+        lang, extra = (info.split(None, 1) + [''] * 2)[:2]
         cls._parse_info = prefix, leading, lang, extra
         return m
 

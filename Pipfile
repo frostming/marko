@@ -7,7 +7,7 @@ name = "pypi"
 
 [dev-packages]
 "backports.html" = {version = "*",python_version = "<'3.4'"}
-marko = {editable = true,path = ".",extras = ["toc", "tests"]}
+marko = {editable = true,path = ".",extras = ["toc", "codehilite"]}
 twine = "*"
 flake8 = "*"
 sphinx = "*"

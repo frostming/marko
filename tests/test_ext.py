@@ -78,3 +78,22 @@ class TestGFM:
         assert self.markdown(content).strip() == '<p>地址：<a href="https://google.com">https://google.com</a></p>'
         content = '地址：www.baidu.com'
         assert self.markdown(content).strip() == '<p>地址：<a href="http://www.baidu.com">www.baidu.com</a></p>'
+
+
+class TestCodeHilite:
+
+    def setup_method(self):
+        self.markdown = Markdown(extensions=['codehilite'])
+
+    def test_render_fenced_code(self):
+        content = '```python\nprint("hello")\n```'
+        assert '<div class="highlight">' in self.markdown(content)
+        content = '```foobar\nprint("hello")\n```'
+        # Fallback to normal output.
+        result = self.markdown(content)
+        assert '<div class="highlight">' not in result
+        assert '<pre><code class="language-foobar">' in result
+
+    def test_render_code_block(self):
+        content = '    print("hello")\n'
+        assert '<pre><code>' in self.markdown(content)

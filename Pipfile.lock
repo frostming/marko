@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a6ecf4595cdc840ea9671041df7a6a32b854630467731bbf59a017a3d0ada82b"
+            "sha256": "020261ecb7062dcbdff9609feaf570fba5db92d294ca4f112b98219e1d8b199e"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -195,8 +195,8 @@
         "marko": {
             "editable": true,
             "extras": [
-                "tests",
-                "toc"
+                "toc",
+                "codehilite"
             ],
             "path": "."
         },
@@ -568,12 +568,17 @@
             "version": "==0.5.1"
         },
         "zipp": {
+            "editable": true,
+            "extras": [
+                "codehilite",
+                "toc"
+            ],
             "hashes": [
                 "sha256:3718b1cbcd963c7d4c5511a8240812904164b7f381b647143a89d3b98f9bcd8e",
                 "sha256:f06903e9f1f43b12d371004b4ac7b06ab39a44adc747266928ae6debfa7b3335"
             ],
             "markers": "python_version >= '2.7'",
-            "version": "==0.6.0"
+            "path": "."
         }
     }
 }
