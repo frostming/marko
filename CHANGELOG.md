@@ -1,4 +1,4 @@
-## v0.7.0(Unreleased)
+## v0.7.0(2019-12-11)
 
 - Deprecate the extension name with `Extension` suffix, e.g. `FootnoteExtension` -> `Footnote`.
   And the old names will be removed by `v1.0.0`.

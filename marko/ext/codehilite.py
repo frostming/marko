@@ -1,4 +1,4 @@
-"""
+r"""
 Code highlight extension
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
