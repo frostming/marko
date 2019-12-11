@@ -126,8 +126,8 @@ class Source(object):
         :param regexp: the expression to be tested.
         :returns: the match object.
         """
-        prefix_len = self.match_prefix(  # type: ignore
-            self.prefix, self.next_line(require_prefix=False)
+        prefix_len = self.match_prefix(
+            self.prefix, self.next_line(require_prefix=False)   # type: ignore
         )
         if prefix_len >= 0:
             match = self._expect_re(regexp, self.pos + prefix_len)
