@@ -1,5 +1,5 @@
-Reference Extensions
-====================
+Built-in Extensions
+===================
 
 .. automodule:: marko.ext.gfm
 

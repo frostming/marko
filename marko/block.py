@@ -159,6 +159,7 @@ class CodeBlock(BlockElement):
     def __init__(self, lines):  # type: (str) -> None
         self.children = [inline.RawText(lines)]
         self.lang = ""
+        self.extra = ""
 
     @classmethod
     def match(cls, source):  # type: (Source) -> str
@@ -215,11 +216,12 @@ class FencedCode(BlockElement):
 
     priority = 7
     pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
-    _parse_info = ("", "", "")  # type: Tuple[str, str, str]
+    _parse_info = ("", "", "", "")  # type: Tuple[str, str, str, str]
 
-    def __init__(self, match):  # type: (Tuple[str, str]) -> None
+    def __init__(self, match):  # type: (Tuple[str, str, str]) -> None
         self.lang = inline.Literal.strip_backslash(match[0])
-        self.children = [inline.RawText(match[1])]
+        self.extra = match[1]
+        self.children = [inline.RawText(match[2])]
 
     @classmethod
     def match(cls, source):  # type: (Source) -> Optional[Match]
@@ -229,11 +231,12 @@ class FencedCode(BlockElement):
         prefix, leading, info = m.groups()
         if leading[0] == '`' and '`' in info:
             return None
-        cls._parse_info = prefix, leading, (info.split() + [''])[0]
+        lang, extra = (info.split() + [''] * 2)[:2]
+        cls._parse_info = prefix, leading, lang, extra
         return m
 
     @classmethod
-    def parse(cls, source):  # type: (Source) -> Tuple[str, str]
+    def parse(cls, source):  # type: (Source) -> Tuple[str, str, str]
         source.next_line()
         source.consume()
         lines = []
@@ -252,7 +255,7 @@ class FencedCode(BlockElement):
             else:
                 line = line.lstrip()
             lines.append(line)
-        return cls._parse_info[2], "".join(lines)
+        return cls._parse_info[2], cls._parse_info[3], "".join(lines)
 
 
 class ThematicBreak(BlockElement):

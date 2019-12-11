@@ -77,7 +77,7 @@ class GFMRendererMixin(object):
         return self.render_link(element)
 
 
-class GFMExtension:
+class GFM:
     elements = [
         elements.Paragraph,
         elements.ListItem,
@@ -90,5 +90,7 @@ class GFMExtension:
     renderer_mixins = [GFMRendererMixin]
 
 
+GFMExtension = GFM
+
 gfm = Markdown()
-gfm.use(GFMExtension)
+gfm.use(GFM)

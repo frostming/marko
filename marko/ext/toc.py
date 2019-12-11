@@ -4,19 +4,24 @@ TOC extension
 ~~~~~~~~~~~~~
 
 Renders the TOC(Table Of Content) for a markdown document.
+This requires to install `toc` extras::
+
+    pip install marko[toc]
 
 Usage::
 
     from marko import Markdown
 
-    markdown = Markdown(extensions=[TocExtension])
+    markdown = Markdown(extensions=['toc'])
 
     print(markdown(text))
     print(markdown.renderer.render_toc())
 """
 from __future__ import unicode_literals
-from slugify import slugify  # type: ignore
 import re
+
+from slugify import slugify  # type: ignore
+from marko import helpers
 
 
 class TocRendererMixin(object):
@@ -68,5 +73,8 @@ class TocRendererMixin(object):
         return '<h{0} id="{1}">{2}</h{0}>\n'.format(element.level, slug, children)
 
 
-class TocExtension:
+class Toc:
     renderer_mixins = [TocRendererMixin]
+
+
+TocExtension = helpers._Deprecated(Toc)

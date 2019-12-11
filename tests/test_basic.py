@@ -1,9 +1,9 @@
 #! -*- coding: utf-8 -*-
-import unittest
+import pytest
 import marko
 
 
-class TestBasic(unittest.TestCase):
+class TestBasic:
 
     def test_xml_renderer(self):
         from marko.ast_renderer import XMLRenderer
@@ -11,8 +11,8 @@ class TestBasic(unittest.TestCase):
         text = "[Overview](#overview)"
         markdown = marko.Markdown(renderer=XMLRenderer)
         res = markdown(text)
-        self.assertIn('<?xml version="1.0" encoding="UTF-8"?>', res)
-        self.assertIn('dest="#overview"', res)
+        assert '<?xml version="1.0" encoding="UTF-8"?>' in res
+        assert 'dest="#overview"' in res
 
     def test_ast_renderer(self):
         from marko.ast_renderer import ASTRenderer
@@ -20,38 +20,33 @@ class TestBasic(unittest.TestCase):
         text = "[Overview](#overview)"
         markdown = marko.Markdown(renderer=ASTRenderer)
         res = markdown(text)
-        self.assertIsInstance(res, dict)
-        self.assertEqual(res['element'], 'document')
-        self.assertEqual(res['children'][0]['element'], 'paragraph')
+        assert isinstance(res, dict)
+        assert res['element'] == 'document'
+        assert res['children'][0]['element'] == 'paragraph'
 
 
-class TestExtension(unittest.TestCase):
+class TestExtension:
 
     def test_extension_use(self):
-        from marko.ext.footnote import FootnoteExtension
-        from marko.ext.toc import TocExtension
 
-        markdown = marko.Markdown(extensions=[FootnoteExtension, TocExtension])
+        markdown = marko.Markdown(extensions=['footnote', 'toc'])
 
-        self.assertEqual(len(markdown._extra_elements), 3)
-        self.assertEqual(len(markdown._renderer_mixins), 2)
-        self.assertTrue(hasattr(markdown._renderer_mixins[1], 'render_footnote_def'))
+        assert len(markdown._extra_elements) == 3
+        assert len(markdown._renderer_mixins) == 2
+        assert hasattr(markdown._renderer_mixins[1], 'render_footnote_def')
 
     def test_extension_setup(self):
-        from marko.ext.footnote import FootnoteExtension
-        from marko.ext.toc import TocExtension
 
         markdown = marko.Markdown()
-        markdown.use(FootnoteExtension)
+        markdown.use('footnote')
 
         markdown.convert('abc')
-        with self.assertRaises(marko.SetupDone):
-            markdown.use(TocExtension)
+        with pytest.raises(marko.SetupDone):
+            markdown.use('toc')
 
-        self.assertTrue(hasattr(markdown.renderer, 'render_footnote_def'))
+        assert hasattr(markdown.renderer, 'render_footnote_def')
 
     def test_extension_override(self):
-        from marko.ext.gfm import GFMExtension
 
         class MyRendererMixin:
             def render_paragraph(self, element):
@@ -60,6 +55,13 @@ class TestExtension(unittest.TestCase):
         class MyExtension:
             renderer_mixins = [MyRendererMixin]
 
-        markdown = marko.Markdown(extensions=[GFMExtension, MyExtension])
+        markdown = marko.Markdown(extensions=['gfm', MyExtension])
         out = markdown.convert('hello world\n')
-        self.assertEqual(out, 'foo bar')
+        assert out == 'foo bar'
+
+    def test_extension_deprecation(self):
+        from marko.ext.footnote import FootnoteExtension
+
+        markdown = marko.Markdown()
+        with pytest.warns(DeprecationWarning):
+            markdown.use(FootnoteExtension)

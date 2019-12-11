@@ -6,14 +6,14 @@ Here is an example to add GitHub wiki links: ``[[Page 2|Page 2]]`` to the parsin
 Create a new element
 --------------------
 
-Github wiki link is an inline level element. For the difference between block elements and inline elements,
+GitHub wiki link is an inline level element. For the difference between block elements and inline elements,
 please refer to `corresponding section <https://spec.commonmark.org/0.28/#container-blocks-and-leaf-blocks>`_ of Commonmark's spec.
 
 Now subclass ``marko.inline.InlineElement`` to a new element type::
 
     from marko import inline
 
-    class GithubWiki(inline.InlineElement):
+    class GitHubWiki(inline.InlineElement):
 
         pattern = r'\[\[ *(.+?) *| *(.+?) *\]\]'
         parse_children = True
@@ -26,7 +26,7 @@ and methods to change the parsing behavior.
 Now, write the ``__init__()`` method to control how the parsed result should map to element attributes.
 You don't need to provide the parsed content since it is handled by parser automatically::
 
-    class GithubWiki(inline.InlineElement):
+    class GitHubWiki(inline.InlineElement):
 
         pattern = r'\[\[ *(.+?) *| *(.+?) *\]\]'
         parse_children = True
@@ -62,7 +62,7 @@ In our case::
 
     class WikiRendererMixin(object):
 
-        def render_github_wiki(self, element):
+        def render_gitHub_wiki(self, element):
             return '<a href="{}">{}</a>'.format(
                 self.escape_url(element.target), self.render_children(element)
             )
@@ -82,8 +82,8 @@ Create an extension object
 We need an additional extension object to sum these mixins up. It is typically a simple class,
 and other Python objects may also work::
 
-    class GithubWikiExtension:
-        elements = [GithubWiki]
+    class GitHubWiki:
+        elements = [GitHubWiki]
         renderer_mixins = [WikiRendererMixin]
 
 An optional ``parser_mixins`` can be also given if you have (a) custom parser class(es).
@@ -97,10 +97,10 @@ Now you have your own extension ready, let's register it to the markdown parser:
 
     from marko import Markdown
 
-    markdown = Markdown(extensions=[GithubWikiExtension])
+    markdown = Markdown(extensions=[GitHubWiki])
     # Alternatively, you can register extensions later.
     markdown = Markdown()
-    markdown.use(GithubWikiExtension)
+    markdown.use(GitHubWiki)
     print(markdown(text))
 
 .. note::
