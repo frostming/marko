@@ -8,3 +8,5 @@ Built-in Extensions
 .. automodule:: marko.ext.footnote
 
 .. automodule:: marko.ext.pangu
+
+.. automodule:: marko.ext.codehilite
