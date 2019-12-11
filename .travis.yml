@@ -22,3 +22,6 @@ jobs:
     - stage: packaging
       python: 3.6
       env: TOXENV=packaging
+
+notifications:
+  email: false

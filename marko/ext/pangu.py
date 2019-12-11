@@ -40,7 +40,7 @@ class PanguRendererMixin(object):
         return PANGU_RE.sub('<span class="pangu"></span>', rv)
 
 
-class Pangu:
+class Pangu(object):
     renderer_mixins = [PanguRendererMixin]
 
 

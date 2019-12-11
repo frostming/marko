@@ -16,7 +16,7 @@ Example usage::
 """
 from __future__ import unicode_literals
 import re
-from marko import Markdown
+from marko import Markdown, helpers
 from . import elements
 
 
@@ -77,7 +77,7 @@ class GFMRendererMixin(object):
         return self.render_link(element)
 
 
-class GFM:
+class GFM(object):
     elements = [
         elements.Paragraph,
         elements.ListItem,
@@ -90,7 +90,7 @@ class GFM:
     renderer_mixins = [GFMRendererMixin]
 
 
-GFMExtension = GFM
+GFMExtension = helpers._Deprecated(GFM)
 
 gfm = Markdown()
 gfm.use(GFM)

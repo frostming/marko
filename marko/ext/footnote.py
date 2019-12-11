@@ -103,7 +103,7 @@ class FootnoteRendererMixin(object):
         return text + footnotes
 
 
-class Footnote:
+class Footnote(object):
     elements = [Document, FootnoteDef, FootnoteRef]
     renderer_mixins = [FootnoteRendererMixin]
 

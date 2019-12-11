@@ -73,7 +73,7 @@ class TocRendererMixin(object):
         return '<h{0} id="{1}">{2}</h{0}>\n'.format(element.level, slug, children)
 
 
-class Toc:
+class Toc(object):
     renderer_mixins = [TocRendererMixin]
 
 
