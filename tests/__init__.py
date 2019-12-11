@@ -27,8 +27,8 @@ def parse_examples(text):
         if md and html:
             count += 1
             name = '%s_%03d' % (section, count)
-            md = md.replace('→', '\t')
-            html = html.replace('→', '\t')
+            md = md.replace(u'→', '\t')
+            html = html.replace(u'→', '\t')
             yield name, md, html
 
 
