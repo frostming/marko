@@ -1,92 +1,99 @@
 #! -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import unittest
+
+from marko import Markdown
 
 
-class TestFootnote(unittest.TestCase):
+class TestFootnote:
 
-    def setUp(self):
-        from marko import Markdown
-        from marko.ext.footnote import FootnoteExtension
-
+    def setup_method(self):
         self.markdown = Markdown()
-        self.markdown.use(FootnoteExtension)
+        self.markdown.use('footnote')
 
     def test_footnote(self):
         result = self.markdown('this is a footnote[^1].\n\n[^1]: foo\n')
-        self.assertIn('<sup class="footnote-ref"', result)
-        self.assertIn('foo<a href="#fnref-1" class="footnote">&#8617;</a>', result)
+        assert '<sup class="footnote-ref"' in result
+        assert 'foo<a href="#fnref-1" class="footnote">&#8617;</a>' in result
 
     def test_non_footnote(self):
         result = self.markdown('foo[^1]')
-        self.assertEqual(result.rstrip(), '<p>foo[^1]</p>')
+        assert result.rstrip() == '<p>foo[^1]</p>'
 
 
-class TestToc(unittest.TestCase):
+class TestToc:
 
-    def setUp(self):
-        from marko import Markdown
-        from marko.ext.toc import TocExtension
-
+    def setup_method(self):
         self.markdown = Markdown()
-        self.markdown.use(TocExtension)
+        self.markdown.use('toc')
 
     def test_render_toc(self):
         content = '# Foo\n## Foobar\n## Foofooz\n# Bar\n'
         result = self.markdown(content)
-        self.assertIn('<h1 id="foo">Foo</h1>', result)
+        assert '<h1 id="foo">Foo</h1>' in result
         toc = self.markdown.renderer.render_toc()
-        self.assertIn('<ul>\n<li><a href="#foo">Foo</a></li>', toc)
-        self.assertIn('<ul>\n<li><a href="#foobar">Foobar</a></li>', toc)
+        assert '<ul>\n<li><a href="#foo">Foo</a></li>' in toc
+        assert '<ul>\n<li><a href="#foobar">Foobar</a></li>' in toc
 
     def test_render_toc_exceeding_maxdepth(self):
         content = '#### Foobar\n'
         self.markdown(content)
         toc = self.markdown.renderer.render_toc()
-        self.assertIn('<li><a href="#foobar">Foobar</a></li>', toc)
+        assert '<li><a href="#foobar">Foobar</a></li>' in toc
         content = '# Foo\n#### Foobar\n'
         self.markdown(content)
         toc = self.markdown.renderer.render_toc()
-        self.assertIn('<li><a href="#foo">Foo</a></li>', toc)
-        self.assertNotIn('<li><a href="#foobar">Foobar</a></li>', toc)
+        assert '<li><a href="#foo">Foo</a></li>' in toc
+        assert '<li><a href="#foobar">Foobar</a></li>' not in toc
 
 
-class TestPangu(unittest.TestCase):
+class TestPangu:
 
-    def setUp(self):
-        from marko import Markdown
-        from marko.ext.pangu import PanguExtension
-
+    def setup_method(self):
         self.markdown = Markdown()
-        self.markdown.use(PanguExtension)
+        self.markdown.use('pangu')
 
     def test_render_pangu(self):
         content = '中国2018年'
         result = self.markdown(content)
-        self.assertEqual(
-            result,
+        assert (
+            result ==
             '<p>中国<span class="pangu"></span>2018<span class="pangu"></span>年</p>\n'
         )
 
     def test_chinese_punctuations(self):
         content = '你好：中国。'
         result = self.markdown(content)
-        self.assertEqual(result, '<p>你好：中国。</p>\n')
+        assert result == '<p>你好：中国。</p>\n'
 
 
-class TestGFM(unittest.TestCase):
+class TestGFM:
 
-    def setUp(self):
+    def setup_method(self):
         from marko.ext.gfm import gfm
 
         self.markdown = gfm
 
     def test_gfm_autolink(self):
         content = '地址：https://google.com'
-        self.assertEqual(self.markdown(content).strip(), '<p>地址：<a href="https://google.com">https://google.com</a></p>')
+        assert self.markdown(content).strip() == '<p>地址：<a href="https://google.com">https://google.com</a></p>'
         content = '地址：www.baidu.com'
-        self.assertEqual(self.markdown(content).strip(), '<p>地址：<a href="http://www.baidu.com">www.baidu.com</a></p>')
+        assert self.markdown(content).strip() == '<p>地址：<a href="http://www.baidu.com">www.baidu.com</a></p>'
 
 
-if __name__ == '__main__':
-    unittest.main()
+class TestCodeHilite:
+
+    def setup_method(self):
+        self.markdown = Markdown(extensions=['codehilite'])
+
+    def test_render_fenced_code(self):
+        content = '```python\nprint("hello")\n```'
+        assert '<div class="highlight">' in self.markdown(content)
+        content = '```foobar\nprint("hello")\n```'
+        # Fallback to normal output.
+        result = self.markdown(content)
+        assert '<div class="highlight">' not in result
+        assert '<pre><code class="language-foobar">' in result
+
+    def test_render_code_block(self):
+        content = '    print("hello")\n'
+        assert '<pre><code>' in self.markdown(content)

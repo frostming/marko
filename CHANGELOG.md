@@ -1,3 +1,15 @@
+## v0.7.0(Unreleased)
+
+- Deprecate the extension name with `Extension` suffix, e.g. `FootnoteExtension` -> `Footnote`.
+  And the old names will be removed by `v1.0.0`.
+- Store extra info after the language text in fenced code:
+  ~~~
+  ```python myscript.py    <-- myscript.py is stored in element
+  print('hello world')
+  ```
+  ~~~
+- Built-in code highlight extension using pygments.
+
 ## v0.6.0(2019-7-26)
 
 - Reverse the extension order.

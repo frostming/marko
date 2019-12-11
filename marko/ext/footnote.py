@@ -9,9 +9,7 @@ Usage::
     from marko import Markdown
 
     text = 'Foo[^1]\\n\\n[^1]: This is a footnote.\\n'
-
-    markdown = Markdown(extensions=[FootnoteExtension])
-
+    markdown = Markdown(extensions=['footnote'])
     print(markdown(text))
 
 """
@@ -105,6 +103,9 @@ class FootnoteRendererMixin(object):
         return text + footnotes
 
 
-class FootnoteExtension:
+class Footnote(object):
     elements = [Document, FootnoteDef, FootnoteRef]
     renderer_mixins = [FootnoteRendererMixin]
+
+
+FootnoteExtension = helpers._Deprecated(Footnote)

@@ -2,13 +2,14 @@
 try:
     from html.parser import HTMLParser
     from html.entities import name2codepoint
+    from html import escape
 except ImportError:
     from backports.html.parser import HTMLParser
     from backports.html.entities import name2codepoint
+    from backports.html import escape
 import urllib
 import sys
 import re
-import cgi
 
 
 class HTMLParseError(Exception):
@@ -18,7 +19,7 @@ class HTMLParseError(Exception):
 # Normalization code, adapted from
 # https://github.com/karlcow/markdown-testsuite/
 significant_attrs = ["alt", "href", "src", "title"]
-whitespace_re = re.compile('\s+')
+whitespace_re = re.compile(r'\s+')
 
 
 class MyHTMLParser(HTMLParser):
@@ -72,7 +73,7 @@ class MyHTMLParser(HTMLParser):
                         "=" + '"' + urllib.quote(urllib.unquote(v), safe='/') + '"'
                     )
                 elif v is not None:
-                    self.output += "=" + '"' + cgi.escape(v, quote=True) + '"'
+                    self.output += "=" + '"' + escape(v, quote=True) + '"'
         self.output += ">"
         self.last_tag = tag
         self.last = "starttag"
@@ -220,7 +221,7 @@ def normalize_html(html):
         >>> normalize_html("&forall;&amp;&gt;&lt;&quot;")
         '\u2200&amp;&gt;&lt;&quot;'
     """
-    html_chunk_re = re.compile("(\<!\[CDATA\[.*?\]\]\>|\<[^>]*\>|[^<]+)")
+    html_chunk_re = re.compile(r"(\<!\[CDATA\[.*?\]\]\>|\<[^>]*\>|[^<]+)")
     try:
         parser = MyHTMLParser()
         # We work around HTMLParser's limitations parsing CDATA

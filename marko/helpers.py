@@ -3,6 +3,8 @@ Helper functions and data structures
 """
 import re
 from contextlib import contextmanager
+from importlib import import_module
+import warnings
 
 from ._compat import string_types
 
@@ -124,8 +126,8 @@ class Source(object):
         :param regexp: the expression to be tested.
         :returns: the match object.
         """
-        prefix_len = self.match_prefix(  # type: ignore
-            self.prefix, self.next_line(require_prefix=False)
+        prefix_len = self.match_prefix(
+            self.prefix, self.next_line(require_prefix=False)   # type: ignore
         )
         if prefix_len >= 0:
             match = self._expect_re(regexp, self.pos + prefix_len)
@@ -175,6 +177,44 @@ class Source(object):
 def normalize_label(label):  # type: (str) -> str
     """Return the normalized form of link label."""
     return re.sub(r"\s+", " ", label).strip().lower()
+
+
+def load_extension_object(name):
+    module = import_module("marko.ext.{}".format(name))
+    sentinel = object()
+
+    for _, attr in vars(module).items():
+        if isinstance(attr, type) and any(
+            getattr(attr, name, sentinel) is not sentinel
+            for name in ('elements', 'parser_mixins', 'renderer_mixins')
+        ):
+            return attr
+
+
+class _Deprecated:
+    def __init__(self, cls):
+        self.__cls = cls
+        self.__module__ = cls.__module__
+        self.__doc__ = cls.__doc__
+        self.__name__ = cls.__name__
+        # only warn once for each instance
+        self.__warned = False
+
+    def __getattr__(self, name):
+        rv = getattr(self.__cls, name)
+        if not self.__warned:
+            warnings.warn(
+                "The name of the extension has been changed to {}. "
+                "Or you can simply use the string form '{}' instead. "
+                "Old names will be deprecated by 1.0.0.".format(
+                    self.__name__,
+                    self.__module__.rsplit('.', 1)[-1]
+                ),
+                DeprecationWarning,
+                stacklevel=2
+            )
+            self.__warned = True
+        return rv
 
 
 def is_type_check():  # type: () -> bool

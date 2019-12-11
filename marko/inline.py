@@ -101,7 +101,7 @@ class LinkOrEmph(InlineElement):
 
     parse_children = True
 
-    def __new__(cls, match):  # type: (_Match) -> InlineElement
+    def __new__(cls, match):  # type: (_Match) -> LinkOrEmph
         return parser.inline_elements[match.etype](match)  # type: ignore
 
     @classmethod

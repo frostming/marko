@@ -13,14 +13,15 @@
 from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
-from .helpers import is_type_check
+from .helpers import is_type_check, load_extension_object
+from ._compat import string_types
 
 if is_type_check():
     from typing import Type, List, Any, Optional
     from .block import Document
     from .parser import ElementType
 
-__version__ = "0.6.0"
+__version__ = "0.7.0"
 
 
 class SetupDone(Exception):
@@ -38,6 +39,7 @@ class Markdown(object):
     :param parser: a subclass :class:`marko.parser.Parser`.
     :param renderer: a subclass :class:`marko.renderer.Renderer`.
     :param extensions: a list of extensions to register on the object.
+        See document of :meth:`Markdown.use()`.
     """
 
     def __init__(self, parser=Parser, renderer=HTMLRenderer, extensions=None):
@@ -59,17 +61,21 @@ class Markdown(object):
 
     def use(self, *extensions):  # type: (Any) -> None
         """Register extensions to Markdown object.
-        An extension should be an object providing ``parser_mixins`` or
-        ``renderer_mixins`` attributes or both. The extension can also provide elements
-        attribute to contain all elements to be added.
-        Note that Marko uses a mixin based extension system, the order of extensions
-        matters: An extension preceding in order will have higher priorty.
+        An extension should be either an object providing ``elements``, `parser_mixins``
+        , ``renderer_mixins`` or all attributes, or a string representing the
+        corresponding extension in ``marko.ext`` module.
 
-        :param \*extensions: one or many extension objects.
+        :param \*extensions: extension object or string.
+
+        .. note:: Marko uses a mixin based extension system, the order of extensions
+            matters: An extension preceding in order will have higher priorty.
         """
         if self._setup_done:
             raise SetupDone()
         for extension in extensions:
+            if isinstance(extension, string_types):
+                extension = load_extension_object(extension)
+
             self._parser_mixins = (
                 getattr(extension, "parser_mixins", []) + self._parser_mixins
             )

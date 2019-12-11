@@ -31,8 +31,6 @@ Renderer Class
 Base Elements
 -------------
 
-.. module:: marko
-
 .. autoclass:: marko.block.BlockElement
     :members:
     :inherited-members:

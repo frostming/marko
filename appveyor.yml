@@ -12,9 +12,8 @@ environment:
 
 install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - "python -m pip install -e .[toc]"
+  - "python -m pip install -e .[toc,codehilite]"
+  - "python -m pip install pytest"
 
 test_script:
-  - "python -m tests.spec"
-  - "python -m tests.spec -f gfm"
-  - "python -m unittest discover"
+  - "pytest tests"
