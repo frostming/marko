@@ -20,7 +20,6 @@ from pygments.util import ClassNotFound
 
 
 class CodeHiliteRendererMixin(object):
-
     def render_fenced_code(self, element):
         if element.lang:
             try:
@@ -30,7 +29,11 @@ class CodeHiliteRendererMixin(object):
             else:
                 formatter = html.HtmlFormatter()
                 return highlight(element.children[0].children, lexer, formatter)
-        return super(CodeHiliteRendererMixin, self).render_fenced_code(element)
+        return (
+            '<div class="highlight">'
+            + super(CodeHiliteRendererMixin, self).render_fenced_code(element)
+            + "</div>"
+        )
 
 
 class CodeHilite(object):
