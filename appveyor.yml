@@ -12,8 +12,10 @@ environment:
 
 install:
   - "SET PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - "python -m pip install -e .[toc,codehilite]"
-  - "python -m pip install pytest"
+  - "curl -fsS -o get-poetry.py https://raw.githubusercontent.com/sdispater/poetry/master/get-poetry.py"
+  - "python get-poetry.py"
+  - "SET PATH=%USERPROFILE%\\.poetry\\bin;%PATH%"
+  - "poetry install -v"
 
 test_script:
-  - "pytest tests"
+  - "poetry run pytest tests"
