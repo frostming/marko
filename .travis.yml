@@ -13,6 +13,7 @@ install:
   - python get-poetry.py -y
   - source $HOME/.poetry/env
   - poetry install -v
+  - rm get-poetry.py
 script: tox
 
 jobs:
