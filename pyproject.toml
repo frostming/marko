@@ -34,9 +34,9 @@ Documentation = "https://marko-py.readthedocs.io"
 
 [tool.pdm.dev-dependencies]
 flake8 = "*"
-mypy = "*"
 pytest = "<5.0.0,>=4.6.9"
 pytest-cov = "<3.0.0,>=2.8.1"
+more-itertools = ">=4.0.0,<6.0.0"
 
 [tool.pdm.toc-dependencies]
 python-slugify = "*"
