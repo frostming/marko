@@ -53,4 +53,5 @@ jobs:
         run: |
           pip install codecov
           pdm run coverage report
+          pdm run coverage xml
           codecov
