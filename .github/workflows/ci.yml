@@ -27,29 +27,30 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python 3.7
-      uses: actions/setup-python@v1
-      with:
-        python-version: 3.7
-    - name: Install PDM
-      run: pip install --upgrade pdm
-    - name: Set up Python
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        pdm use ${{ matrix.python-version }}
-        pdm install -d -s toc -s codehilite
-    - name: Run Tests
-      run: |
-        pdm run pytest --cov marko tests
-    - name: Report code coverage
-      if: matrix.os != 'windows-latest'
-      env:
-        CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
-      run: |
-        pip install codecov
-        pdm run coverage report
-        codecov
+      - uses: actions/checkout@v1
+      - name: Set up Python 3.7
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: Install PDM
+        run: pip install --upgrade pdm
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          pdm use ${{ matrix.python-version }}
+          pip install wheel
+          pdm install -d -s toc -s codehilite
+      - name: Run Tests
+        run: |
+          pdm run pytest --cov marko tests
+      - name: Report code coverage
+        if: matrix.os != 'windows-latest'
+        env:
+          CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
+        run: |
+          pip install codecov
+          pdm run coverage report
+          codecov
