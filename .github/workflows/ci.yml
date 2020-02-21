@@ -34,16 +34,17 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip install -e .[toc,codehilite]
-        pip install pytest pytest-cov
+        pip3.7 install --upgrade pdm
+        pdm use ${{ matrix.python-version }}
+        pdm install -d -s toc -s codehilite
     - name: Test
       run: |
-        pytest --cov marko tests
+        pdm run pytest --cov marko tests
     - name: Report code coverage
       if: matrix.os != 'windows-latest'
       env:
         CODECOV_TOKEN: ${{secrets.CODECOV_TOKEN}}
       run: |
         pip install codecov
-        coverage report
+        pdm run coverage report
         codecov

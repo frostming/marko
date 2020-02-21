@@ -104,3 +104,6 @@ venv.bak/
 .mypy_cache/
 
 .vscode/
+__pypackages__/
+.pdm.toml
+.idea/

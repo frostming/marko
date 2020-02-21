@@ -6,8 +6,8 @@
 Marko: A markdown parser with high extensibility.
 =================================================
 
-.. image:: https://github.com/python-poetry/poetry/workflows/Tests/badge.svg
-    :target: https://github.com/python-poetry/poetry/workflows/Tests
+.. image:: https://github.com/frostming/marko/workflows/Tests/badge.svg
+    :target: https://github.com/frostming/marko/workflows/Tests
 .. image:: https://img.shields.io/pypi/v/marko.svg
     :target: https://pypi.org/project/marko/
 .. image:: https://img.shields.io/pypi/pyversions/marko.svg
