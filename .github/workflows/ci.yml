@@ -28,16 +28,21 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+    - name: Install PDM
+      run: pip install --upgrade pdm
+    - name: Set up Python
       uses: actions/setup-python@v1
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        pip3.7 install --upgrade pdm
         pdm use ${{ matrix.python-version }}
         pdm install -d -s toc -s codehilite
-    - name: Test
+    - name: Run Tests
       run: |
         pdm run pytest --cov marko tests
     - name: Report code coverage

@@ -530,6 +530,5 @@ contextlib2 = {marker = "python_version < \"3.4\"", version = "*"}
 ]
 
 [root]
-content_hash = "md5:d04d05f4f3e860cd23f3559d9ea5f63e"
+content_hash = "md5:c18999126c6f21b09c70c4eddb6d9f23"
 meta_version = "0.0.1"
-
