@@ -1,6 +1,0 @@
-include README.md LICENSE CHANGELOG.md
-exclude tox.ini .coveragerc appveyor.yml
-exclude Pipfile*
-
-prune docs
-prune tests
