@@ -17,7 +17,6 @@ Usage::
     markdown.convert(```python my_script.py\nprint('hello world')\n```)
 """
 import json
-from typing import Dict, Any
 
 from pygments import highlight
 from pygments.lexers import get_lexer_by_name, guess_lexer
@@ -32,7 +31,7 @@ def _parse_extras(line):
 
 
 class CodeHiliteRendererMixin(object):
-    options = {}  # type: Dict[str, Any]
+    options = {}  # type: dict
 
     def render_fenced_code(self, element):
         code = element.children[0].children
