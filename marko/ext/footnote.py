@@ -109,3 +109,7 @@ class Footnote(object):
 
 
 FootnoteExtension = helpers._Deprecated(Footnote)
+
+
+def make_extension():
+    return Footnote()

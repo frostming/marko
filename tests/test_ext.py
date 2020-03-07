@@ -43,6 +43,16 @@ class TestToc:
         assert '<li><a href="#foo">Foo</a></li>' in toc
         assert '<li><a href="#foobar">Foobar</a></li>' not in toc
 
+    def test_render_toc_replace_tags(self):
+        from marko.ext.toc import Toc
+
+        markdown = Markdown(extensions=[Toc("<div>", "</div>")])
+        content = "#### Foobar\n"
+        markdown(content)
+        toc = markdown.renderer.render_toc()
+        assert "<div>\n" in toc
+        assert "</div>\n" in toc
+
 
 class TestPangu:
     def setup_method(self):
@@ -91,9 +101,19 @@ class TestCodeHilite:
         assert '<div class="highlight">' in self.markdown(content)
         content = '```foobar\nprint("hello")\n```'
         # Fallback to normal output.
-        result = self.markdown(content)
-        assert '<pre><code class="language-foobar">' in result
+        assert '<div class="highlight">' in self.markdown(content)
 
     def test_render_code_block(self):
         content = '    print("hello")\n'
-        assert "<pre><code>" in self.markdown(content)
+        assert '<div class="highlight">' in self.markdown(content)
+
+    def test_codehilite_options(self):
+        from marko.ext.codehilite import CodeHilite
+
+        markdown = Markdown(extensions=[CodeHilite(linenos="table")])
+        content = '```python\nprint("hello")\n```'
+        assert '<table class="highlighttable">' in markdown(content)
+
+    def test_render_code_block_with_extra(self):
+        content = '```python filename="test.py"\nprint("hello")\n```'
+        assert '<span class="filename">test.py</span>' in self.markdown(content)

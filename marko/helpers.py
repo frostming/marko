@@ -127,7 +127,7 @@ class Source(object):
         :returns: the match object.
         """
         prefix_len = self.match_prefix(
-            self.prefix, self.next_line(require_prefix=False)   # type: ignore
+            self.prefix, self.next_line(require_prefix=False)  # type: ignore
         )
         if prefix_len >= 0:
             match = self._expect_re(regexp, self.pos + prefix_len)
@@ -180,15 +180,16 @@ def normalize_label(label):  # type: (str) -> str
 
 
 def load_extension_object(name):
-    module = import_module("marko.ext.{}".format(name))
-    sentinel = object()
-
-    for _, attr in vars(module).items():
-        if isinstance(attr, type) and any(
-            getattr(attr, name, sentinel) is not sentinel
-            for name in ('elements', 'parser_mixins', 'renderer_mixins')
-        ):
-            return attr
+    if "." not in name:
+        name = "marko.ext.{}".format(name)
+    module = import_module(name)
+    try:
+        maker = getattr(module, "make_extension")
+    except AttributeError:
+        raise AttributeError(
+            "Module {} does not have 'make_extension' attributte.".format(name)
+        )
+    return maker
 
 
 class _Deprecated:
@@ -207,11 +208,10 @@ class _Deprecated:
                 "The name of the extension has been changed to {}. "
                 "Or you can simply use the string form '{}' instead. "
                 "Old names will be deprecated by 1.0.0.".format(
-                    self.__name__,
-                    self.__module__.rsplit('.', 1)[-1]
+                    self.__name__, self.__module__.rsplit(".", 1)[-1]
                 ),
                 DeprecationWarning,
-                stacklevel=2
+                stacklevel=2,
             )
             self.__warned = True
         return rv

@@ -40,7 +40,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          pdm use ${{ matrix.python-version }}
+          pdm use -f ${{ matrix.python-version }}
           pip install wheel
           pdm install -d -s toc -s codehilite
       - name: Run Tests
