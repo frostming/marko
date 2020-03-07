@@ -1,3 +1,7 @@
+## v0.8.0(2020-03-07)
+
+- Support arguments for extensions
+
 ## v0.7.1(2019-12-20)
 
 - Wrap code block with 'highlight' container in codehilite mode.
