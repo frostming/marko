@@ -117,4 +117,3 @@ class TestCodeHilite:
     def test_render_code_block_with_extra(self):
         content = '```python filename="test.py"\nprint("hello")\n```'
         assert '<span class="filename">test.py</span>' in self.markdown(content)
-
