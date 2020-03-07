@@ -222,13 +222,6 @@ marker = "python_version >= \"3.5\""
 summary = "a fork of Python 2 and 3 ast modules with type comment support"
 
 [[package]]
-name = "typing"
-sections = ["dev"]
-version = "3.7.4.1"
-marker = "python_version < \"3.5\""
-summary = "Type Hints for Python"
-
-[[package]]
 name = "typing-extensions"
 sections = ["dev"]
 version = "3.7.4.1"
@@ -422,11 +415,6 @@ contextlib2 = {marker = "python_version < \"3.4\"", version = "*"}
     {file = "typed_ast-1.4.1-cp38-cp38-win32.whl", hash = "sha256:715ff2f2df46121071622063fc7543d9b1fd19ebfc4f5c8895af64a77a8c852c"},
     {file = "typed_ast-1.4.1-cp38-cp38-win_amd64.whl", hash = "sha256:fc0fea399acb12edbf8a628ba8d2312f583bdbdb3335635db062fa98cf71fca4"},
     {file = "typed_ast-1.4.1-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:d43943ef777f9a1c42bf4e552ba23ac77a6351de620aa9acf64ad54933ad4d34"},
-]
-"typing 3.7.4.1" = [
-    {file = "typing-3.7.4.1.tar.gz", hash = "sha256:91dfe6f3f706ee8cc32d38edbbf304e9b7583fb37108fef38229617f8b3eba23"},
-    {file = "typing-3.7.4.1-py2-none-any.whl", hash = "sha256:c8cabb5ab8945cd2f54917be357d134db9cc1eb039e59d1606dc1e60cb1d9d36"},
-    {file = "typing-3.7.4.1-py3-none-any.whl", hash = "sha256:f38d83c5a7a7086543a0f649564d661859c5146a85775ab90c0d2f93ffaa9714"},
 ]
 "typing-extensions 3.7.4.1" = [
     {file = "typing_extensions-3.7.4.1.tar.gz", hash = "sha256:091ecc894d5e908ac75209f10d5b4f118fbdb2eb1ede6a63544054bb1edb41f2"},
