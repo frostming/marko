@@ -36,7 +36,7 @@ Documentation = "https://marko-py.readthedocs.io"
 pytest = "<5.0.0,>=4.6.9"
 pytest-cov = "<3.0.0,>=2.8.1"
 more-itertools = ">=4.0.0,<6.0.0"
-mypy = "*"
+mypy = {version="*", marker="python_version>='3.5'"}
 
 [tool.pdm.toc-dependencies]
 python-slugify = "*"
