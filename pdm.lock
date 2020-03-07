@@ -225,6 +225,7 @@ summary = "a fork of Python 2 and 3 ast modules with type comment support"
 name = "typing"
 sections = ["dev"]
 version = "3.7.4.1"
+marker = "python_version < \"3.5\""
 summary = "Type Hints for Python"
 
 [[package]]
