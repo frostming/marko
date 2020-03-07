@@ -74,7 +74,7 @@ class Markdown(object):
             raise SetupDone()
         for extension in extensions:
             if isinstance(extension, string_types):
-                extension = load_extension_object(extension)
+                extension = load_extension_object(extension)()
 
             self._parser_mixins = (
                 getattr(extension, "parser_mixins", []) + self._parser_mixins

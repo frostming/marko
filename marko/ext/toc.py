@@ -8,6 +8,11 @@ This requires to install `toc` extras::
 
     pip install marko[toc]
 
+Arguments:
+* openning: the openning tag, defaults to <ul>
+* closing: the closing tag, defaults to </ul>
+* item_format: the toc item format, defaults to '<li><a href="#{slug}">{text}</a></li>'
+
 Usage::
 
     from marko import Markdown
@@ -16,6 +21,7 @@ Usage::
 
     print(markdown(text))
     print(markdown.renderer.render_toc())
+
 """
 from __future__ import unicode_literals
 import re
@@ -25,6 +31,10 @@ from marko import helpers
 
 
 class TocRendererMixin(object):
+    openning = "<ul>"
+    closing = "</ul>"
+    item_format = '<li><a href="#{slug}">{text}</a></li>'
+
     def __enter__(self):
         self.headings = []
         return super(TocRendererMixin, self).__enter__()
@@ -42,29 +52,20 @@ class TocRendererMixin(object):
             if first_level is None:
                 first_level = level
                 last_level = level
-                rv.append(self._open_heading_group())
+                rv.append(TocRendererMixin.openning + "\n")
 
             if last_level == level - 1:
-                rv.append(self._open_heading_group())
+                rv.append(TocRendererMixin.openning + "\n")
                 last_level = level
             while last_level > level:
-                rv.append(self._close_heading_group())
+                rv.append(TocRendererMixin.closing + "\n")
                 last_level -= 1
             # last_level == level
-            rv.append(self._render_toc_item(slug, text))
+            rv.append(TocRendererMixin.item_format.format(slug=slug, text=text) + "\n")
         for _ in range(first_level, last_level + 1):
-            rv.append(self._close_heading_group())
+            rv.append(TocRendererMixin.closing + "\n")
 
         return "".join(rv)
-
-    def _open_heading_group(self):
-        return "<ul>\n"
-
-    def _close_heading_group(self):
-        return "</ul>\n"
-
-    def _render_toc_item(self, slug, text):
-        return '<li><a href="#{}">{}</a></li>\n'.format(slug, self.escape_html(text))
 
     def render_heading(self, element):
         children = self.render_children(element)
@@ -74,7 +75,18 @@ class TocRendererMixin(object):
 
 
 class Toc(object):
-    renderer_mixins = [TocRendererMixin]
+    def __init__(self, openning=None, closing=None, item_format=None):
+        if openning:
+            TocRendererMixin.openning = openning
+        if closing:
+            TocRendererMixin.closing = closing
+        if item_format:
+            TocRendererMixin.item_format = item_format
+        self.renderer_mixins = [TocRendererMixin]
 
 
 TocExtension = helpers._Deprecated(Toc)
+
+
+def make_extension(openning=None, closing=None, item_format=None):
+    return Toc(openning, closing, item_format)

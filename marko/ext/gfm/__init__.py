@@ -94,3 +94,7 @@ GFMExtension = helpers._Deprecated(GFM)
 
 gfm = Markdown()
 gfm.use(GFM)
+
+
+def make_extension():
+    return GFM()

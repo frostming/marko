@@ -90,6 +90,16 @@ An optional ``parser_mixins`` can be also given if you have (a) custom parser cl
 The extension exposes a single object so that it can be distributed as a standalone package. Read the following section about
 how to use it.
 
+Sometimes the extension will leave some arguments for users to customize. You can create an "extension factory function" ::
+
+    class GitHubWiki:
+        def __init__(self, arg):
+            WikiRendererMixin.arg = arg
+            self.elements = [GitHubWiki]
+            self.renderer_mixins = [WikiRendererMixin]
+
+So, the extension can by any object, with at least one of the attributes ``elements``, ``renderer_mixins``, ``parser_mixins``.
+
 Register the extension
 ----------------------
 
@@ -112,3 +122,16 @@ Now you have your own extension ready, let's register it to the markdown parser:
     You can also choose a different base parser or renderer by::
 
         markdown = Markdown(renderer=marko.ast_renderer.ASTRenderer)
+
+
+Publish the extension as package
+--------------------------------
+
+Put a ``make_extension()`` function in the entry file which takes any arguments and returns an extension object::
+
+    def make_extension(arg):
+        return GitHubWiki(arg)
+
+Then you can refer to the extension via import string(assume the package name is ``marko_github_wiki``)::
+
+    markdown = Markdown(extensions=["marko_github_wiki"])

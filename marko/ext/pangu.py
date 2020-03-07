@@ -45,3 +45,7 @@ class Pangu(object):
 
 
 PanguExtension = helpers._Deprecated(Pangu)
+
+
+def make_extension():
+    return Pangu()
