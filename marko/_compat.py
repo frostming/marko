@@ -16,8 +16,17 @@ if PY2:
         s = s.encode("utf-8")
         return _quote(s, safe)
 
+    def lru_cache(maxsize=128, typed=False):
+        """Python 2.7 doesn't support LRU cache, return a fake decoractor."""
+
+        def decorator(f):
+            return f
+
+        return decorator
+
 
 else:
     string_types = str
     import html
     from urllib.parse import quote
+    from functools import lru_cache

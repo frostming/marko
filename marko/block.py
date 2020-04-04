@@ -84,7 +84,7 @@ class Document(BlockElement):
     virtual = True
 
     def __init__(self, text):  # type: (str) -> None
-        self.link_ref_defs = {}   # type: Dict[str, Tuple[str, str]]
+        self.link_ref_defs = {}  # type: Dict[str, Tuple[str, str]]
         source = Source(text)
         inline._root_node = self  # type: ignore
         with source.under_state(self):
@@ -168,7 +168,7 @@ class CodeBlock(BlockElement):
         if isinstance(source.state, Quote):
             # requires five spaces to prefix
             prefix = source.prefix[:-1] + " {4}"
-        return cls.strip_prefix(line, prefix)   # type: ignore
+        return cls.strip_prefix(line, prefix)  # type: ignore
 
     @classmethod
     def parse(cls, source):  # type: (Source) -> str
@@ -229,9 +229,9 @@ class FencedCode(BlockElement):
         if not m:
             return None
         prefix, leading, info = m.groups()
-        if leading[0] == '`' and '`' in info:
+        if leading[0] == "`" and "`" in info:
             return None
-        lang, extra = (info.split(None, 1) + [''] * 2)[:2]
+        lang, extra = (info.split(None, 1) + [""] * 2)[:2]
         cls._parse_info = prefix, leading, lang, extra
         return m
 
@@ -281,7 +281,7 @@ class HTMLBlock(BlockElement):
     """HTML blocks, parsed as it is"""
 
     priority = 5
-    _end_cond = None    # Optional[Match]
+    _end_cond = None  # Optional[Match]
 
     def __init__(self, lines):  # type: (str) -> None
         self.children = lines
@@ -532,7 +532,15 @@ class ListItem(BlockElement):
             return False
         if not source.expect_re(cls.pattern):
             return False
-        indent, bullet, mid, tail = cls.parse_leading(source.next_line())  # type: ignore
+        next_line = source.next_line(False)
+        assert next_line is not None
+        for i in range(1, len(next_line) + 1):
+            m = re.match(source.prefix, next_line[:i].expandtabs(4))
+            if not m:
+                continue
+            next_line = next_line[:i].expandtabs(4)[m.end() :] + next_line[i:]
+            break
+        indent, bullet, mid, tail = cls.parse_leading(next_line)  # type: ignore
         parent = source.state
         assert isinstance(parent, List)
         if (

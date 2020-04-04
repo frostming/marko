@@ -41,15 +41,11 @@ def parse(args):
         default="marko.HTMLRenderer",
         help="Specify another renderer class",
     )
-    parser.add_argument(
-        "-o",
-        "--output",
-        help="Ouput to a file"
-    )
+    parser.add_argument("-o", "--output", help="Ouput to a file")
     parser.add_argument(
         "document",
         nargs="?",
-        help="The document to convert, will use stdin if not given."
+        help="The document to convert, will use stdin if not given.",
     )
     return parser.parse_args(args)
 
