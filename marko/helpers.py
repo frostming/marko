@@ -2,12 +2,11 @@
 Helper functions and data structures
 """
 import re
-import functools
 from contextlib import contextmanager
 from importlib import import_module
 import warnings
 
-from ._compat import string_types
+from ._compat import string_types, lru_cache
 
 
 def camel_to_snake_case(name):  # type: (str) -> str
@@ -103,7 +102,7 @@ class Source(object):
         return regexp.match(self._buffer, pos)
 
     @staticmethod
-    @functools.lru_cache()
+    @lru_cache()
     def match_prefix(prefix, line):  # type: (str, str) -> int
         """Check if the line starts with given prefix and
         return the position of the end of prefix.
