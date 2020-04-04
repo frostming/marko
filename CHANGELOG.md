@@ -1,3 +1,7 @@
+## v0.8.1(2020-04-03)
+
+- Fix a bug of list item parsing when mixed whitespace type is used.
+
 ## v0.8.0(2020-03-07)
 
 - Support arguments for extensions
