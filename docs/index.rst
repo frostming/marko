@@ -54,7 +54,8 @@ Marko also provides a simple CLI, for example, to render a document and output t
 
 Other CLI usage::
 
-    usage: marko [-h] [-v] [-p PARSER] [-r RENDERER] [-o OUTPUT] [document]
+    usage: marko [-h] [-v] [-p PARSER] [-r RENDERER] [-e EXTENSTION] [-o OUTPUT]
+             [document]
 
     positional arguments:
     document              The document to convert, will use stdin if not given.
@@ -66,6 +67,9 @@ Other CLI usage::
                             Specify another parser class
     -r RENDERER, --renderer RENDERER
                             Specify another renderer class
+    -e EXTENSTION, --extension EXTENSTION
+                            Specify the import name of extension, can be given
+                            multiple times
     -o OUTPUT, --output OUTPUT
                             Ouput to a file
 

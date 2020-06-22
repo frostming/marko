@@ -53,14 +53,16 @@ It is super easy to use an extension:
 
 ```python
 from marko import Markdown
-from marko.ext.footnote import FootnoteExtension
+from marko.ext.footnote import Footnote
 # Add footnote extension
-markdown = Markdown(extensions=[FootnoteExtension])
+markdown = Markdown(extensions=[Footnote])
+# Or you can just:
+markdown = Markdown(extensions=['footnote'])
 # Alternatively you can register an extension later
-markdown.use(FootnoteExtension)
+markdown.use(Footnote)
 ```
-Marko is shipped with 3 extensions: `marko.ext.toc.TocExtension`, `marko.ext.footnote.FootnoteExtension`,
-`marko.ext.pangu.PanguExtension`. They are not included in CommonMark's spec but are common in other markdown parsers.
+Marko is shipped with 4 extensions: `'footnote', 'toc' 'pangu', 'codehilite'`.
+They are not included in CommonMark's spec but are common in other markdown parsers.
 
 Marko also provides a Github flavored markdown parser which can be found at `marko.ext.gfm.gfm`.
 
