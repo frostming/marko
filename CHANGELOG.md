@@ -1,3 +1,8 @@
+## v0.8.2(2020-06-22)
+
+- Add support for specifying extensions in marko CLI.
+- Display a help message when prompting for input in marko CLI.
+
 ## v0.8.1(2020-04-03)
 
 - Fix a bug of list item parsing when mixed whitespace type is used.
