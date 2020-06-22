@@ -181,9 +181,18 @@ def normalize_label(label):  # type: (str) -> str
 
 
 def load_extension_object(name):
+    """Load extension object from a string.
+    First try `marko.ext.<name>` if possible
+    """
+    module = None
     if "." not in name:
-        name = "marko.ext.{}".format(name)
-    module = import_module(name)
+        try:
+            module = import_module("marko.ext.{}".format(name))
+        except ImportError:
+            pass
+    if module is None:
+        module = import_module(name)
+
     try:
         maker = getattr(module, "make_extension")
     except AttributeError:
