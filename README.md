@@ -65,7 +65,7 @@ markdown.use(Footnote)
 An example of using an extension with the command-line version of Marko:
 
 ```
-$ cat this_has_footnote.txt | marko -e marko.ext.footnote > hi_world.html
+$ cat this_has_footnote.txt | marko -e footnote > hi_world.html
 ```
 
 Marko is shipped with 4 extensions: `'footnote', 'toc' 'pangu', 'codehilite'`.
