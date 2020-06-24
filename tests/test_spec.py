@@ -23,5 +23,10 @@ class TestGFM(SpecTestSuite):
     def ignore_case(cls, n):
         return n in GFM_IGNORE
 
+    def test_parse_table_with_backslashes(self):
+        md = "\\\n\n| \\ |\n| - |\n| \\ |"
+        html = "<p>\\</p><table><thead><tr><th>\\</th></tr></thead><tbody><tr><td>\\</td></tr></tbody></table>"
+        self.assert_case(md, html)
+
 
 TestGFM.load_spec("gfm")

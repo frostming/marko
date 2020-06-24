@@ -211,6 +211,6 @@ class TableCell(block.BlockElement):
     inline_children = True
 
     def __init__(self, text):
-        self.children = text.strip().replace('\\', '')
+        self.children = text.strip()
         self.header = False
         self.align = None
