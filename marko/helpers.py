@@ -191,7 +191,10 @@ def load_extension_object(name):
         except ImportError:
             pass
     if module is None:
-        module = import_module(name)
+        try:
+            module = import_module(name)
+        except ImportError:
+            raise ImportError("Extension {} cannot be found. Please check the name.")
 
     try:
         maker = getattr(module, "make_extension")
