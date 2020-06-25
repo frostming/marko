@@ -67,7 +67,7 @@ def main():
     else:
         keystroke = "Ctrl+Z" if sys.platform.startswith("win") else "Ctrl+D"
         print(
-            "Type in the markdown content to be converted. End with {}".format(
+            "Type in the markdown content to be converted. End with {} followed by the key 'Enter'".format(
                 keystroke
             ),
             file=sys.stderr
