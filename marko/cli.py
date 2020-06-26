@@ -65,9 +65,9 @@ def main():
         with codecs.open(namespace.document, encoding="utf-8") as f:
             content = f.read()
     else:
-        keystroke = "Ctrl+Z" if sys.platform.startswith("win") else "Ctrl+D"
+        keystroke = "Ctrl+Z followed by the key 'Enter'" if sys.platform.startswith("win") else "Ctrl+D"
         print(
-            "Type in the markdown content to be converted. End with {}, followed by the key 'Enter'".format(
+            "Type in the markdown content to be converted. End with {}".format(
                 keystroke
             ),
             file=sys.stderr
