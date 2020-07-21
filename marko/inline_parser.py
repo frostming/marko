@@ -105,9 +105,13 @@ class Token(object):
         if self.end <= other.start:
             return Token.PRECEDE
         if self.end >= other.end:
-            if other.start >= self.inner_start and other.end <= self.inner_end:
+            if (
+                self.etype.parse_children
+                and other.start >= self.inner_start
+                and other.end <= self.inner_end
+            ):
                 return Token.CONTAIN
-            if self.inner_end <= other.start:
+            if self.etype.parse_children and self.inner_end <= other.start:
                 return Token.SHADE
         return Token.INTERSECT
 
