@@ -4,7 +4,8 @@ Inline(span) level elements
 """
 from __future__ import unicode_literals
 import re
-from .helpers import string_types, is_type_check
+from ._compat import string_types
+from .helpers import is_type_check
 from . import inline_parser, patterns
 
 if is_type_check():
