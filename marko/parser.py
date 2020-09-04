@@ -2,7 +2,8 @@
 Base parser
 """
 import itertools
-from .helpers import string_types, is_type_check, Source
+from ._compat import string_types
+from .helpers import is_type_check, Source
 
 
 class Parser(object):
