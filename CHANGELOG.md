@@ -1,4 +1,4 @@
-## v0.9.0(Unreleased)
+## v0.9.0(2020-09-27)
 
 - Fix a bug that backslashes get dropped inside a table cell.
 - Fix a bug that the priority of inline elements is not honored.
