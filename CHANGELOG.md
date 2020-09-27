@@ -1,3 +1,7 @@
+## v0.9.1(2020-09-27)
+
+- Fix an XSS issue that exists in code language field.
+
 ## v0.9.0(2020-09-27)
 
 - Fix a bug that backslashes get dropped inside a table cell.

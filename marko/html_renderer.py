@@ -55,7 +55,10 @@ class HTMLRenderer(Renderer):
         return "<blockquote>\n{}</blockquote>\n".format(self.render_children(element))
 
     def render_fenced_code(self, element):
-        lang = ' class="language-{}"'.format(element.lang) if element.lang else ""
+        lang = (
+            ' class="language-{}"'.format(self.escape_html(element.lang))
+            if element.lang else ""
+        )
         return "<pre><code{}>{}</code></pre>\n".format(
             lang, html.escape(element.children[0].children)
         )
