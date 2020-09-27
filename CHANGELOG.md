@@ -1,3 +1,9 @@
+## v0.9.0(Unreleased)
+
+- Fix a bug that backslashes get dropped inside a table cell.
+- Fix a bug that the priority of inline elements is not honored.
+- Add a new renderer: `marko.md_renderer.MarkdownRenderer` which rerenders the input back to markdown text.
+
 ## v0.8.2(2020-06-22)
 
 - Add support for specifying extensions in marko CLI.
