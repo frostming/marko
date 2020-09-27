@@ -48,7 +48,7 @@ class MarkdownRenderer(Renderer):
                 with self.container("{} ".format(element.bullet), "  "):
                     result.append(self.render(child))
         self._prefix = self._second_prefix
-        return "".join(result) + "\n"
+        return "".join(result)
 
     def render_list_item(self, element):
         return self.render_children(element)
@@ -131,7 +131,7 @@ class MarkdownRenderer(Renderer):
         return template.format(element.children, element.dest, title)
 
     def render_literal(self, element):
-        return "\\" + element.chilren
+        return "\\" + element.children
 
     def render_raw_text(self, element):
         return element.children
@@ -140,4 +140,7 @@ class MarkdownRenderer(Renderer):
         return "\n"
 
     def render_code_span(self, element):
+        text = element.children
+        if text and text[0] == "`" or text[-1] == "`":
+            return "`` {} ``".format(text)
         return "`{}`".format(element.children)

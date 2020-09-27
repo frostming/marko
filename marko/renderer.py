@@ -54,7 +54,7 @@ class Renderer(object):
         render_func = getattr(self, self._cls_to_func_name(element.__class__), None)
         if not render_func:
             render_func = self.render_children
-        return render_func(element).strip("\n") + "\n"
+        return render_func(element)
 
     def render_children(self, element):  # type: (Element) -> str
         """

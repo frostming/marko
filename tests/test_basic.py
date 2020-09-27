@@ -1,6 +1,7 @@
 #! -*- coding: utf-8 -*-
 import pytest
 import marko
+from tests.normalize import normalize_html
 
 
 class TestBasic:
@@ -23,6 +24,19 @@ class TestBasic:
         assert isinstance(res, dict)
         assert res['element'] == 'document'
         assert res['children'][0]['element'] == 'paragraph'
+
+    def test_markdown_renderer(self):
+        from marko.md_renderer import MarkdownRenderer
+
+        with open('tests/samples/syntax.md') as f:
+            text = f.read()
+
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert (
+            normalize_html(marko.convert(rerendered))
+            == normalize_html(marko.convert(text))
+        )
 
 
 class TestExtension:
