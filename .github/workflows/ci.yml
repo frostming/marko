@@ -45,8 +45,6 @@ jobs:
       - name: Install dependencies
         run: |
           pdm use -f ${{ matrix.python-version }}
-          pdm config set parallel_install false
-          pip install wheel
           pdm install -d -s toc -s codehilite
       - name: Run Tests
         run: |
