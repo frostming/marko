@@ -128,7 +128,7 @@ class MarkdownRenderer(Renderer):
         title = (
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
-        return template.format(element.children, element.dest, title)
+        return template.format(self.render_children(element), element.dest, title)
 
     def render_literal(self, element):
         return "\\" + element.children
