@@ -45,7 +45,7 @@ jobs:
       - name: Install dependencies
         run: |
           pdm use -f ${{ matrix.python-version }}
-          pdm install -d -s toc -s codehilite
+          pdm install -dvvv -s toc -s codehilite
       - name: Run Tests
         run: |
           pdm run pytest --cov=marko/ --cov-report=xml tests
