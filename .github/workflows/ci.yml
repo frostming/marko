@@ -43,6 +43,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
+          python -m pip install -U setuptools
           pdm use -f ${{ matrix.python-version }}
           pdm install -dvvv -s toc -s codehilite
       - name: Run Tests
