@@ -23,7 +23,6 @@ jobs:
           mypy .
 
   Testing:
-    needs: Linting
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
