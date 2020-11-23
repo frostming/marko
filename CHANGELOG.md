@@ -1,3 +1,8 @@
+## v0.10.0(2020-11-23)
+
+- Drop support of Python 3.5
+- Fix a bug about rendering image links of `MarkdownRender`
+
 ## v0.9.1(2020-09-27)
 
 - Fix an XSS issue that exists in code language field.
