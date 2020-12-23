@@ -37,13 +37,13 @@ You don't need to provide the parsed content since it is handled by parser autom
 About parsing priority
 ++++++++++++++++++++++
 
-The parser respects element's ``priority`` attribute to control the parsing precedence. It is 5 by default, which is the same as emphasis, links and images.
+The parser respects element's ``priority`` attribute to control the parsing precedence. It is 5 by default, which is the same as emphasis, links and images. A higher number means the element will be tried sooner.
 For elements of the same priority, what comes the first will be parsed::
 
     *This is an [[emphasis*|target]]
     # Parsed as: <em>This is an [[emphasis</em>|target]]
 
-If we set a higher priority, it will be first parsed instead::
+If we set a higher priority (e.g. 6), it will be first parsed instead::
 
     *This is an <a href="target">emphasis*</a>
 
