@@ -19,7 +19,7 @@ jobs:
       - name: Install Current PDM
         run: |
           pip install -U pip
-          pip install .
+          pip install --pre pdm
       - name: Build artifacts
         run: |
           pdm build -v
