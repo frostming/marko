@@ -1,6 +1,8 @@
 #! -*- coding: utf-8 -*-
 import pytest
+
 import marko
+from marko import block
 from tests.normalize import normalize_html
 
 
@@ -8,7 +10,7 @@ class TestBasic:
     def test_xml_renderer(self):
         from marko.ast_renderer import XMLRenderer
 
-        text = "[Overview](#overview)"
+        text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)
         res = markdown(text)
         assert '<?xml version="1.0" encoding="UTF-8"?>' in res
@@ -17,7 +19,7 @@ class TestBasic:
     def test_ast_renderer(self):
         from marko.ast_renderer import ASTRenderer
 
-        text = "[Overview](#overview)"
+        text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=ASTRenderer)
         res = markdown(text)
         assert isinstance(res, dict)
@@ -27,7 +29,7 @@ class TestBasic:
     def test_markdown_renderer(self):
         from marko.md_renderer import MarkdownRenderer
 
-        with open("tests/samples/syntax.md") as f:
+        with open("tests/samples/syntax.md", encoding="utf-8") as f:
             text = f.read()
 
         markdown = marko.Markdown(renderer=MarkdownRenderer)
@@ -52,7 +54,7 @@ class TestExtension:
         markdown.use("footnote")
 
         markdown.convert("abc")
-        with pytest.raises(marko.SetupDone):
+        with pytest.raises(marko.SetupDone, match="Unable to register more extensions"):
             markdown.use("toc")
 
         assert hasattr(markdown.renderer, "render_footnote_def")
@@ -68,3 +70,33 @@ class TestExtension:
         markdown = marko.Markdown(extensions=["gfm", MyExtension])
         out = markdown.convert("hello world\n")
         assert out == "foo bar"
+
+    def test_extension_override_element(self):
+        class MyHeading(block.Heading):
+            override = True
+
+        class MyExtension:
+            elements = [MyHeading]
+
+        markdown = marko.Markdown(extensions=[MyExtension])
+        markdown._setup_extensions()
+        assert markdown.parser.block_elements["Heading"] is MyHeading
+
+    def test_extension_override_non_base_element(self):
+        class MyHeading(block.BlockElement):
+            override = True
+
+        class MyExtension:
+            elements = [MyHeading]
+
+        markdown = marko.Markdown(extensions=[MyExtension])
+        markdown._setup_extensions()
+        assert markdown.parser.block_elements["MyHeading"] is MyHeading
+
+    def test_extension_with_illegal_element(self):
+        class MyExtension:
+            elements = [object]
+
+        markdown = marko.Markdown(extensions=[MyExtension])
+        with pytest.raises(TypeError, match="The element should be a subclass of"):
+            markdown.convert("hello world\n")

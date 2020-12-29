@@ -72,7 +72,7 @@ class LineBreak(InlineElement):
     """
 
     priority = 2
-    pattern = re.compile(r"( *|\\)\n(?!\Z)")
+    pattern = r"( *|\\)\n(?!\Z)"
 
     def __init__(self, match):  # type: (_Match) -> None
         self.soft = not match.group(1).startswith(("  ", "\\"))

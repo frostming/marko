@@ -127,7 +127,7 @@ class MarkdownRenderer(Renderer):
         return "[{}]({}{})".format(self.render_children(element), element.dest, title)
 
     def render_auto_link(self, element):
-        return "<{}>".format(self.render_link(element))
+        return "<{}>".format(element.dest)
 
     def render_image(self, element):
         template = "![{}]({}{})"
@@ -143,7 +143,7 @@ class MarkdownRenderer(Renderer):
         return element.children
 
     def render_line_break(self, element):
-        return "\n"
+        return "\n" if element.soft else "\\\n"
 
     def render_code_span(self, element):
         text = element.children

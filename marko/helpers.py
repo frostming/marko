@@ -88,11 +88,6 @@ class Source:
         """The prefix of each line when parsing."""
         return "".join(s._prefix for s in self._states)
 
-    @property
-    def rest(self):  # type: () -> str
-        """The remaining source unparsed."""
-        return self._buffer[self.pos :]
-
     def _expect_re(self, regexp, pos):
         # type: (Union[Pattern, str], int) -> Optional[Match]
         if isinstance(regexp, str):
@@ -117,7 +112,7 @@ class Source:
         for i in range(1, len(line) + 1):
             if len(line[:i].expandtabs(4)) >= pos:
                 return i
-        return -1
+        return -1  # pragma: no cover
 
     def expect_re(self, regexp):  # type: (Union[Pattern, str]) -> Optional[Match]
         """Test against the given regular expression and returns the match object.
@@ -192,7 +187,9 @@ def load_extension_object(name):
         try:
             module = import_module(name)
         except ImportError:
-            raise ImportError("Extension {} cannot be found. Please check the name.")
+            raise ImportError(
+                f"Extension {name} cannot be found. Please check the name."
+            )
 
     try:
         maker = getattr(module, "make_extension")
@@ -203,7 +200,7 @@ def load_extension_object(name):
     return maker
 
 
-def is_type_check():  # type: () -> bool
+def is_type_check() -> bool:  # pragma: no cover
     try:
         from typing import TYPE_CHECKING
     except ImportError:
