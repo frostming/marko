@@ -2,7 +2,6 @@
 """
 Command line interfaces
 """
-from __future__ import print_function
 import sys
 import importlib
 import marko
@@ -48,7 +47,7 @@ def parse(args):
         action="append",
         default=[],
         metavar="EXTENSTION",
-        help="Specify the import name of extension, can be given multiple times"
+        help="Specify the import name of extension, can be given multiple times",
     )
     parser.add_argument("-o", "--output", help="Ouput to a file")
     parser.add_argument(
@@ -65,18 +64,20 @@ def main():
         with codecs.open(namespace.document, encoding="utf-8") as f:
             content = f.read()
     else:
-        keystroke = "Ctrl+Z followed by the key 'Enter'" if sys.platform.startswith("win") else "Ctrl+D"
+        keystroke = (
+            "Ctrl+Z followed by the key 'Enter'"
+            if sys.platform.startswith("win")
+            else "Ctrl+D"
+        )
         print(
             "Type in the markdown content to be converted. End with {}".format(
                 keystroke
             ),
-            file=sys.stderr
+            file=sys.stderr,
         )
         content = sys.stdin.read()
     markdown = marko.Markdown(
-        namespace.parser,
-        namespace.renderer,
-        extensions=namespace.extension
+        namespace.parser, namespace.renderer, extensions=namespace.extension
     )
     result = markdown(content)
     if namespace.output:

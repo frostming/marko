@@ -2,10 +2,10 @@
 """
 HTML renderer
 """
-from __future__ import unicode_literals
+import html
 import re
+from urllib.parse import quote
 
-from ._compat import string_types, html, quote
 from .renderer import Renderer
 
 
@@ -57,7 +57,8 @@ class HTMLRenderer(Renderer):
     def render_fenced_code(self, element):
         lang = (
             ' class="language-{}"'.format(self.escape_html(element.lang))
-            if element.lang else ""
+            if element.lang
+            else ""
         )
         return "<pre><code{}>{}</code></pre>\n".format(
             lang, html.escape(element.children[0].children)

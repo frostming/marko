@@ -14,7 +14,6 @@ from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
 from .helpers import is_type_check, load_extension_object
-from ._compat import string_types
 
 if is_type_check():
     from typing import Type, List, Any, Optional
@@ -73,7 +72,7 @@ class Markdown(object):
         if self._setup_done:
             raise SetupDone()
         for extension in extensions:
-            if isinstance(extension, string_types):
+            if isinstance(extension, str):
                 extension = load_extension_object(extension)()
 
             self._parser_mixins = (

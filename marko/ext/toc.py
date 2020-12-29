@@ -23,7 +23,6 @@ Usage::
     print(markdown.renderer.render_toc())
 
 """
-from __future__ import unicode_literals
 import re
 
 from slugify import slugify  # type: ignore

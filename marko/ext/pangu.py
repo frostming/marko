@@ -17,7 +17,6 @@ Example::
     markdown = Markdown(extensions=['pangu'])
     print(markdown(text))
 """
-from __future__ import unicode_literals
 import re
 
 from marko import helpers

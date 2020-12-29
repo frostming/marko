@@ -2,9 +2,7 @@
 """
 Inline(span) level elements
 """
-from __future__ import unicode_literals
 import re
-from ._compat import string_types
 from .helpers import is_type_check
 from . import inline_parser, patterns
 
@@ -52,7 +50,7 @@ class InlineElement(object):
     @classmethod
     def find(cls, text):  # type: (str) -> Iterator[Match]
         """This method should return an iterable containing matches of this element."""
-        if isinstance(cls.pattern, string_types):
+        if isinstance(cls.pattern, str):
             cls.pattern = re.compile(cls.pattern)
         return cls.pattern.finditer(text)
 

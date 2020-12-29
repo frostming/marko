@@ -14,7 +14,6 @@ Example usage::
     print(gfm(text))
 
 """
-from __future__ import unicode_literals
 import re
 from marko import Markdown, helpers
 from . import elements

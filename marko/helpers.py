@@ -1,12 +1,11 @@
 """
 Helper functions and data structures
 """
+import functools
 import re
 from contextlib import contextmanager
 from importlib import import_module
 import warnings
-
-from ._compat import string_types, lru_cache
 
 
 def camel_to_snake_case(name):  # type: (str) -> str
@@ -97,12 +96,12 @@ class Source(object):
 
     def _expect_re(self, regexp, pos):
         # type: (Union[Pattern, str], int) -> Optional[Match]
-        if isinstance(regexp, string_types):
+        if isinstance(regexp, str):
             regexp = re.compile(regexp)
         return regexp.match(self._buffer, pos)
 
     @staticmethod
-    @lru_cache()
+    @functools.lru_cache()
     def match_prefix(prefix, line):  # type: (str, str) -> int
         """Check if the line starts with given prefix and
         return the position of the end of prefix.
