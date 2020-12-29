@@ -6,7 +6,7 @@ from .helpers import is_type_check
 from . import inline_parser, patterns
 
 if is_type_check():
-    from typing import Pattern, Match, Iterator
+    from typing import Pattern, Match, Iterator, Union
     from .inline_parser import _Match
 
 __all__ = (
@@ -30,7 +30,7 @@ class InlineElement:
     #: Use to denote the precedence in parsing.
     priority = 5
     #: element regex pattern.
-    pattern = None  # type: Pattern
+    pattern = None  # type: Union[Pattern[str], str]
     #: whether to parse children.
     parse_children = False
     #: which match group to parse.
