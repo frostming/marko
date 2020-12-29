@@ -1,4 +1,3 @@
-#! -*- coding: utf-8 -*-
 """
 Base renderer class
 """
@@ -15,7 +14,7 @@ if is_type_check():
     Element = Union[BlockElement, InlineElement]
 
 
-class Renderer(object):
+class Renderer:
     """The base class of renderers.
 
     A custom renderer should subclass this class and include your own render functions.

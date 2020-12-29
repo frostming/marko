@@ -1,4 +1,3 @@
-#! -*- coding: utf-8 -*-
 """
 Block level elements
 """
@@ -27,7 +26,7 @@ __all__ = (
 )
 
 
-class BlockElement(object):
+class BlockElement:
     """Any block element should inherit this class"""
 
     #: Use to denote the precedence in parsing
@@ -302,7 +301,7 @@ class HTMLBlock(BlockElement):
         if source.expect_re(r" {,3}<!\[CDATA\["):
             cls._end_cond = re.compile(r"\]\]>")
             return 5
-        block_tag = r"(?:%s)" % ("|".join(patterns.tags),)
+        block_tag = r"(?:{})".format("|".join(patterns.tags))
         if source.expect_re(r"(?im) {,3}</?%s(?: +|/?>|$)" % block_tag):
             cls._end_cond = None
             return 6

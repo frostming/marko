@@ -50,11 +50,11 @@ class XMLRenderer(Renderer):
 
     def __enter__(self):
         self.indent = 0
-        return super(XMLRenderer, self).__enter__()
+        return super().__enter__()
 
     def __exit__(self, *args):
         self.indent = 0
-        return super(XMLRenderer, self).__exit__(*args)
+        return super().__exit__(*args)
 
     def render_children(self, element):
         lines = []
@@ -68,9 +68,9 @@ class XMLRenderer(Renderer):
             for k, v in element.__dict__.items()
             if not k.startswith("_") and k != "children"
         }
-        attr_str = "".join(' {}="{}"'.format(k, v) for k, v in attrs.items())
+        attr_str = "".join(f' {k}="{v}"' for k, v in attrs.items())
         element_name = camel_to_snake_case(element.__class__.__name__)
-        lines.append(" " * self.indent + "<{}{}>".format(element_name, attr_str))
+        lines.append(" " * self.indent + f"<{element_name}{attr_str}>")
         if getattr(element, "children", None):
             self.indent += 2
             if isinstance(element.children, str):
@@ -78,7 +78,7 @@ class XMLRenderer(Renderer):
             else:
                 lines.extend(self.render(child) for child in element.children)
             self.indent -= 2
-            lines.append(" " * self.indent + "</{}>".format(element_name))
+            lines.append(" " * self.indent + f"</{element_name}>")
         else:
             lines[-1] = lines[-1][:-1] + " />"
         return "\n".join(lines)

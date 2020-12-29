@@ -15,11 +15,11 @@ Example usage::
 
 """
 import re
-from marko import Markdown, helpers
+from marko import Markdown
 from . import elements
 
 
-class GFMRendererMixin(object):
+class GFMRendererMixin:
     tagfilter = re.compile(
         r"<(title|texarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
         flags=re.I,
@@ -39,7 +39,7 @@ class GFMRendererMixin(object):
         if element._tight:
             return children
         else:
-            return "<p>{}</p>\n".format(children)
+            return f"<p>{children}</p>\n"
 
     def render_strikethrough(self, element):
         return "<del>{}</del>".format(self.render_children(element))
@@ -58,7 +58,7 @@ class GFMRendererMixin(object):
             tbody = "\n<tbody>\n{}</tbody>".format(
                 "".join(self.render(row) for row in body)
             )
-        return "<table>\n{}{}</table>".format(theader, tbody)
+        return f"<table>\n{theader}{tbody}</table>"
 
     def render_table_row(self, element):
         return "<tr>\n{}</tr>\n".format(self.render_children(element))
@@ -67,7 +67,7 @@ class GFMRendererMixin(object):
         tag = "th" if element.header else "td"
         align = ""
         if element.align:
-            align = ' align="{}"'.format(element.align)
+            align = f' align="{element.align}"'
         return "<{tag}{align}>{children}</{tag}>\n".format(
             tag=tag, children=self.render_children(element), align=align
         )
@@ -76,7 +76,7 @@ class GFMRendererMixin(object):
         return self.render_link(element)
 
 
-class GFM(object):
+class GFM:
     elements = [
         elements.Paragraph,
         elements.ListItem,
@@ -88,8 +88,6 @@ class GFM(object):
     ]
     renderer_mixins = [GFMRendererMixin]
 
-
-GFMExtension = helpers._Deprecated(GFM)
 
 gfm = Markdown()
 gfm.use(GFM)

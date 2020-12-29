@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 TOC extension
 ~~~~~~~~~~~~~
@@ -26,17 +25,16 @@ Usage::
 import re
 
 from slugify import slugify  # type: ignore
-from marko import helpers
 
 
-class TocRendererMixin(object):
+class TocRendererMixin:
     openning = "<ul>"
     closing = "</ul>"
     item_format = '<li><a href="#{slug}">{text}</a></li>'
 
     def __enter__(self):
         self.headings = []
-        return super(TocRendererMixin, self).__enter__()
+        return super().__enter__()
 
     def render_toc(self, maxdepth=3):
         if not self.headings:
@@ -73,7 +71,7 @@ class TocRendererMixin(object):
         return '<h{0} id="{1}">{2}</h{0}>\n'.format(element.level, slug, children)
 
 
-class Toc(object):
+class Toc:
     def __init__(self, openning=None, closing=None, item_format=None):
         if openning:
             TocRendererMixin.openning = openning
@@ -82,9 +80,6 @@ class Toc(object):
         if item_format:
             TocRendererMixin.item_format = item_format
         self.renderer_mixins = [TocRendererMixin]
-
-
-TocExtension = helpers._Deprecated(Toc)
 
 
 def make_extension(openning=None, closing=None, item_format=None):

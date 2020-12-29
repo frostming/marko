@@ -5,8 +5,8 @@ import itertools
 from .helpers import is_type_check, Source
 
 
-class Parser(object):
-    """
+class Parser:
+    r"""
     All elements defined in CommonMark's spec are included in the parser
     by default.
 

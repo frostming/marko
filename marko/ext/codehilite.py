@@ -30,7 +30,7 @@ def _parse_extras(line):
     return {k: json.loads(v) for part in line.split(",") for k, v in [part.split("=")]}
 
 
-class CodeHiliteRendererMixin(object):
+class CodeHiliteRendererMixin:
     options = {}  # type: dict
 
     def render_fenced_code(self, element):
@@ -48,7 +48,7 @@ class CodeHiliteRendererMixin(object):
         return highlight(code, lexer, formatter)
 
 
-class CodeHilite(object):
+class CodeHilite:
     def __init__(self, **options):
         CodeHiliteRendererMixin.options = options
         self.renderer_mixins = [CodeHiliteRendererMixin]

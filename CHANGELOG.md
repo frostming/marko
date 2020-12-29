@@ -1,3 +1,9 @@
+## v1.0.0(Unreleased)
+
+- Drop support of Python 2.7
+- Remove the deprecated extension object
+- Blacken the code base
+
 ## v0.10.0(2020-11-23)
 
 - Drop support of Python 3.5

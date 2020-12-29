@@ -12,7 +12,7 @@ class Paragraph(block.Paragraph):
     override = True
 
     def __init__(self, lines):
-        super(Paragraph, self).__init__(lines)
+        super().__init__(lines)
         m = self._task_list_item_pattern.match(self.children)
         if m:
             self.checked = m.group(1)[1:-1].lower() == "x"
@@ -26,7 +26,7 @@ class Strikethrough(inline.InlineElement):
     parse_children = True
 
 
-class _MatchObj(object):
+class _MatchObj:
     def __init__(self, match, start_shift=0, end_shift=0):
         self._match = match
         self._start_shift = start_shift
@@ -66,7 +66,7 @@ class Url(inline.AutoLink):
     priority = 5
 
     def __init__(self, match):
-        super(Url, self).__init__(match)
+        super().__init__(match)
         if self.www_pattern.match(self.dest):
             self.dest = "http://" + self.dest
 

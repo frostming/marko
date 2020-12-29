@@ -1,4 +1,3 @@
-#! -*- coding: utf-8 -*-
 """
 Inline(span) level elements
 """
@@ -25,7 +24,7 @@ __all__ = (
 )
 
 
-class InlineElement(object):
+class InlineElement:
     """Any inline element should inherit this class"""
 
     #: Use to denote the precedence in parsing.
@@ -172,7 +171,7 @@ class AutoLink(InlineElement):
     """Autolinks: <http://example.org>"""
 
     priority = 7
-    pattern = re.compile(r"<(%s|%s)>" % (patterns.uri, patterns.email))
+    pattern = re.compile(fr"<({patterns.uri}|{patterns.email})>")
 
     def __init__(self, match):  # type: (_Match) -> None
         self.dest = match.group(1)

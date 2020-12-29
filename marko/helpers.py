@@ -5,7 +5,6 @@ import functools
 import re
 from contextlib import contextmanager
 from importlib import import_module
-import warnings
 
 
 def camel_to_snake_case(name):  # type: (str) -> str
@@ -39,7 +38,7 @@ def _preprocess_text(text):  # type: (str) -> str
     return text.replace("\r\n", "\n")
 
 
-class Source(object):
+class Source:
     """Wrapper class on content to be parsed"""
 
     def __init__(self, text):  # type: (str) -> None
@@ -186,7 +185,7 @@ def load_extension_object(name):
     module = None
     if "." not in name:
         try:
-            module = import_module("marko.ext.{}".format(name))
+            module = import_module(f"marko.ext.{name}")
         except ImportError:
             pass
     if module is None:
@@ -199,34 +198,9 @@ def load_extension_object(name):
         maker = getattr(module, "make_extension")
     except AttributeError:
         raise AttributeError(
-            "Module {} does not have 'make_extension' attributte.".format(name)
+            f"Module {name} does not have 'make_extension' attributte."
         )
     return maker
-
-
-class _Deprecated:
-    def __init__(self, cls):
-        self.__cls = cls
-        self.__module__ = cls.__module__
-        self.__doc__ = cls.__doc__
-        self.__name__ = cls.__name__
-        # only warn once for each instance
-        self.__warned = False
-
-    def __getattr__(self, name):
-        rv = getattr(self.__cls, name)
-        if not self.__warned:
-            warnings.warn(
-                "The name of the extension has been changed to {}. "
-                "Or you can simply use the string form '{}' instead. "
-                "Old names will be deprecated by 1.0.0.".format(
-                    self.__name__, self.__module__.rsplit(".", 1)[-1]
-                ),
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            self.__warned = True
-        return rv
 
 
 def is_type_check():  # type: () -> bool

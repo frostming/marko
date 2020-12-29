@@ -1,4 +1,3 @@
-#! -*- coding: utf-8 -*-
 """
 Command line interfaces
 """
@@ -18,7 +17,7 @@ def import_class(import_string):
     except ImportError:
         sys.exit("Cannot import module %s" % module)
     except AttributeError:
-        sys.exit("Cannot find class {} in module {}".format(classname, module))
+        sys.exit(f"Cannot find class {classname} in module {module}")
     else:
         return cls
 

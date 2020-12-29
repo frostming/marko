@@ -78,7 +78,7 @@ def make_elements(tokens, text, start=0, end=None, fallback=None):
     return result
 
 
-class Token(object):
+class Token:
     """An intermediate class to wrap the match object.
     It can be converted to element by :meth:`as_element()`
     """
@@ -350,7 +350,7 @@ def _nearest_opener(delimiters, higher, lower):
     return None
 
 
-class Delimiter(object):
+class Delimiter:
     whitespace_re = re.compile(r"\s", flags=re.UNICODE)
 
     def __init__(self, match, text):  # type: (_Match, str) -> None
@@ -429,7 +429,7 @@ class Delimiter(object):
         )
 
 
-class MatchObj(object):
+class MatchObj:
     """A fake match object that memes re.match methods"""
 
     def __init__(self, etype, text, start, end, *groups):
