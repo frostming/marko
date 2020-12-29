@@ -2,12 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import sys
+import functools
 from importlib import import_module
 from time import perf_counter
 
 
 TEST_FILE = "tests/samples/syntax.md"
 TIMES = 100
+
+open = functools.partial(open, encoding="utf-8")
 
 
 def benchmark(package_name):
@@ -33,7 +36,7 @@ def benchmark(package_name):
 @benchmark("markdown")
 def run_markdown(package):
     with open(TEST_FILE, "r") as fin:
-        return package.markdown(fin.read(), ["extra"])
+        return package.markdown(fin.read())
 
 
 @benchmark("mistune")
@@ -42,7 +45,7 @@ def run_mistune(package):
         return package.markdown(fin.read())
 
 
-@benchmark("CommonMark")
+@benchmark("commonmark")
 def run_commonmark(package):
     with open(TEST_FILE, "r") as fin:
         return package.commonmark(fin.read())
@@ -51,13 +54,20 @@ def run_commonmark(package):
 @benchmark("marko")
 def run_marko(package):
     with open(TEST_FILE, "r") as fin:
-        return package.markdown(fin.read())
+        return package.convert(fin.read())
 
 
 @benchmark("mistletoe")
 def run_mistletoe(package):
     with open(TEST_FILE, "r") as fin:
         return package.markdown(fin)
+
+
+@benchmark("markdown_it")
+def run_markdown_it(package):
+    md = package.MarkdownIt()
+    with open(TEST_FILE, "r") as fin:
+        return md.render(fin.read())
 
 
 def run(package_name):
@@ -79,7 +89,9 @@ def main(*args):
     if args[1:]:
         run_all(args[1:])
     else:
-        run_all(["markdown", "mistune", "commonmark", "marko", "mistletoe"])
+        run_all(
+            ["markdown", "mistune", "commonmark", "marko", "mistletoe", "markdown_it"]
+        )
 
 
 if __name__ == "__main__":
