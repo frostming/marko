@@ -1,5 +1,4 @@
-#! -*- coding: utf-8 -*-
-"""
+r"""
   _    _     _     ___   _  _    ___
  | \  / |   /_\   | _ \ | |/ /  / _ \
  | |\/| |  / _ \  |   / | ' <  | (_) |
@@ -14,7 +13,6 @@ from .html_renderer import HTMLRenderer
 from .renderer import Renderer
 from .parser import Parser
 from .helpers import is_type_check, load_extension_object
-from ._compat import string_types
 
 if is_type_check():
     from typing import Type, List, Any, Optional
@@ -29,7 +27,7 @@ class SetupDone(Exception):
         return "Unable to register more extensions after setup done."
 
 
-class Markdown(object):
+class Markdown:
     """The main class to convert markdown documents.
 
     Attributes:
@@ -60,7 +58,7 @@ class Markdown(object):
             self.use(*extensions)
 
     def use(self, *extensions):  # type: (Any) -> None
-        """Register extensions to Markdown object.
+        r"""Register extensions to Markdown object.
         An extension should be either an object providing ``elements``, `parser_mixins``
         , ``renderer_mixins`` or all attributes, or a string representing the
         corresponding extension in ``marko.ext`` module.
@@ -73,7 +71,7 @@ class Markdown(object):
         if self._setup_done:
             raise SetupDone()
         for extension in extensions:
-            if isinstance(extension, string_types):
+            if isinstance(extension, str):
                 extension = load_extension_object(extension)()
 
             self._parser_mixins = (

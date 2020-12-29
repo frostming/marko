@@ -1,10 +1,7 @@
-#! -*- coding: utf-8 -*-
 """
 Inline(span) level elements
 """
-from __future__ import unicode_literals
 import re
-from ._compat import string_types
 from .helpers import is_type_check
 from . import inline_parser, patterns
 
@@ -27,7 +24,7 @@ __all__ = (
 )
 
 
-class InlineElement(object):
+class InlineElement:
     """Any inline element should inherit this class"""
 
     #: Use to denote the precedence in parsing.
@@ -52,7 +49,7 @@ class InlineElement(object):
     @classmethod
     def find(cls, text):  # type: (str) -> Iterator[Match]
         """This method should return an iterable containing matches of this element."""
-        if isinstance(cls.pattern, string_types):
+        if isinstance(cls.pattern, str):
             cls.pattern = re.compile(cls.pattern)
         return cls.pattern.finditer(text)
 
@@ -174,7 +171,7 @@ class AutoLink(InlineElement):
     """Autolinks: <http://example.org>"""
 
     priority = 7
-    pattern = re.compile(r"<(%s|%s)>" % (patterns.uri, patterns.email))
+    pattern = re.compile(fr"<({patterns.uri}|{patterns.email})>")
 
     def __init__(self, match):  # type: (_Match) -> None
         self.dest = match.group(1)

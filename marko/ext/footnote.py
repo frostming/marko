@@ -20,7 +20,7 @@ from marko import block, inline, helpers
 class Document(block.Document):
     def __init__(self, text):
         self.footnotes = {}
-        super(Document, self).__init__(text)
+        super().__init__(text)
 
 
 class FootnoteDef(block.BlockElement):
@@ -56,15 +56,15 @@ class FootnoteRef(inline.InlineElement):
 
     @classmethod
     def find(cls, text):
-        for match in super(FootnoteRef, cls).find(text):
+        for match in super().find(text):
             label = helpers.normalize_label(match.group(1))
             if label in inline._root_node.footnotes:
                 yield match
 
 
-class FootnoteRendererMixin(object):
+class FootnoteRendererMixin:
     def __init__(self):
-        super(FootnoteRendererMixin, self).__init__()
+        super().__init__()
         self.footnotes = []
 
     def render_footnote_ref(self, element):
@@ -83,11 +83,11 @@ class FootnoteRendererMixin(object):
 
     def _render_footnote_def(self, element):
         children = self.render_children(element).rstrip()
-        back = '<a href="#fnref-{}" class="footnote">&#8617;</a>'.format(element.label)
+        back = f'<a href="#fnref-{element.label}" class="footnote">&#8617;</a>'
         if children.endswith("</p>"):
-            children = re.sub(r"</p>$", "{}</p>".format(back), children)
+            children = re.sub(r"</p>$", f"{back}</p>", children)
         else:
-            children = "{}<p>{}</p>\n".format(children, back)
+            children = f"{children}<p>{back}</p>\n"
         return '<li id="fn-{}">\n{}</li>\n'.format(
             self.escape_url(element.label), children
         )
@@ -98,17 +98,14 @@ class FootnoteRendererMixin(object):
         if not items:
             return text
         children = "".join(self._render_footnote_def(item) for item in items)
-        footnotes = '<div class="footnotes">\n<ol>\n{}</ol>\n</div>\n'.format(children)
+        footnotes = f'<div class="footnotes">\n<ol>\n{children}</ol>\n</div>\n'
         self.footnotes = []
         return text + footnotes
 
 
-class Footnote(object):
+class Footnote:
     elements = [Document, FootnoteDef, FootnoteRef]
     renderer_mixins = [FootnoteRendererMixin]
-
-
-FootnoteExtension = helpers._Deprecated(Footnote)
 
 
 def make_extension():

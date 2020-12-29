@@ -1,11 +1,10 @@
-#! -*- coding: utf-8 -*-
 """
 HTML renderer
 """
-from __future__ import unicode_literals
+import html
 import re
+from urllib.parse import quote
 
-from ._compat import string_types, html, quote
 from .renderer import Renderer
 
 
@@ -20,23 +19,23 @@ class HTMLRenderer(Renderer):
         # commonmark spec doesn't respect char refs without ';' as end.
         self._charref_bak = html._charref
         html._charref = self._charref
-        return super(HTMLRenderer, self).__enter__()
+        return super().__enter__()
 
     def __exit__(self, *args):
         html._charref = self._charref_bak
-        return super(HTMLRenderer, self).__exit__(*args)
+        return super().__exit__(*args)
 
     def render_paragraph(self, element):
         children = self.render_children(element)
         if element._tight:
             return children
         else:
-            return "<p>{}</p>\n".format(children)
+            return f"<p>{children}</p>\n"
 
     def render_list(self, element):
         if element.ordered:
             tag = "ol"
-            extra = ' start="{}"'.format(element.start) if element.start != 1 else ""
+            extra = f' start="{element.start}"' if element.start != 1 else ""
         else:
             tag = "ul"
             extra = ""
@@ -57,7 +56,8 @@ class HTMLRenderer(Renderer):
     def render_fenced_code(self, element):
         lang = (
             ' class="language-{}"'.format(self.escape_html(element.lang))
-            if element.lang else ""
+            if element.lang
+            else ""
         )
         return "<pre><code{}>{}</code></pre>\n".format(
             lang, html.escape(element.children[0].children)
@@ -96,7 +96,7 @@ class HTMLRenderer(Renderer):
         return self.render_html_block(element)
 
     def render_plain_text(self, element):
-        if isinstance(element.children, string_types):
+        if isinstance(element.children, str):
             return self.escape_html(element.children)
         return self.render_children(element)
 

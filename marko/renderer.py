@@ -1,8 +1,6 @@
-#! -*- coding: utf-8 -*-
 """
 Base renderer class
 """
-from __future__ import unicode_literals
 import itertools
 
 from .helpers import camel_to_snake_case, is_type_check
@@ -16,7 +14,7 @@ if is_type_check():
     Element = Union[BlockElement, InlineElement]
 
 
-class Renderer(object):
+class Renderer:
     """The base class of renderers.
 
     A custom renderer should subclass this class and include your own render functions.

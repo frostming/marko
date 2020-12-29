@@ -26,7 +26,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [2.7, 3.6, 3.7, 3.8]
+        python-version: [3.6, 3.7, 3.8, 3.9]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
@@ -35,6 +35,24 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+      - name: Set Variables
+        id: set_variables
+        run: |
+          echo "::set-output name=PIP_CACHE::$(pip cache dir)"
+      - name: Cache PIP
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.set_variables.outputs.PIP_CACHE }}
+          key: ${{ runner.os }}-pip-${{ matrix.python-version }}
+      - name: Cache PEP 582 packages
+        uses: actions/cache@v2
+        with:
+          path: __pypackages__
+          # Look to see if there is a cache hit for the corresponding requirements file
+          key: ${{ runner.os }}-packages-${{ matrix.python-version }}-${{ hashFiles('pdm.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-packages-${{ matrix.python-version }}-
+            ${{ runner.os }}-packages-
       - name: Install PDM
         run: python -m pip install --upgrade --pre pdm
       - name: Set up Python
@@ -44,7 +62,7 @@ jobs:
       - name: Install dependencies
         run: |
           pdm use -f ${{ matrix.python-version }}
-          pdm install -dvvv -s toc -s codehilite
+          pdm sync -dvvv -s toc -s codehilite
       - name: Run Tests
         run: |
           pdm run pytest --cov=marko/ --cov-report=xml tests

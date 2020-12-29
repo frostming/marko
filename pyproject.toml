@@ -10,16 +10,13 @@ authors = [
 ]
 dynamic = ["version"]
 version = {from = "marko/__init__.py"}
-requires-python = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
+requires-python = ">=3.6"
 license = {text = "MIT"}
-dependencies = [
-    "backports.html; python_version < \"3.4\"",
-]
+dependencies = []
 dev-dependencies = [
-    "pytest<5.0.0,>=4.6.9",
-    "pytest-cov<3.0.0,>=2.8.1",
-    "more-itertools<6.0.0,>=4.0.0",
-    "mypy; python_version >= \"3.5\"",
+    "pytest<7.0.0,>=6.1.2",
+    "pytest-cov<3.0.0,>=2.10.1",
+    "mypy",
 ]
 description = "A markdown parser with high extensibility."
 name = "marko"
@@ -40,3 +37,6 @@ codehilite = ["pygments"]
 
 [project.scripts]
 marko = "marko.cli:main"
+
+[tool]
+[tool.pdm]

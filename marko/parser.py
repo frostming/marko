@@ -2,12 +2,11 @@
 Base parser
 """
 import itertools
-from ._compat import string_types
 from .helpers import is_type_check, Source
 
 
-class Parser(object):
-    """
+class Parser:
+    r"""
     All elements defined in CommonMark's spec are included in the parser
     by default.
 
@@ -65,7 +64,7 @@ class Parser(object):
             - text: returns the parsed Document element.
             - source: parse the source and returns the parsed children as a list.
         """
-        if isinstance(source_or_text, string_types):
+        if isinstance(source_or_text, str):
             block.parser = self  # type: ignore
             inline.parser = self  # type: ignore
             return self.block_elements["Document"](source_or_text)  # type: ignore
@@ -102,8 +101,7 @@ class Parser(object):
         )
 
     def _build_block_element_list(self):  # type: () -> List[BlockElementType]
-        """Return a list of block elements, ordered from highest priority to lowest.
-        """
+        """Return a list of block elements, ordered from highest priority to lowest."""
         return sorted(
             [e for e in self.block_elements.values() if not e.virtual],
             key=lambda e: e.priority,

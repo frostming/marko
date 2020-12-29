@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Pangu Extension
 ~~~~~~~~~~~~~~~
@@ -17,10 +16,7 @@ Example::
     markdown = Markdown(extensions=['pangu'])
     print(markdown(text))
 """
-from __future__ import unicode_literals
 import re
-
-from marko import helpers
 
 CJK_RE = (
     r"\u2e80-\u2eff\u2f00-\u2fdf\u3040-\u309f\u30a0-\u30ff\u3100-\u312f"
@@ -34,17 +30,14 @@ PANGU_RE = re.compile(
 )
 
 
-class PanguRendererMixin(object):
+class PanguRendererMixin:
     def render_raw_text(self, element):
-        rv = super(PanguRendererMixin, self).render_raw_text(element)
+        rv = super().render_raw_text(element)
         return PANGU_RE.sub('<span class="pangu"></span>', rv)
 
 
-class Pangu(object):
+class Pangu:
     renderer_mixins = [PanguRendererMixin]
-
-
-PanguExtension = helpers._Deprecated(Pangu)
 
 
 def make_extension():

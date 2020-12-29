@@ -41,11 +41,11 @@ class MarkdownRenderer(Renderer):
         if element.ordered:
             num = element.start
             for child in element.children:
-                with self.container("{}. ".format(num), " " * (len(str(num)) + 2)):
+                with self.container(f"{num}. ", " " * (len(str(num)) + 2)):
                     result.append(self.render(child))
         else:
             for child in element.children:
-                with self.container("{} ".format(element.bullet), "  "):
+                with self.container(f"{element.bullet} ", "  "):
                     result.append(self.render(child))
         self._prefix = self._second_prefix
         return "".join(result)
@@ -60,8 +60,8 @@ class MarkdownRenderer(Renderer):
         return result + "\n"
 
     def render_fenced_code(self, element):
-        extra = " {}".format(element.extra) if element.extra else ""
-        lines = [self._prefix + "```{}{}".format(element.lang, extra)]
+        extra = f" {element.extra}" if element.extra else ""
+        lines = [self._prefix + f"```{element.lang}{extra}"]
         lines.extend(
             self._second_prefix + line
             for line in self.render_children(element).splitlines()
@@ -90,7 +90,13 @@ class MarkdownRenderer(Renderer):
         return result
 
     def render_heading(self, element):
-        result = self._prefix + "#" * element.level + " " + self.render_children(element) + "\n"
+        result = (
+            self._prefix
+            + "#" * element.level
+            + " "
+            + self.render_children(element)
+            + "\n"
+        )
         self._prefix = self._second_prefix
         return result
 
@@ -124,7 +130,7 @@ class MarkdownRenderer(Renderer):
         return "<{}>".format(self.render_link(element))
 
     def render_image(self, element):
-        template = '![{}]({}{})'
+        template = "![{}]({}{})"
         title = (
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
@@ -142,5 +148,5 @@ class MarkdownRenderer(Renderer):
     def render_code_span(self, element):
         text = element.children
         if text and text[0] == "`" or text[-1] == "`":
-            return "`` {} ``".format(text)
-        return "`{}`".format(element.children)
+            return f"`` {text} ``"
+        return f"`{element.children}`"
