@@ -8,7 +8,7 @@ build-backend = "pdm.pep517.api"
 authors = [
     {name = "Frost Ming", email = "mianghong@gmail.com"},
 ]
-dynamic = ["version"]
+dynamic = ["version", "classifiers"]
 version = {from = "marko/__init__.py"}
 requires-python = ">=3.6"
 license = {text = "MIT"}
