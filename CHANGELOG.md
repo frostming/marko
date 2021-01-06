@@ -1,4 +1,8 @@
-## v1.0.0(Unreleased)
+## v1.0.1(2020-01-06)
+
+- Remove the duplicate newlines in the output of paragraphs of markdown renderer.
+
+## v1.0.0(2020-12-29)
 
 - Drop support of Python 2.7
 - Remove the deprecated extension object
