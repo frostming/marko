@@ -28,7 +28,7 @@ jobs:
           python3 -m venv fresh_env
           . fresh_env/bin/activate
           pip install dist/*.whl
-          output = $(echo '# hello world' | fresh_env/bin/marko | xargs)
+          output=$(echo '# hello world' | fresh_env/bin/marko | xargs)
           [[ $output == "<h1>hello world</h1>" ]] || false
       - name: Upload to Pypi
         run: |
