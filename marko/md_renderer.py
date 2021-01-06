@@ -31,8 +31,7 @@ class MarkdownRenderer(Renderer):
 
     def render_paragraph(self, element):
         children = self.render_children(element)
-        tail = "\n" if element._tight else "\n\n"
-        line = self._prefix + children + tail
+        line = self._prefix + children + "\n"
         self._prefix = self._second_prefix
         return line
 
