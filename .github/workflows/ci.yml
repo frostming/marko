@@ -35,26 +35,20 @@ jobs:
         uses: actions/setup-python@v1
         with:
           python-version: 3.8
+      - name: Install PDM
+        run: python -m pip install --upgrade --pre pdm
       - name: Set Variables
         id: set_variables
         run: |
           echo "::set-output name=PIP_CACHE::$(pip cache dir)"
+          echo "::set-output name=PDM_CACHE::$(pdm config cache_dir)"
       - name: Cache PIP
         uses: actions/cache@v2
         with:
-          path: ${{ steps.set_variables.outputs.PIP_CACHE }}
+          path: |
+            ${{ steps.set_variables.outputs.PIP_CACHE }}
+            ${{ steps.set_variables.outputs.PDM_CACHE }}
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}
-      - name: Cache PEP 582 packages
-        uses: actions/cache@v2
-        with:
-          path: __pypackages__
-          # Look to see if there is a cache hit for the corresponding requirements file
-          key: ${{ runner.os }}-packages-${{ matrix.python-version }}-${{ hashFiles('pdm.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-packages-${{ matrix.python-version }}-
-            ${{ runner.os }}-packages-
-      - name: Install PDM
-        run: python -m pip install --upgrade --pre pdm
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
@@ -62,10 +56,10 @@ jobs:
       - name: Install dependencies
         run: |
           pdm use -f ${{ matrix.python-version }}
-          pdm sync -dvvv -s toc -s codehilite
+          pdm sync -d -s toc -s codehilite
       - name: Run Tests
         run: |
-          pdm run pytest --cov=marko/ --cov-report=xml tests
+          pdm run -v pytest --cov=marko/ --cov-report=xml tests
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
