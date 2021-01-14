@@ -150,7 +150,7 @@ class Source:
         """Consume the body of source. ``pos`` will move forward."""
         if self.match:
             self.pos = self.match.end()
-            if self.match.group()[-1] == "\n":
+            if self.match.group()[-1:] == "\n":
                 self._update_prefix()
             self.match = None
 
