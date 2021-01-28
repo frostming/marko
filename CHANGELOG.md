@@ -2,7 +2,7 @@
 
 - Fix a parsing crash if no newline following the prefix of a block element.
 
-## v1.0.1(2020-01-06)
+## v1.0.1(2021-01-06)
 
 - Remove the duplicate newlines in the output of paragraphs of markdown renderer.
 
