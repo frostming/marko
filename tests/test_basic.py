@@ -3,13 +3,14 @@ import pytest
 
 import marko
 from marko import block
+from marko.ast_renderer import ASTRenderer, XMLRenderer
+from marko.md_renderer import MarkdownRenderer
+
 from tests.normalize import normalize_html
 
 
 class TestBasic:
     def test_xml_renderer(self):
-        from marko.ast_renderer import XMLRenderer
-
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)
         res = markdown(text)
@@ -17,8 +18,6 @@ class TestBasic:
         assert 'dest="#overview"' in res
 
     def test_ast_renderer(self):
-        from marko.ast_renderer import ASTRenderer
-
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=ASTRenderer)
         res = markdown(text)
@@ -26,9 +25,15 @@ class TestBasic:
         assert res["element"] == "document"
         assert res["children"][0]["element"] == "paragraph"
 
-    def test_markdown_renderer(self):
-        from marko.md_renderer import MarkdownRenderer
+    def test_ast_renderer_unescape_raw_text(self):
+        markdown = marko.Markdown(renderer=ASTRenderer)
+        res = markdown("&lt;&#42;")
+        assert res["children"][0]["children"][0]["children"] == "<*"
 
+        res = markdown("    &lt;&#42;")
+        assert res["children"][0]["children"][0]["children"] == "&lt;&#42;\n"
+
+    def test_markdown_renderer(self):
         with open("tests/samples/syntax.md", encoding="utf-8") as f:
             text = f.read()
 

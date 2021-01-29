@@ -1,6 +1,7 @@
 ### Unreleased
 
 - Fix a parsing crash if no newline following the prefix of a block element.
+- Unescape html character refs in ASTRenderer result.
 
 ## v1.0.1(2021-01-06)
 

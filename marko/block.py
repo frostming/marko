@@ -155,7 +155,7 @@ class CodeBlock(BlockElement):
     priority = 4
 
     def __init__(self, lines):  # type: (str) -> None
-        self.children = [inline.RawText(lines)]
+        self.children = [inline.RawText(lines, False)]
         self.lang = ""
         self.extra = ""
 
@@ -219,7 +219,7 @@ class FencedCode(BlockElement):
     def __init__(self, match):  # type: (Tuple[str, str, str]) -> None
         self.lang = inline.Literal.strip_backslash(match[0])
         self.extra = match[1]
-        self.children = [inline.RawText(match[2])]
+        self.children = [inline.RawText(match[2], False)]
 
     @classmethod
     def match(cls, source):  # type: (Source) -> Optional[Match]

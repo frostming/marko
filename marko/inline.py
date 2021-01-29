@@ -2,6 +2,7 @@
 Inline(span) level elements
 """
 import re
+
 from .helpers import is_type_check
 from . import inline_parser, patterns
 
@@ -186,8 +187,9 @@ class RawText(InlineElement):
 
     virtual = True
 
-    def __init__(self, match):  # type: (str) -> None
+    def __init__(self, match, escape=True):  # type: (str, bool) -> None
         self.children = match
+        self.escape = escape
 
 
 # backrefs to avoid cylic  import

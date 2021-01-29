@@ -17,7 +17,7 @@ class MarkdownRenderer(Renderer):
     def __enter__(self):  # type: () -> Renderer
         self._prefix = ""
         self._second_prefix = ""
-        return self
+        return super().__enter__()
 
     @contextmanager
     def container(self, prefix, second_prefix=""):
