@@ -18,9 +18,8 @@ jobs:
           python-version: 3.8
       - name: Linting
         run: |
-          pip install mypy flake8
+          pip install flake8
           flake8
-          mypy .
 
   Testing:
     runs-on: ${{ matrix.os }}
