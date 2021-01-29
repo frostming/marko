@@ -1,7 +1,9 @@
 """
 Base renderer class
 """
+import html
 import itertools
+import re
 
 from .helpers import camel_to_snake_case, is_type_check
 
@@ -30,15 +32,21 @@ class Renderer:
     :meth:`Renderer.render_children`.
     """
 
+    _charref = re.compile(
+        r"&(#[0-9]{1,8};" r"|#[xX][0-9a-fA-F]{1,8};" r"|[^\t\n\f <&#;]{1,32};)"
+    )
+
     def __init__(self):  # type: () -> None
         self.root_node = None
 
     def __enter__(self):  # type: () -> Renderer
         """Provide a context so that root_node can be reset after render."""
+        self._charref_bak = html._charref
+        html._charref = self._charref
         return self
 
     def __exit__(self, *args):  # type: (Any) -> None
-        pass
+        html._charref = self._charref_bak
 
     def render(self, element):  # type: (Element) -> str
         """Renders the given element to string.

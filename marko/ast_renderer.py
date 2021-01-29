@@ -2,6 +2,9 @@
 AST renderers for inspecting the markdown parsing result.
 """
 import json
+import html
+from marko.html_renderer import HTMLRenderer
+
 from .renderer import Renderer
 from .helpers import camel_to_snake_case
 
@@ -18,9 +21,18 @@ class ASTRenderer(Renderer):
          'element': 'document'}
     """
 
+    def render_raw_text(self, element):
+        return {
+            "element": "raw_text",
+            "children": html.unescape(element.children)
+            if element.escape
+            else element.children,
+            "escape": element.escape,
+        }
+
     def render_children(self, element):
         if isinstance(element, list):
-            return [self.render_children(e) for e in element]
+            return [self.render(e) for e in element]
         if isinstance(element, str):
             return element
         rv = {k: v for k, v in element.__dict__.items() if not k.startswith("_")}
@@ -74,7 +86,10 @@ class XMLRenderer(Renderer):
         if getattr(element, "children", None):
             self.indent += 2
             if isinstance(element.children, str):
-                lines.append(" " * self.indent + json.dumps(element.children)[1:-1])
+                lines.append(
+                    " " * self.indent
+                    + HTMLRenderer.escape_html(json.dumps(element.children)[1:-1])
+                )
             else:
                 lines.extend(self.render(child) for child in element.children)
             self.indent -= 2

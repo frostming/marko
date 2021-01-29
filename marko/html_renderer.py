@@ -2,7 +2,6 @@
 HTML renderer
 """
 import html
-import re
 from urllib.parse import quote
 
 from .renderer import Renderer
@@ -10,20 +9,6 @@ from .renderer import Renderer
 
 class HTMLRenderer(Renderer):
     """The most common renderer for markdown parser"""
-
-    _charref = re.compile(
-        r"&(#[0-9]{1,8};" r"|#[xX][0-9a-fA-F]{1,8};" r"|[^\t\n\f <&#;]{1,32};)"
-    )
-
-    def __enter__(self):
-        # commonmark spec doesn't respect char refs without ';' as end.
-        self._charref_bak = html._charref
-        html._charref = self._charref
-        return super().__enter__()
-
-    def __exit__(self, *args):
-        html._charref = self._charref_bak
-        return super().__exit__(*args)
 
     def render_paragraph(self, element):
         children = self.render_children(element)

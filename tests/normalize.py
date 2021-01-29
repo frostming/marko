@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
-try:
-    from html.parser import HTMLParser
-    from html.entities import name2codepoint
-    from html import escape
-except ImportError:
-    from backports.html.parser import HTMLParser
-    from backports.html.entities import name2codepoint
-    from backports.html import escape
+from html.parser import HTMLParser
+from html.entities import name2codepoint
+from html import escape
+
 import urllib
 import sys
 import re
@@ -19,7 +15,7 @@ class HTMLParseError(Exception):
 # Normalization code, adapted from
 # https://github.com/karlcow/markdown-testsuite/
 significant_attrs = ["alt", "href", "src", "title"]
-whitespace_re = re.compile(r'\s+')
+whitespace_re = re.compile(r"\s+")
 
 
 class MyHTMLParser(HTMLParser):
@@ -35,9 +31,9 @@ class MyHTMLParser(HTMLParser):
         after_tag = self.last == "endtag" or self.last == "starttag"
         after_block_tag = after_tag and self.is_block_tag(self.last_tag)
         if after_tag and self.last_tag == "br":
-            data = data.lstrip('\n')
+            data = data.lstrip("\n")
         if not self.in_pre:
-            data = whitespace_re.sub(' ', data)
+            data = whitespace_re.sub(" ", data)
         if after_block_tag and not self.in_pre:
             if self.last == "starttag":
                 data = data.lstrip()
@@ -68,9 +64,9 @@ class MyHTMLParser(HTMLParser):
             attrs.sort()
             for (k, v) in attrs:
                 self.output += " " + k
-                if v in ['href', 'src']:
+                if v in ["href", "src"]:
                     self.output += (
-                        "=" + '"' + urllib.quote(urllib.unquote(v), safe='/') + '"'
+                        "=" + '"' + urllib.quote(urllib.unquote(v), safe="/") + '"'
                     )
                 elif v is not None:
                     self.output += "=" + '"' + escape(v, quote=True) + '"'
@@ -85,19 +81,19 @@ class MyHTMLParser(HTMLParser):
         self.last = "endtag"
 
     def handle_comment(self, data):
-        self.output += '<!--' + data + '-->'
+        self.output += "<!--" + data + "-->"
         self.last = "comment"
 
     def handle_decl(self, data):
-        self.output += '<!' + data + '>'
+        self.output += "<!" + data + ">"
         self.last = "decl"
 
     def unknown_decl(self, data):
-        self.output += '<!' + data + '>'
+        self.output += "<!" + data + ">"
         self.last = "decl"
 
     def handle_pi(self, data):
-        self.output += '<?' + data + '>'
+        self.output += "<?" + data + ">"
         self.last = "pi"
 
     def handle_entityref(self, name):
@@ -105,7 +101,7 @@ class MyHTMLParser(HTMLParser):
             c = chr(name2codepoint[name])
         except KeyError:
             c = None
-        self.output_char(c, '&' + name + ';')
+        self.output_char(c, "&" + name + ";")
         self.last = "ref"
 
     def handle_charref(self, name):
@@ -116,16 +112,16 @@ class MyHTMLParser(HTMLParser):
                 c = chr(int(name))
         except ValueError:
             c = None
-        self.output_char(c, '&' + name + ';')
+        self.output_char(c, "&" + name + ";")
         self.last = "ref"
 
     # Helpers.
     def output_char(self, c, fallback):
-        if c == '<':
+        if c == "<":
             self.output += "&lt;"
-        elif c == '>':
+        elif c == ">":
             self.output += "&gt;"
-        elif c == '&':
+        elif c == "&":
             self.output += "&amp;"
         elif c == '"':
             self.output += "&quot;"
@@ -136,56 +132,56 @@ class MyHTMLParser(HTMLParser):
 
     def is_block_tag(self, tag):
         return tag in [
-            'article',
-            'header',
-            'aside',
-            'hgroup',
-            'blockquote',
-            'hr',
-            'iframe',
-            'body',
-            'li',
-            'map',
-            'button',
-            'object',
-            'canvas',
-            'ol',
-            'caption',
-            'output',
-            'col',
-            'p',
-            'colgroup',
-            'pre',
-            'dd',
-            'progress',
-            'div',
-            'section',
-            'dl',
-            'table',
-            'td',
-            'dt',
-            'tbody',
-            'embed',
-            'textarea',
-            'fieldset',
-            'tfoot',
-            'figcaption',
-            'th',
-            'figure',
-            'thead',
-            'footer',
-            'tr',
-            'form',
-            'ul',
-            'h1',
-            'h2',
-            'h3',
-            'h4',
-            'h5',
-            'h6',
-            'video',
-            'script',
-            'style',
+            "article",
+            "header",
+            "aside",
+            "hgroup",
+            "blockquote",
+            "hr",
+            "iframe",
+            "body",
+            "li",
+            "map",
+            "button",
+            "object",
+            "canvas",
+            "ol",
+            "caption",
+            "output",
+            "col",
+            "p",
+            "colgroup",
+            "pre",
+            "dd",
+            "progress",
+            "div",
+            "section",
+            "dl",
+            "table",
+            "td",
+            "dt",
+            "tbody",
+            "embed",
+            "textarea",
+            "fieldset",
+            "tfoot",
+            "figcaption",
+            "th",
+            "figure",
+            "thead",
+            "footer",
+            "tr",
+            "form",
+            "ul",
+            "h1",
+            "h2",
+            "h3",
+            "h4",
+            "h5",
+            "h6",
+            "video",
+            "script",
+            "style",
         ]
 
 
