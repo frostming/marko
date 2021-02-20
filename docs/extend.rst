@@ -1,15 +1,15 @@
 Extend Marko
 ============
 
-Here is an example to add GitHub wiki links: ``[[Page 2|Page 2]]`` to the parsing process.
+Here is an example of supporting parsing GitHub wiki links: ``[[Page 2|Page 2]]``.
 
 Create a new element
 --------------------
 
 GitHub wiki link is an inline level element. For the difference between block elements and inline elements,
-please refer to `corresponding section <https://spec.commonmark.org/0.28/#container-blocks-and-leaf-blocks>`_ of Commonmark's spec.
+please refer to the `corresponding section <https://spec.commonmark.org/0.28/#container-blocks-and-leaf-blocks>`_ of Commonmark's spec.
 
-Now subclass ``marko.inline.InlineElement`` to a new element type::
+Now subclass ``marko.inline.InlineElement`` to create a new element type::
 
     from marko import inline
 
@@ -34,8 +34,8 @@ You don't need to provide the parsed content since it is handled by parser autom
         def __init__(self, match):
             self.target = match.group(2)
 
-About parsing priority
-++++++++++++++++++++++
+About the parsing priority
+++++++++++++++++++++++++++
 
 The parser respects element's ``priority`` attribute to control the parsing precedence. It is 5 by default, which is the same as emphasis, links and images. A higher number means the element will be tried sooner.
 For elements of the same priority, what comes the first will be parsed::
@@ -43,26 +43,26 @@ For elements of the same priority, what comes the first will be parsed::
     *This is an [[emphasis*|target]]
     # Parsed as: <em>This is an [[emphasis</em>|target]]
 
-If we set a higher priority (e.g. 6), it will be first parsed instead::
+If we set a higher priority (e.g. 6), it will be tried sooner::
 
     *This is an <a href="target">emphasis*</a>
 
 About overriding default elements
 +++++++++++++++++++++++++++++++++
 
-Sometimes you modify the functionality of existing elements, like changing the parsing process or providing more attributes, and want to replace the old one.
+Sometimes you may want to modify the functionality of existing elements, like changing the parsing process or providing more attributes, and want to replace the old one.
 In this case, you should add ``override = True`` to the element attribute.
 
 Add a new render function
 -------------------------
 
 Marko uses mixins to add functionalities to renderer or parser. Parser controls the parsing logic which you don't need
-to change at the most of time. Renderer mixins controll how to represent the elements by the element name, in snake-cased form.
+to change at the most of time, while renderer mixins controll how to represent the elements by the element name, in snake-cased form.
 In our case::
 
     class WikiRendererMixin(object):
 
-        def render_gitHub_wiki(self, element):
+        def render_github_wiki(self, element):
             return '<a href="{}">{}</a>'.format(
                 self.escape_url(element.target), self.render_children(element)
             )
@@ -70,8 +70,8 @@ In our case::
 The renderer mixins will be combined together with marko's default base renderer: ``HTMLRenderer``,
 which you need in most cases, to create a :class:`marko.renderer.Renderer` instance.
 
-Besides HTML renderer, Marko also provides AST renderers to inspect the parsed AST.
-They are useful to develop your own parsing algorithm:
+Besides of the HTML renderer, Marko also provides some AST renderers to inspect the parsed AST.
+They are useful to see how parsing works when you are developing your own parsing algorithm:
 
 * ``marko.ast_renderer.ASTRenderer``: renders elements as JSON objects.
 * ``marko.ast_renderer.XMLRenderer``: renders elements as XML format AST.
@@ -80,25 +80,29 @@ Create an extension object
 --------------------------
 
 We need an additional extension object to sum these mixins up. It is typically a simple class,
-and other Python objects may also work::
+though other Python objects may also work::
+
+The extension object protocol is something like::
+
+    type Extension
+        one-of: elements, renderer_mixins, parser_mixins
+
+And our ``GitHubWiki`` extension should be::
 
     class GitHubWiki:
         elements = [GitHubWiki]
         renderer_mixins = [WikiRendererMixin]
 
-An optional ``parser_mixins`` can be also given if you have (a) custom parser class(es).
-The extension exposes a single object so that it can be distributed as a standalone package. Read the following section about
-how to use it.
+An optional ``parser_mixins`` can be also given if you want to customize the parser.
+The extension exposes a single object so that it can be distributed as a standalone package. We will come to how to use it in the later sections.
 
-Sometimes the extension will leave some arguments for users to customize. You can create an "extension factory function" ::
+Sometimes the extension can leave some arguments for users to customize. In this case, you can create an "extension factory" ::
 
     class GitHubWiki:
         def __init__(self, arg):
             WikiRendererMixin.arg = arg
             self.elements = [GitHubWiki]
             self.renderer_mixins = [WikiRendererMixin]
-
-So, the extension can by any object, with at least one of the attributes ``elements``, ``renderer_mixins``, ``parser_mixins``.
 
 Register the extension
 ----------------------
@@ -123,11 +127,33 @@ Now you have your own extension ready, let's register it to the markdown parser:
 
         markdown = Markdown(renderer=marko.ast_renderer.ASTRenderer)
 
+Let's have a look at how Marko creates the renderer with the extensions and base renderer class. The same applies for the parser.
+
+Assume you choose ``HTMLRenderer`` as the base renderer class and have three extensions ``A, B, C`` registered in order::
+
+    class A:
+        renderer_mixins = [ARendererMixin]
+
+    class B:
+        renderer_mixins = [BRendererMixin]
+
+    class C:
+        renderer_mixins = [CRendererMixin]
+
+    markdown = Markdown(extensions=[A, B, C])
+
+Then the renderer is created like following::
+
+    class MyRenderer(CRendererMixin, BRendererMixin, ARendererMixin, HTMLRenderer):
+        pass
+
+Note the order of the multi inheriting.
 
 Publish the extension as package
 --------------------------------
+You can also refer to the extension without actually importing the extension object.
 
-Put a ``make_extension()`` function in the entry file which takes any arguments and returns an extension object::
+To do so, put a ``make_extension()`` function in the entry file which takes any arguments and returns an extension object::
 
     def make_extension(arg):
         return GitHubWiki(arg)
