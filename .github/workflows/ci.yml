@@ -29,13 +29,11 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python 3.8
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - name: Set up PDM
+        uses: pdm-project/setup-pdm@v1
         with:
-          python-version: 3.8
-      - name: Install PDM
-        run: python -m pip install --upgrade --pre pdm
+          python-version: ${{ matrix.python-version }}
       - name: Set Variables
         id: set_variables
         run: |
@@ -48,10 +46,7 @@ jobs:
             ${{ steps.set_variables.outputs.PIP_CACHE }}
             ${{ steps.set_variables.outputs.PDM_CACHE }}
           key: ${{ runner.os }}-pip-${{ matrix.python-version }}
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
+
       - name: Install dependencies
         run: |
           pdm use -f ${{ matrix.python-version }}
