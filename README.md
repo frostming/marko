@@ -14,7 +14,7 @@
 Marko is a markdown parser written in pure Python that complies [CommonMark's spec v0.29][spec].
 It is designed to be highly extensible, see [Extend Marko](#extend-marko) for details.
 
-Marko requires Python2.7, Python 3.6 or higher.
+Marko requires Python 3.6 or higher.
 
 ## Why Marko
 
