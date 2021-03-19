@@ -7,8 +7,8 @@ from marko import helpers
     "raw_string",
     [
         "(hello(to)world)",
-        "(hello\)world)",
-        "he\(llo(world)",
+        r"(hello\)world)",
+        r"he\(llo(world)",
         "",
         "hello world",
         "(hello), (world)",

@@ -1,4 +1,20 @@
 [[package]]
+name = "appdirs"
+sections = ["dev"]
+version = "1.4.4"
+summary = "A small Python module for determining appropriate platform-specific dirs, e.g. a \"user data dir\"."
+
+[[package]]
+name = "argcomplete"
+sections = ["dev"]
+version = "1.12.2"
+summary = "Bash tab completion for argparse"
+dependencies = [
+    "importlib-metadata<4,>=0.23; python_version == \"3.6\"",
+    "importlib-metadata<4,>=0.23; python_version == \"3.7\"",
+]
+
+[[package]]
 name = "atomicwrites"
 sections = ["dev"]
 version = "1.4.0"
@@ -7,7 +23,7 @@ summary = "Atomic file writes."
 
 [[package]]
 name = "attrs"
-sections = ["dev"]
+sections = ["benchmark", "dev"]
 version = "20.3.0"
 summary = "Classes Without Boilerplate"
 
@@ -19,14 +35,41 @@ marker = "sys_platform == 'win32'"
 summary = "Cross-platform colored terminal text."
 
 [[package]]
+name = "colorlog"
+sections = ["dev"]
+version = "4.7.2"
+summary = "Log formatting with colors!"
+dependencies = [
+    "colorama; sys_platform == \"win32\"",
+]
+
+[[package]]
+name = "commonmark"
+sections = ["benchmark"]
+version = "0.9.1"
+summary = "Python parser for the CommonMark Markdown spec"
+
+[[package]]
 name = "coverage"
 sections = ["dev"]
 version = "5.3.1"
 summary = "Code coverage measurement for Python"
 
 [[package]]
-name = "importlib-metadata"
+name = "distlib"
 sections = ["dev"]
+version = "0.3.1"
+summary = "Distribution utilities"
+
+[[package]]
+name = "filelock"
+sections = ["dev"]
+version = "3.0.12"
+summary = "A platform independent file lock."
+
+[[package]]
+name = "importlib-metadata"
+sections = ["benchmark", "dev"]
 version = "2.1.1"
 marker = "python_version < '3.8'"
 summary = "Read metadata from Python packages"
@@ -35,10 +78,60 @@ dependencies = [
 ]
 
 [[package]]
+name = "importlib-resources"
+sections = ["dev"]
+version = "5.1.2"
+marker = "python_version < '3.7'"
+summary = "Read resources from Python packages"
+dependencies = [
+    "zipp>=0.4; python_version < \"3.8\"",
+]
+
+[[package]]
 name = "iniconfig"
 sections = ["dev"]
 version = "1.1.1"
 summary = "iniconfig: brain-dead simple config-ini parsing"
+
+[[package]]
+name = "markdown"
+sections = ["benchmark"]
+version = "3.3.4"
+summary = "Python implementation of Markdown."
+dependencies = [
+    "importlib-metadata; python_version < \"3.8\"",
+]
+
+[[package]]
+name = "markdown-it-py"
+sections = ["benchmark"]
+version = "0.6.2"
+summary = "Python port of markdown-it. Markdown parsing, done right!"
+dependencies = [
+    "attrs<21,>=19",
+    "mdit-py-plugins~=0.2.1",
+]
+
+[[package]]
+name = "mdit-py-plugins"
+sections = ["benchmark"]
+version = "0.2.6"
+summary = "Collection of plugins for markdown-it-py"
+dependencies = [
+    "markdown-it-py<2.0.0,>=0.5.8",
+]
+
+[[package]]
+name = "mistletoe"
+sections = ["benchmark"]
+version = "0.7.2"
+summary = "A fast, extensible Markdown parser in pure Python."
+
+[[package]]
+name = "mistune"
+sections = ["benchmark"]
+version = "0.8.4"
+summary = "The fastest markdown parser in pure Python"
 
 [[package]]
 name = "mypy"
@@ -56,6 +149,19 @@ name = "mypy-extensions"
 sections = ["dev"]
 version = "0.4.3"
 summary = "Experimental type system extensions for programs checked with the mypy typechecker."
+
+[[package]]
+name = "nox"
+sections = ["dev"]
+version = "2020.12.31"
+summary = "Flexible test automation."
+dependencies = [
+    "argcomplete<2.0,>=1.9.4",
+    "colorlog<5.0.0,>=2.6.1",
+    "py<2.0.0,>=1.4.0",
+    "virtualenv>=14.0.0",
+    "importlib-metadata; python_version < \"3.8\"",
+]
 
 [[package]]
 name = "packaging"
@@ -130,6 +236,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "six"
+sections = ["dev"]
+version = "1.15.0"
+summary = "Python 2 and 3 compatibility utilities"
+
+[[package]]
 name = "text-unidecode"
 sections = ["toc"]
 version = "1.3"
@@ -154,17 +266,39 @@ version = "3.7.4.3"
 summary = "Backported and Experimental Type Hints for Python 3.5+"
 
 [[package]]
-name = "zipp"
+name = "virtualenv"
 sections = ["dev"]
+version = "20.4.3"
+summary = "Virtual Python Environment builder"
+dependencies = [
+    "appdirs<2,>=1.4.3",
+    "distlib<1,>=0.3.1",
+    "filelock<4,>=3.0.0",
+    "six<2,>=1.9.0",
+    "importlib-resources>=1.0; python_version < \"3.7\"",
+    "importlib-metadata>=0.12; python_version < \"3.8\"",
+]
+
+[[package]]
+name = "zipp"
+sections = ["benchmark", "dev"]
 version = "1.2.0"
 marker = "python_version < '3.8'"
 summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "2"
-content_hash = "sha256:d68ddcd88525686d4c5ab80f2f1fc902b13b2b264cefdf56f501fca7c464123a"
+content_hash = "sha256:c10fcd2990cc0eccf9a713dcc0cd334f6fffa563212e62924f77bf0b465d2514"
 
 [metadata.files]
+"appdirs 1.4.4" = [
+    {file = "appdirs-1.4.4-py2.py3-none-any.whl", hash = "sha256:a841dacd6b99318a741b166adb07e19ee71a274450e68237b4650ca1055ab128"},
+    {file = "appdirs-1.4.4.tar.gz", hash = "sha256:7d5d0167b2b1ba821647616af46a749d1c653740dd0d2415100fe26e27afdf41"},
+]
+"argcomplete 1.12.2" = [
+    {file = "argcomplete-1.12.2-py2.py3-none-any.whl", hash = "sha256:17f01a9b9b9ece3e6b07058eae737ad6e10de8b4e149105f84614783913aba71"},
+    {file = "argcomplete-1.12.2.tar.gz", hash = "sha256:de0e1282330940d52ea92a80fea2e4b9e0da1932aaa570f84d268939d1897b04"},
+]
 "atomicwrites 1.4.0" = [
     {file = "atomicwrites-1.4.0-py2.py3-none-any.whl", hash = "sha256:6d1784dea7c0c8d4a5172b6c620f40b6e4cbfdf96d783691f2e1302a7b88e197"},
     {file = "atomicwrites-1.4.0.tar.gz", hash = "sha256:ae70396ad1a434f9c7046fd2dd196fc04b12f9e91ffb859164193be8b6168a7a"},
@@ -176,6 +310,14 @@ content_hash = "sha256:d68ddcd88525686d4c5ab80f2f1fc902b13b2b264cefdf56f501fca7c
 "colorama 0.4.4" = [
     {file = "colorama-0.4.4-py2.py3-none-any.whl", hash = "sha256:9f47eda37229f68eee03b24b9748937c7dc3868f906e8ba69fbcbdd3bc5dc3e2"},
     {file = "colorama-0.4.4.tar.gz", hash = "sha256:5941b2b48a20143d2267e95b1c2a7603ce057ee39fd88e7329b0c292aa16869b"},
+]
+"colorlog 4.7.2" = [
+    {file = "colorlog-4.7.2-py2.py3-none-any.whl", hash = "sha256:0a9dcdba6cab68e8a768448b418a858d73c52b37b6e8dea2568296faece393bd"},
+    {file = "colorlog-4.7.2.tar.gz", hash = "sha256:18d05b616438a75762d7d214b9ec3b05d274466c9f3ddd92807e755840c88251"},
+]
+"commonmark 0.9.1" = [
+    {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
+    {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
 ]
 "coverage 5.3.1" = [
     {file = "coverage-5.3.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:fabeeb121735d47d8eab8671b6b031ce08514c86b7ad8f7d5490a7b6dcd6267d"},
@@ -228,13 +370,45 @@ content_hash = "sha256:d68ddcd88525686d4c5ab80f2f1fc902b13b2b264cefdf56f501fca7c
     {file = "coverage-5.3.1-pp37-none-any.whl", hash = "sha256:c89b558f8a9a5a6f2cfc923c304d49f0ce629c3bd85cb442ca258ec20366394c"},
     {file = "coverage-5.3.1.tar.gz", hash = "sha256:38f16b1317b8dd82df67ed5daa5f5e7c959e46579840d77a67a4ceb9cef0a50b"},
 ]
+"distlib 0.3.1" = [
+    {file = "distlib-0.3.1-py2.py3-none-any.whl", hash = "sha256:8c09de2c67b3e7deef7184574fc060ab8a793e7adbb183d942c389c8b13c52fb"},
+    {file = "distlib-0.3.1.zip", hash = "sha256:edf6116872c863e1aa9d5bb7cb5e05a022c519a4594dc703843343a9ddd9bff1"},
+]
+"filelock 3.0.12" = [
+    {file = "filelock-3.0.12-py3-none-any.whl", hash = "sha256:929b7d63ec5b7d6b71b0fa5ac14e030b3f70b75747cef1b10da9b879fef15836"},
+    {file = "filelock-3.0.12.tar.gz", hash = "sha256:18d82244ee114f543149c66a6e0c14e9c4f8a1044b5cdaadd0f82159d6a6ff59"},
+]
 "importlib-metadata 2.1.1" = [
     {file = "importlib_metadata-2.1.1-py2.py3-none-any.whl", hash = "sha256:c2d6341ff566f609e89a2acb2db190e5e1d23d5409d6cc8d2fe34d72443876d4"},
     {file = "importlib_metadata-2.1.1.tar.gz", hash = "sha256:b8de9eff2b35fb037368f28a7df1df4e6436f578fa74423505b6c6a778d5b5dd"},
 ]
+"importlib-resources 5.1.2" = [
+    {file = "importlib_resources-5.1.2-py3-none-any.whl", hash = "sha256:ebab3efe74d83b04d6bf5cd9a17f0c5c93e60fb60f30c90f56265fce4682a469"},
+    {file = "importlib_resources-5.1.2.tar.gz", hash = "sha256:642586fc4740bd1cad7690f836b3321309402b20b332529f25617ff18e8e1370"},
+]
 "iniconfig 1.1.1" = [
     {file = "iniconfig-1.1.1-py2.py3-none-any.whl", hash = "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3"},
     {file = "iniconfig-1.1.1.tar.gz", hash = "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"},
+]
+"markdown 3.3.4" = [
+    {file = "Markdown-3.3.4-py3-none-any.whl", hash = "sha256:96c3ba1261de2f7547b46a00ea8463832c921d3f9d6aba3f255a6f71386db20c"},
+    {file = "Markdown-3.3.4.tar.gz", hash = "sha256:31b5b491868dcc87d6c24b7e3d19a0d730d59d3e46f4eea6430a321bed387a49"},
+]
+"markdown-it-py 0.6.2" = [
+    {file = "markdown_it_py-0.6.2-py3-none-any.whl", hash = "sha256:30b3e9f8198dc82a5df0dcb73fd31d56cd9a43bf8a747feb10b2ba74f962bcb1"},
+    {file = "markdown-it-py-0.6.2.tar.gz", hash = "sha256:c3b9f995be0792cbbc8ab2f53d74072eb7ff8a8b622be8d61d38ab879709eca3"},
+]
+"mdit-py-plugins 0.2.6" = [
+    {file = "mdit_py_plugins-0.2.6-py3-none-any.whl", hash = "sha256:77fd75dad81109ee91f30eb49146196f79afbbae041f298ae4886c8c2b5e23d7"},
+    {file = "mdit-py-plugins-0.2.6.tar.gz", hash = "sha256:1e467ca2ea056e8065cbd5d6c61e5052bb50826bde84c40f6a5ed77e82125710"},
+]
+"mistletoe 0.7.2" = [
+    {file = "mistletoe-0.7.2-py3-none-any.whl", hash = "sha256:3e2d31b2fa6231ea2ee46981274ebac8d5e5736e3aad2d1cd449e2c053b7023b"},
+    {file = "mistletoe-0.7.2.tar.gz", hash = "sha256:24d0f18cc5f0381c2cfb8a24ef3de83eb9f7929cb7d0e71ecb164b671d86e6a3"},
+]
+"mistune 0.8.4" = [
+    {file = "mistune-0.8.4-py2.py3-none-any.whl", hash = "sha256:88a1051873018da288eee8538d476dffe1262495144b33ecb586c4ab266bb8d4"},
+    {file = "mistune-0.8.4.tar.gz", hash = "sha256:59a3429db53c50b5c6bcc8a07f8848cb00d7dc8bdb431a4ab41920d201d4756e"},
 ]
 "mypy 0.812" = [
     {file = "mypy-0.812-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a26f8ec704e5a7423c8824d425086705e381b4f1dfdef6e3a1edab7ba174ec49"},
@@ -263,6 +437,10 @@ content_hash = "sha256:d68ddcd88525686d4c5ab80f2f1fc902b13b2b264cefdf56f501fca7c
 "mypy-extensions 0.4.3" = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},
     {file = "mypy_extensions-0.4.3.tar.gz", hash = "sha256:2d82818f5bb3e369420cb3c4060a7970edba416647068eb4c5343488a6c604a8"},
+]
+"nox 2020.12.31" = [
+    {file = "nox-2020.12.31-py3-none-any.whl", hash = "sha256:f179d6990f7a0a9cebad01b9ecea34556518b8d3340dfcafdc1d85f2c1a37ea0"},
+    {file = "nox-2020.12.31.tar.gz", hash = "sha256:58a662070767ed4786beb46ce3a789fca6f1e689ed3ac15c73c4d0094e4f9dc4"},
 ]
 "packaging 20.8" = [
     {file = "packaging-20.8-py2.py3-none-any.whl", hash = "sha256:24e0da08660a87484d1602c30bb4902d74816b6985b93de36926f5bc95741858"},
@@ -294,6 +472,10 @@ content_hash = "sha256:d68ddcd88525686d4c5ab80f2f1fc902b13b2b264cefdf56f501fca7c
 ]
 "python-slugify 4.0.0" = [
     {file = "python-slugify-4.0.0.tar.gz", hash = "sha256:a8fc3433821140e8f409a9831d13ae5deccd0b033d4744d94b31fea141bdd84c"},
+]
+"six 1.15.0" = [
+    {file = "six-1.15.0-py2.py3-none-any.whl", hash = "sha256:8b74bedcbbbaca38ff6d7491d76f2b06b3592611af620f8426e82dddb04a5ced"},
+    {file = "six-1.15.0.tar.gz", hash = "sha256:30639c035cdb23534cd4aa2dd52c3bf48f06e5f4a941509c8bafd8ce11080259"},
 ]
 "text-unidecode 1.3" = [
     {file = "text_unidecode-1.3-py2.py3-none-any.whl", hash = "sha256:1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"},
@@ -339,6 +521,10 @@ content_hash = "sha256:d68ddcd88525686d4c5ab80f2f1fc902b13b2b264cefdf56f501fca7c
     {file = "typing_extensions-3.7.4.3-py2-none-any.whl", hash = "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"},
     {file = "typing_extensions-3.7.4.3-py3-none-any.whl", hash = "sha256:7cb407020f00f7bfc3cb3e7881628838e69d8f3fcab2f64742a5e76b2f841918"},
     {file = "typing_extensions-3.7.4.3.tar.gz", hash = "sha256:99d4073b617d30288f569d3f13d2bd7548c3a7e4c8de87db09a9d29bb3a4a60c"},
+]
+"virtualenv 20.4.3" = [
+    {file = "virtualenv-20.4.3-py2.py3-none-any.whl", hash = "sha256:83f95875d382c7abafe06bd2a4cdd1b363e1bb77e02f155ebe8ac082a916b37c"},
+    {file = "virtualenv-20.4.3.tar.gz", hash = "sha256:49ec4eb4c224c6f7dd81bb6d0a28a09ecae5894f4e593c89b0db0885f565a107"},
 ]
 "zipp 1.2.0" = [
     {file = "zipp-1.2.0-py2.py3-none-any.whl", hash = "sha256:e0d9e63797e483a30d27e09fffd308c59a700d365ec34e93cc100844168bf921"},

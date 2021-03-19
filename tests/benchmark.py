@@ -71,7 +71,7 @@ def run_markdown_it(package):
 
 
 def run(package_name):
-    print(package_name, end=": ")
+    print(f"{package_name:>15}:  ", end="")
     print(globals()["run_{}".format(package_name.lower())]())
 
 
