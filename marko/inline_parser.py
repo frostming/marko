@@ -222,7 +222,7 @@ def _is_legal_link_text(text):  # type: (str) -> bool
 def _expect_inline_link(text, start):
     # type: (str, int) -> Optional[Tuple[Group, Group, int]]
     """(link_dest "link_title")"""
-    if start >= len(text) or text[start] != "(":
+    if start >= len(text) - 1 or text[start] != "(":
         return None
     i = start + 1
     m = patterns.whitespace.match(text, i)
