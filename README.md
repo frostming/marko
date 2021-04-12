@@ -11,17 +11,17 @@
 [![codecov](https://codecov.io/gh/frostming/marko/branch/master/graph/badge.svg)](https://codecov.io/gh/frostming/marko)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b785f5b3fa7c4d93a02372d31b3f73b1)](https://www.codacy.com/app/frostming/marko?utm_source=github.com&utm_medium=referral&utm_content=frostming/marko&utm_campaign=Badge_Grade)
 
-Marko is a markdown parser written in pure Python that complies [CommonMark's spec v0.29][spec].
+Marko is a markdown parser written in pure Python that complies with [CommonMark's spec v0.29][spec].
 It is designed to be highly extensible, see [Extend Marko](#extend-marko) for details.
 
 Marko requires Python 3.6 or higher.
 
 ## Why Marko
 
-Among all implementations of Python's markdown parser, it is a common issue that user can't easily extend it to add his own features. Furthermore, [Python-Markdown][pymd] and [mistune][mistune] don't comply CommonMark's spec. It is a good reason for me to develop a new markdown parser.
+Among all implementations of Python's markdown parser, it is a common issue that user can't easily extend it to add his own features. Furthermore, [Python-Markdown][pymd] and [mistune][mistune] don't comply with CommonMark's spec. It is a good reason for me to develop a new markdown parser.
 
-Respecting that Marko complies CommonMark's spec at the same time, which is a super complicated spec, Marko's performance will be affected. However, using a parser
-which doesn't comply the CommonMark spec may give you unexpected rendered results from time to time.
+Respecting that Marko complies with CommonMark's spec at the same time, which is a super complicated spec, Marko's performance will be affected. However, using a parser
+which doesn't comply with the CommonMark spec may give you unexpected rendered results from time to time.
 A benchmark result shows that Marko is 3 times slower than [Python-Markdown][pymd], but a bit faster than [Commonmark-py][cmpy], much slower than [mistune][mistune]. If performance is a bigger concern to you than spec compliance, you'd better choose another parser.
 
 [spec]: https://spec.commonmark.org/0.29/
