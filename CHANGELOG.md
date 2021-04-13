@@ -1,3 +1,7 @@
+## Unreleased
+
+- Consider unicode punctuations when judging whether a delimiter is an opener or a closer.
+
 ## v1.0.2(2021-04-06)
 
 - Fix a parsing crash if no newline following the prefix of a block element.

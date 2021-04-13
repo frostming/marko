@@ -13,12 +13,6 @@ version = {from = "marko/__init__.py"}
 requires-python = ">=3.6"
 license = {text = "MIT"}
 dependencies = []
-dev-dependencies = [
-    "pytest<7.0.0,>=6.1.2",
-    "pytest-cov<3.0.0,>=2.10.1",
-    "mypy",
-    "nox~=2020.12",
-]
 description = "A markdown parser with high extensibility."
 name = "marko"
 readme = "README.md"
@@ -48,3 +42,10 @@ marko = "marko.cli:main"
 
 [tool]
 [tool.pdm]
+[tool.pdm.dev-dependencies]
+dev = [
+    "pytest<7.0.0,>=6.1.2",
+    "pytest-cov<3.0.0,>=2.10.1",
+    "mypy",
+    "nox~=2020.12",
+]

@@ -367,14 +367,14 @@ class Delimiter:
         if self.content[0] == "*":
             return self.is_left_flanking()
         return self.is_left_flanking() and (
-            not self.is_right_flanking() or self.preceded_by(string.punctuation)
+            not self.is_right_flanking() or self.preceded_by_punc()
         )
 
     def _can_close(self):  # type: () -> bool
         if self.content[0] == "*":
             return self.is_right_flanking()
         return self.is_right_flanking() and (
-            not self.is_left_flanking() or self.followed_by(string.punctuation)
+            not self.is_left_flanking() or self.followed_by_punc()
         )
 
     def is_left_flanking(self):  # type: () -> bool
@@ -382,9 +382,9 @@ class Delimiter:
             self.end < len(self.text)
             and self.whitespace_re.match(self.text, self.end) is None
         ) and (
-            not self.followed_by(string.punctuation)
+            not self.followed_by_punc()
             or self.start == 0
-            or self.preceded_by(string.punctuation)
+            or self.preceded_by_punc()
             or self.whitespace_re.match(self.text, self.start - 1) is not None
         )
 
@@ -393,17 +393,23 @@ class Delimiter:
             self.start > 0
             and self.whitespace_re.match(self.text, self.start - 1) is None
         ) and (
-            not self.preceded_by(string.punctuation)
+            not self.preceded_by_punc()
             or self.end == len(self.text)
-            or self.followed_by(string.punctuation)
+            or self.followed_by_punc()
             or self.whitespace_re.match(self.text, self.end) is not None
         )
 
-    def followed_by(self, target):  # type: (str) -> bool
-        return self.end < len(self.text) and self.text[self.end] in target
+    def followed_by_punc(self):  # type: () -> bool
+        return (
+            self.end < len(self.text)
+            and patterns.punctuation.match(self.text, self.end) is not None
+        )
 
-    def preceded_by(self, target):  # type: (str) -> bool
-        return self.start > 0 and self.text[self.start - 1] in target
+    def preceded_by_punc(self):  # type: () -> bool
+        return (
+            self.start > 0
+            and patterns.punctuation.match(self.text[self.start - 1]) is not None
+        )
 
     def closed_by(self, other):  # type: (Delimiter) -> bool
         return not (
