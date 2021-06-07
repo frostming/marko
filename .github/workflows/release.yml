@@ -12,13 +12,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up PDM
-        uses: pdm-project/setup-pdm@main
+      - name: Set up Python
+        uses: actions/setup-python@v2
         with:
           python-version: 3.8
       - name: Build artifacts
         run: |
-          pdm build -v
+          pip install build
+          python -m build
       - name: Test Build
         run: |
           python3 -m venv fresh_env

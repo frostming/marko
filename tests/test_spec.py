@@ -8,6 +8,14 @@ class TestCommonMark(SpecTestSuite):
     def setup_class(cls):
         cls.markdown = Markdown()
 
+    def test_greedy_consume_prefix(self):
+        md = "> 1. Item 1\n>    ```code\n>       indented code\n>    ```"
+        html = (
+            '<blockquote><ol><li>Item 1<pre><code class="language-code">'
+            "   indented code\n</code></pre></li></ol></blockquote>"
+        )
+        self.assert_case(md, html)
+
 
 TestCommonMark.load_spec("commonmark")
 

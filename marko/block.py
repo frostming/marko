@@ -532,13 +532,16 @@ class ListItem(BlockElement):
             return False
         next_line = source.next_line(False)
         assert next_line is not None
+        prefix_pos = 0
+        stripped_line = next_line
         for i in range(1, len(next_line) + 1):
             m = re.match(source.prefix, next_line[:i].expandtabs(4))
             if not m:
                 continue
-            next_line = next_line[:i].expandtabs(4)[m.end() :] + next_line[i:]
-            break
-        indent, bullet, mid, tail = cls.parse_leading(next_line)  # type: ignore
+            if m.end() > prefix_pos:
+                prefix_pos = m.end()
+                stripped_line = next_line[:i].expandtabs(4)[prefix_pos:] + next_line[i:]
+        indent, bullet, mid, tail = cls.parse_leading(stripped_line)  # type: ignore
         parent = source.state
         assert isinstance(parent, List)
         if (

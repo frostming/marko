@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Consider unicode punctuations when judging whether a delimiter is an opener or a closer.
+- Prefix parsing is eager now.
 
 ## v1.0.2(2021-04-06)
 
