@@ -1,4 +1,4 @@
-## Unreleased
+## v1.0.3(2021-06-07)
 
 - Consider unicode punctuations when judging whether a delimiter is an opener or a closer.
 - Prefix parsing is eager now.
