@@ -33,7 +33,7 @@ class Renderer:
     """
 
     _charref = re.compile(
-        r"&(#[0-9]{1,8};" r"|#[xX][0-9a-fA-F]{1,8};" r"|[^\t\n\f <&#;]{1,32};)"
+        r"&(#[0-9]{1,7};" r"|#[xX][0-9a-fA-F]{1,6};" r"|[^\t\n\f <&#;]{1,32};)"
     )
 
     def __init__(self):  # type: () -> None

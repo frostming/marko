@@ -111,10 +111,10 @@ class MarkdownRenderer(Renderer):
         return ""
 
     def render_emphasis(self, element):
-        return "*{}*".format(self.render_children(element))
+        return f"*{self.render_children(element)}*"
 
     def render_strong_emphasis(self, element):
-        return "**{}**".format(self.render_children(element))
+        return f"**{self.render_children(element)}**"
 
     def render_inline_html(self, element):
         return element.children
@@ -123,10 +123,10 @@ class MarkdownRenderer(Renderer):
         title = (
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
-        return "[{}]({}{})".format(self.render_children(element), element.dest, title)
+        return f"[{self.render_children(element)}]({element.dest}{title})"
 
     def render_auto_link(self, element):
-        return "<{}>".format(element.dest)
+        return f"<{element.dest}>"
 
     def render_image(self, element):
         template = "![{}]({}{})"

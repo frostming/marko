@@ -103,7 +103,7 @@ class Parser:
     def _build_block_element_list(self):  # type: () -> List[BlockElementType]
         """Return a list of block elements, ordered from highest priority to lowest."""
         return sorted(
-            [e for e in self.block_elements.values() if not e.virtual],
+            (e for e in self.block_elements.values() if not e.virtual),
             key=lambda e: e.priority,
             reverse=True,
         )
