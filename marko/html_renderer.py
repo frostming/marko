@@ -33,14 +33,14 @@ class HTMLRenderer(Renderer):
             sep = ""
         else:
             sep = "\n"
-        return "<li>{}{}</li>\n".format(sep, self.render_children(element))
+        return f"<li>{sep}{self.render_children(element)}</li>\n"
 
     def render_quote(self, element):
-        return "<blockquote>\n{}</blockquote>\n".format(self.render_children(element))
+        return f"<blockquote>\n{self.render_children(element)}</blockquote>\n"
 
     def render_fenced_code(self, element):
         lang = (
-            ' class="language-{}"'.format(self.escape_html(element.lang))
+            f' class="language-{self.escape_html(element.lang)}"'
             if element.lang
             else ""
         )
@@ -72,10 +72,10 @@ class HTMLRenderer(Renderer):
         return ""
 
     def render_emphasis(self, element):
-        return "<em>{}</em>".format(self.render_children(element))
+        return f"<em>{self.render_children(element)}</em>"
 
     def render_strong_emphasis(self, element):
-        return "<strong>{}</strong>".format(self.render_children(element))
+        return f"<strong>{self.render_children(element)}</strong>"
 
     def render_inline_html(self, element):
         return self.render_html_block(element)
@@ -88,7 +88,7 @@ class HTMLRenderer(Renderer):
     def render_link(self, element):
         template = '<a href="{}"{}>{}</a>'
         title = (
-            ' title="{}"'.format(self.escape_html(element.title))
+            f' title="{self.escape_html(element.title)}"'
             if element.title
             else ""
         )
@@ -102,7 +102,7 @@ class HTMLRenderer(Renderer):
     def render_image(self, element):
         template = '<img src="{}" alt="{}"{} />'
         title = (
-            ' title="{}"'.format(self.escape_html(element.title))
+            f' title="{self.escape_html(element.title)}"'
             if element.title
             else ""
         )
@@ -125,7 +125,7 @@ class HTMLRenderer(Renderer):
         return "<br />\n"
 
     def render_code_span(self, element):
-        return "<code>{}</code>".format(html.escape(element.children))
+        return f"<code>{html.escape(element.children)}</code>"
 
     @staticmethod
     def escape_html(raw):

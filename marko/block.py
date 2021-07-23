@@ -286,8 +286,8 @@ class HTMLBlock(BlockElement):
 
     @classmethod
     def match(cls, source):  # type: (Source) -> Union[int, bool]
-        if source.expect_re(r"(?i) {,3}<(?:script|pre|style)[>\s]"):
-            cls._end_cond = re.compile(r"(?i)</(?:script|pre|style)>")
+        if source.expect_re(r"(?i) {,3}<(script|pre|style|textarea)[>\s]"):
+            cls._end_cond = re.compile(rf"(?i)</{source.match.group(1)}>")
             return 1
         if source.expect_re(r" {,3}<!--"):
             cls._end_cond = re.compile(r"-->")

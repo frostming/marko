@@ -170,7 +170,7 @@ class Source:
 
 def normalize_label(label):  # type: (str) -> str
     """Return the normalized form of link label."""
-    return re.sub(r"\s+", " ", label).strip().lower()
+    return re.sub(r"\s+", " ", label).strip().casefold()
 
 
 def load_extension_object(name):

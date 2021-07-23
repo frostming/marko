@@ -1,3 +1,7 @@
+## v1.1.0(2021-07-23)
+
+- Update the implementation to conform with Commonmark 0.30 spec.
+
 ## v1.0.3(2021-06-07)
 
 - Consider unicode punctuations when judging whether a delimiter is an opener or a closer.
