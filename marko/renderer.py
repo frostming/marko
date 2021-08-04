@@ -32,6 +32,9 @@ class Renderer:
     :meth:`Renderer.render_children`.
     """
 
+    #: Whether to delegate rendering to specific render functions
+    delegate: bool = True
+
     _charref = re.compile(
         r"&(#[0-9]{1,7};" r"|#[xX][0-9a-fA-F]{1,6};" r"|[^\t\n\f <&#;]{1,32};)"
     )
@@ -58,9 +61,11 @@ class Renderer:
         if not self.root_node:
             self.root_node = element  # type: ignore
         render_func = getattr(self, self._cls_to_func_name(element.__class__), None)
-        if not render_func:
-            render_func = self.render_children
-        return render_func(element)
+        if render_func is not None and (
+            getattr(render_func, "_force_delegate", False) or self.delegate
+        ):
+            return render_func(element)
+        return self.render_children(element)
 
     def render_children(self, element):  # type: (Element) -> str
         """
@@ -89,3 +94,11 @@ class Renderer:
                 return "render_" + camel_to_snake_case(name)
 
         return "render_children"
+
+
+def force_delegate(func):
+    """
+    A decorator to allow delegation for the specified method even if cls.delegate = False
+    """
+    func._force_delegate = True
+    return func

@@ -5,7 +5,7 @@ import json
 import html
 from marko.html_renderer import HTMLRenderer
 
-from .renderer import Renderer
+from .renderer import Renderer, force_delegate
 from .helpers import camel_to_snake_case
 
 
@@ -21,6 +21,9 @@ class ASTRenderer(Renderer):
          'element': 'document'}
     """
 
+    delegate = False
+
+    @force_delegate
     def render_raw_text(self, element):
         return {
             "element": "raw_text",
@@ -59,6 +62,8 @@ class XMLRenderer(Renderer):
         </heading>
         </document>
     """
+
+    delegate = False
 
     def __enter__(self):
         self.indent = 0

@@ -1,3 +1,7 @@
+## Unreleased
+
+- Forbid delegation to element-specific render methods for AST renderers.
+
 ## v1.1.0(2021-07-23)
 
 - Update the implementation to conform with Commonmark 0.30 spec.

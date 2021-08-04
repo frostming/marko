@@ -105,3 +105,20 @@ class TestExtension:
         markdown = marko.Markdown(extensions=[MyExtension])
         with pytest.raises(TypeError, match="The element should be a subclass of"):
             markdown.convert("hello world\n")
+
+    def test_no_delegate_render_methods(self):
+        class RendererMixin:
+            def render_paragraph(self, element):
+                return "ohohohohohoh"
+
+        class Extension:
+            renderer_mixins = [RendererMixin]
+
+        markdown = marko.Markdown(renderer=ASTRenderer, extensions=[Extension])
+        res = markdown.convert("Hello world")
+        paragraph = res["children"][0]
+        assert isinstance(paragraph, dict)
+        assert paragraph["element"] == "paragraph"
+
+        raw_text = paragraph["children"][0]
+        assert raw_text["children"] == "Hello world"
