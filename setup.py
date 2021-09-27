@@ -2,4 +2,4 @@
 from setuptools import setup
 
 
-setup(name="marko")
+setup(name="marko", package_data={'marko': ['py.typed']})
