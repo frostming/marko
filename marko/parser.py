@@ -45,15 +45,7 @@ class Parser:
                 "The element should be a subclass of either `BlockElement` or "
                 "`InlineElement`."
             )
-        if not element.override:
-            dest[element.__name__] = element
-        else:
-            for cls in element.__bases__:
-                if cls.__name__ in dest:
-                    dest[cls.__name__] = element
-                    break
-            else:
-                dest[element.__name__] = element
+        dest[element.get_element_type()] = element
 
     def parse(self, source_or_text):
         # type: (Union[Source, AnyStr]) -> Union[List[block.BlockElement], block.BlockElement]
