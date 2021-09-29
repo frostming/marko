@@ -5,6 +5,7 @@ import re
 
 from .helpers import is_type_check
 from . import inline_parser, patterns
+from .element import Element
 
 if is_type_check():
     from typing import Pattern, Match, Iterator, Union
@@ -25,7 +26,7 @@ __all__ = (
 )
 
 
-class InlineElement:
+class InlineElement(Element):
     """Any inline element should inherit this class"""
 
     #: Use to denote the precedence in parsing.
