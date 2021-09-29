@@ -60,7 +60,7 @@ class Renderer:
         # Store the root node to provide some context to render functions
         if not self.root_node:
             self.root_node = element  # type: ignore
-        render_func = getattr(self, self._cls_to_func_name(element.__class__), None)
+        render_func = getattr(self, self._cls_to_func_name(element), None)
         if render_func is not None and (
             getattr(render_func, "_force_delegate", False) or self.delegate
         ):
@@ -82,18 +82,12 @@ class Renderer:
         rendered = [self.render(child) for child in element.children]  # type: ignore
         return "".join(rendered)
 
-    def _cls_to_func_name(self, klass):  # type: (ElementType) -> str
-        from .block import parser
-
-        element_types = itertools.chain(
-            parser.block_elements.items(),  # type: ignore
-            parser.inline_elements.items(),  # type: ignore
-        )
-        for name, cls in element_types:
-            if cls is klass:
-                return "render_" + camel_to_snake_case(name)
-
-        return "render_children"
+    def _cls_to_func_name(self, element):  # type: (ElementType) -> str
+        try:
+            name = element.get_element_type()
+            return "render_" + camel_to_snake_case(name)
+        except AttributeError:
+            return "render_children"
 
 
 def force_delegate(func):
