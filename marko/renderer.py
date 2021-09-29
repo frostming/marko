@@ -5,15 +5,14 @@ import html
 import itertools
 import re
 
-from .helpers import camel_to_snake_case, is_type_check
+from .helpers import is_type_check
 
 if is_type_check():
-    from typing import Any, Union
+    from typing import Any, Union, List, TypeVar
     from .inline import InlineElement
     from .block import BlockElement
-    from .parser import ElementType
-
-    Element = Union[BlockElement, InlineElement]
+    from .element import Element
+    T = TypeVar("T")
 
 
 class Renderer:
@@ -60,7 +59,7 @@ class Renderer:
         # Store the root node to provide some context to render functions
         if not self.root_node:
             self.root_node = element  # type: ignore
-        render_func = getattr(self, self._cls_to_func_name(element), None)
+        render_func = getattr(self, self._el_to_func_name(element), None)
         if render_func is not None and (
             getattr(render_func, "_force_delegate", False) or self.delegate
         ):
@@ -82,10 +81,9 @@ class Renderer:
         rendered = [self.render(child) for child in element.children]  # type: ignore
         return "".join(rendered)
 
-    def _cls_to_func_name(self, element):  # type: (ElementType) -> str
+    def _el_to_func_name(self, element):  # type: (Union[Element, List[T]]) -> str
         try:
-            name = element.get_element_type()
-            return "render_" + camel_to_snake_case(name)
+            return "render_" + element.get_element_type(snake_case=True)
         except AttributeError:
             return "render_children"
 

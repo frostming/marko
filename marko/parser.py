@@ -107,11 +107,11 @@ class Parser:
         return [e for e in self.inline_elements.values() if not e.virtual]
 
 
-from . import block, inline, inline_parser  # noqa
+from . import block, inline, inline_parser, element  # noqa
 
 if is_type_check():
     from typing import Type, Union, Dict, AnyStr, List
 
     BlockElementType = Type[block.BlockElement]
     InlineElementType = Type[inline.InlineElement]
-    ElementType = Union[BlockElementType, InlineElementType]
+    ElementType = Type[element.Element]
