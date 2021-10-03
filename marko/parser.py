@@ -12,7 +12,7 @@ class Parser:
 
     Attributes:
         block_elements(dict): a dict of name: block_element pairs
-        inlin_elements(dict): a dict of name: inlin_element pairs
+        inline_elements(dict): a dict of name: inline_element pairs
 
     :param \*extras: extra elements to be included in parsing process.
     """
