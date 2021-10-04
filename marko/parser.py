@@ -21,11 +21,11 @@ class Parser:
         self.block_elements = {}  # type: Dict[str, BlockElementType]
         self.inline_elements = {}  # type: Dict[str, InlineElementType]
 
-        for element in itertools.chain(
+        for el in itertools.chain(
             (getattr(block, name) for name in block.__all__),
             (getattr(inline, name) for name in inline.__all__),
         ):
-            self.add_element(element)
+            self.add_element(el)
 
     def add_element(self, element):  # type: (ElementType) -> None
         """Add an element to the parser.
