@@ -2,7 +2,6 @@
 Base renderer class
 """
 import html
-import itertools
 import re
 
 from .helpers import is_type_check

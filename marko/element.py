@@ -3,8 +3,9 @@ from .helpers import camel_to_snake_case, is_type_check
 if is_type_check():
     from typing import Any
 
+
 class Element:
-    """This class holds attributes common to both the BlockElement and 
+    """This class holds attributes common to both the BlockElement and
     InlineElement classes.
     This class should not be subclassed by any other classes beside these.
     """
