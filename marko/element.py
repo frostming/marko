@@ -9,7 +9,7 @@ class Element:
     This class should not be subclassed by any other classes beside these.
     """
     @classmethod
-    def get_element_type(cls, snake_case=False):  # type: (Any) -> str
+    def get_type(cls, snake_case=False):  # type: (Any) -> str
         """
         Return the Markdown element type that the object represents.
 

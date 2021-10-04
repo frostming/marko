@@ -83,7 +83,7 @@ class Renderer:
 
     def _el_to_func_name(self, element):  # type: (Union[Element, List[T]]) -> str
         try:
-            return "render_" + element.get_element_type(snake_case=True)
+            return "render_" + element.get_type(snake_case=True)
         except AttributeError:
             return "render_children"
 

@@ -86,7 +86,7 @@ class TestExtension:
         markdown = marko.Markdown(extensions=[MyExtension])
         markdown._setup_extensions()
         assert markdown.parser.block_elements["Heading"] is MyHeading
-        assert markdown.parser.block_elements["Heading"].get_element_type() == "Heading"
+        assert markdown.parser.block_elements["Heading"].get_type() == "Heading"
 
     def test_extension_override_non_base_element(self):
         class MyHeading(block.BlockElement):
@@ -98,7 +98,7 @@ class TestExtension:
         markdown = marko.Markdown(extensions=[MyExtension])
         markdown._setup_extensions()
         assert markdown.parser.block_elements["MyHeading"] is MyHeading
-        assert markdown.parser.block_elements["MyHeading"].get_element_type() == "MyHeading"
+        assert markdown.parser.block_elements["MyHeading"].get_type() == "MyHeading"
 
     def test_extension_with_illegal_element(self):
         class MyExtension:

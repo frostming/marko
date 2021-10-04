@@ -45,7 +45,7 @@ class Parser:
                 "The element should be a subclass of either `BlockElement` or "
                 "`InlineElement`."
             )
-        dest[element.get_element_type()] = element
+        dest[element.get_type()] = element
 
     def parse(self, source_or_text):
         # type: (Union[Source, AnyStr]) -> Union[List[block.BlockElement], block.BlockElement]
