@@ -2,18 +2,13 @@
 Base renderer class
 """
 import html
-import itertools
 import re
 
-from .helpers import camel_to_snake_case, is_type_check
+from .helpers import is_type_check
 
 if is_type_check():
-    from typing import Any, Union
-    from .inline import InlineElement
-    from .block import BlockElement
-    from .parser import ElementType
-
-    Element = Union[BlockElement, InlineElement]
+    from typing import Any
+    from .element import Element
 
 
 class Renderer:
@@ -60,11 +55,13 @@ class Renderer:
         # Store the root node to provide some context to render functions
         if not self.root_node:
             self.root_node = element  # type: ignore
-        render_func = getattr(self, self._cls_to_func_name(element.__class__), None)
-        if render_func is not None and (
-            getattr(render_func, "_force_delegate", False) or self.delegate
-        ):
-            return render_func(element)
+        if hasattr(element, "get_type"):
+            func_name = "render_" + element.get_type(snake_case=True)
+            render_func = getattr(self, func_name, None)
+            if render_func is not None and (
+                getattr(render_func, "_force_delegate", False) or self.delegate
+            ):
+                return render_func(element)
         return self.render_children(element)
 
     def render_children(self, element):  # type: (Element) -> str
@@ -81,19 +78,6 @@ class Renderer:
         """
         rendered = [self.render(child) for child in element.children]  # type: ignore
         return "".join(rendered)
-
-    def _cls_to_func_name(self, klass):  # type: (ElementType) -> str
-        from .block import parser
-
-        element_types = itertools.chain(
-            parser.block_elements.items(),  # type: ignore
-            parser.inline_elements.items(),  # type: ignore
-        )
-        for name, cls in element_types:
-            if cls is klass:
-                return "render_" + camel_to_snake_case(name)
-
-        return "render_children"
 
 
 def force_delegate(func):

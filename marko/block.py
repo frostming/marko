@@ -5,6 +5,7 @@ import re
 from . import inline, patterns
 from .helpers import Source, is_paired, normalize_label, is_type_check
 from .parser import Parser
+from .element import Element
 
 if is_type_check():
     from typing import Any, Optional, Match, Dict, Union, Tuple, List as _List
@@ -26,7 +27,7 @@ __all__ = (
 )
 
 
-class BlockElement:
+class BlockElement(Element):
     """Any block element should inherit this class"""
 
     #: Use to denote the precedence in parsing

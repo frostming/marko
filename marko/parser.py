@@ -21,11 +21,11 @@ class Parser:
         self.block_elements = {}  # type: Dict[str, BlockElementType]
         self.inline_elements = {}  # type: Dict[str, InlineElementType]
 
-        for element in itertools.chain(
+        for el in itertools.chain(
             (getattr(block, name) for name in block.__all__),
             (getattr(inline, name) for name in inline.__all__),
         ):
-            self.add_element(element)
+            self.add_element(el)
 
     def add_element(self, element):  # type: (ElementType) -> None
         """Add an element to the parser.
@@ -45,15 +45,7 @@ class Parser:
                 "The element should be a subclass of either `BlockElement` or "
                 "`InlineElement`."
             )
-        if not element.override:
-            dest[element.__name__] = element
-        else:
-            for cls in element.__bases__:
-                if cls.__name__ in dest:
-                    dest[cls.__name__] = element
-                    break
-            else:
-                dest[element.__name__] = element
+        dest[element.get_type()] = element
 
     def parse(self, source_or_text):
         # type: (Union[Source, AnyStr]) -> Union[List[block.BlockElement], block.BlockElement]
@@ -115,11 +107,11 @@ class Parser:
         return [e for e in self.inline_elements.values() if not e.virtual]
 
 
-from . import block, inline, inline_parser  # noqa
+from . import block, inline, inline_parser, element  # noqa
 
 if is_type_check():
     from typing import Type, Union, Dict, AnyStr, List
 
     BlockElementType = Type[block.BlockElement]
     InlineElementType = Type[inline.InlineElement]
-    ElementType = Union[BlockElementType, InlineElementType]
+    ElementType = Type[element.Element]
