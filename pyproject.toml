@@ -8,8 +8,7 @@ build-backend = "pdm.pep517.api"
 authors = [
     {name = "Frost Ming", email = "mianghong@gmail.com"},
 ]
-dynamic = ["version", "classifiers"]
-version = {from = "marko/__init__.py"}
+dynamic = ["version"]
 requires-python = ">=3.6"
 license = {text = "MIT"}
 dependencies = []
@@ -20,6 +19,12 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     'Operating System :: OS Independent',
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
 ]
 
 [project.urls]
@@ -32,16 +37,17 @@ codehilite = ["pygments"]
 benchmark = [
     "commonmark~=0.9",
     "markdown~=3.3",
-    "markdown-it-py~=0.6",
-    "mistune~=0.8",
+    "markdown-it-py~=2.0",
+    "mistune~=2.0",
     "mistletoe~=0.7",
 ]
 
 [project.scripts]
 marko = "marko.cli:main"
 
-[tool]
 [tool.pdm]
+version = {from = "marko/__init__.py"}
+
 [tool.pdm.dev-dependencies]
 dev = [
     "pytest<7.0.0,>=6.1.2",
