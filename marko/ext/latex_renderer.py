@@ -2,7 +2,7 @@
 LaTeX renderer
 """
 import logging
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 
 from marko import Renderer
 
@@ -12,8 +12,8 @@ _logger = logging.getLogger(__name__)
 class LatexRenderer(Renderer):
     """Render the parsed Markdown to LaTeX format."""
 
-    packages: set[str]
-    graphic_paths: set[str]
+    packages: Set[str]
+    graphic_paths: Set[str]
 
     # Header levels that will be numbered. Default none.
     # It could be a list of header levels (ex. [1, 2]) or header names ['part', 'section']

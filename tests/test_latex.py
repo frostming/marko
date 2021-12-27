@@ -12,7 +12,7 @@ def test_render_paragraph():
         This is
          another paragraph.
 
-        This has line
+        This has line   \n\
            break!
         """
     latex = """\
