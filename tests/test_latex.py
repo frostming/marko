@@ -12,17 +12,17 @@ def test_render_paragraph():
         This is
          another paragraph.
 
-        This has line    
+        This has line
            break!
         """
     latex = """\
         \\documentclass{article}
         \\begin{document}
         This is a paragraph.
-        
+
         This is
         another paragraph.
-        
+
         This has line\\\\
         break!
         \\end{document}
@@ -103,19 +103,19 @@ def test_render_headers():
     markdown = """\
         # Header 1
         Paragraph 1.
-        
+
         ## Header 2
         Paragraph 2.
-        
+
         ### Header 3
         Paragraph 3.
-        
+
         #### Header 4
         Paragraph 4.
-        
+
         ##### Header 5
         Paragraph 5.
-        
+
         ###### Header 6
         Paragraph 6.
 
@@ -244,8 +244,8 @@ def test_render_quote():
 def test_render_thematic_break():
     markdown = """\
         This paragraph is above the horizontal line.
-        
-        * * * 
+
+        ---
 
         While this paragraph is below the horizontal line.
         """
@@ -253,7 +253,7 @@ def test_render_thematic_break():
         \\documentclass{article}
         \\begin{document}
         This paragraph is above the horizontal line.
-        
+
         \\noindent\\rule{\\textwidth}{1pt}
 
         While this paragraph is below the horizontal line.
