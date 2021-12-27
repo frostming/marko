@@ -18,7 +18,7 @@ class LatexRenderer(Renderer):
     # Header levels that will be numbered. Default none.
     # It could be a list of header levels (ex. [1, 2]) or header names ['part', 'section']
     # TODO: add unit test
-    numbered_headers: list[Union[int, str]]
+    numbered_headers: List[Union[int, str]]
 
     def __init__(self):
         super().__init__()
