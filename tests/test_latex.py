@@ -202,16 +202,21 @@ def test_render_code():
 
 def test_render_links():
     markdown = """\
-        [marko](https://github.com/frostming/marko "marko on GitHub"): A markdown parser with high extensibility.
+        [marko](https://github.com/frostming/marko "marko on GitHub"): A markdown parser with high extensibility,
+          see [Extensions][extensions] for details.
 
         Documentation: <https://marko-py.readthedocs.io/en/latest/>.
+
+        [extensions]: https://github.com/frostming/marko#extensions
         """
     latex = """\
         \\documentclass{article}
         \\begin{document}
-        \\href{https://github.com/frostming/marko}{marko}: A markdown parser with high extensibility.
+        \\href{https://github.com/frostming/marko}{marko}: A markdown parser with high extensibility,
+        see \\href{https://github.com/frostming/marko#extensions}{Extensions} for details.
 
         Documentation: \\url{https://marko-py.readthedocs.io/en/latest/}.
+
         \\end{document}
         """
 

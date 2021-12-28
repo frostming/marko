@@ -111,7 +111,6 @@ class LatexRenderer(Renderer):
         return self._simple_command("url", element.dest)
 
     def render_link_ref_def(self, element):
-        # TODO: check if a special handling is needed for link_ref_def
         return ""
 
     def render_image(self, element):
