@@ -280,6 +280,27 @@ def test_render_image():
     _assert_latex(markdown, latex)
 
 
+def test_render_html(caplog):
+    markdown = """\
+        This HTML tag <br> will be ignored as well as the following HTML block.
+
+        <table>
+          <tr><th>X</th><th>Y</th></tr>
+          <tr><td>1</td><td>2</td></tr>
+        </table>
+        """
+    latex = """\
+        \\documentclass{article}
+        \\begin{document}
+        This HTML tag  will be ignored as well as the following HTML block.
+
+        \\end{document}
+        """
+
+    _assert_latex(markdown, latex)
+    assert "Rendering HTML is not supported!" in caplog.text
+
+
 def _assert_latex(markdown: str, latex: str):
     ast_converter = Markdown(renderer=ASTRenderer)
     print(ast_converter(dedent(markdown)))
