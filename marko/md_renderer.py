@@ -107,7 +107,7 @@ class MarkdownRenderer(Renderer):
         self._prefix = self._second_prefix
         return result
 
-    def render_link_ref_def(self, elemement):
+    def render_link_ref_def(self, element):
         return ""
 
     def render_emphasis(self, element):

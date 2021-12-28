@@ -68,7 +68,7 @@ class HTMLRenderer(Renderer):
     def render_blank_line(self, element):
         return ""
 
-    def render_link_ref_def(self, elemement):
+    def render_link_ref_def(self, element):
         return ""
 
     def render_emphasis(self, element):
