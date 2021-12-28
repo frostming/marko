@@ -13,7 +13,6 @@ class LatexRenderer(Renderer):
     """Render the parsed Markdown to LaTeX format."""
 
     packages: Set[str]
-    graphic_paths: Set[str]
 
     # Header levels that will be numbered. Default none.
     # It could be a list of header levels (ex. [1, 2]) or header names ['part', 'section']
@@ -23,7 +22,6 @@ class LatexRenderer(Renderer):
     def __init__(self):
         super().__init__()
         self.packages = set()
-        self.graphic_paths = set()
         self.numbered_headers = []
 
     def render_document(self, element):
@@ -33,10 +31,6 @@ class LatexRenderer(Renderer):
         items = [self._simple_command("documentclass", "article")]
         # add used packages
         items.extend(self._simple_command("usepackage", p) for p in self.packages)
-        # add graphics paths
-        if self.graphic_paths:
-            graphic_paths = "".join(f" {{{p}}} " for p in self.graphic_paths)
-            items.append(self._simple_command("graphicspath", graphic_paths))
         # add inner content
         items.append(self._environment("document", children))
         return "\n".join(items)
@@ -174,10 +168,6 @@ class LatexRenderer(Renderer):
         if content is None:
             return f"\\{cmd_name}"
         return f"\\{cmd_name}{{{content}}}"
-
-    @staticmethod
-    def _scope_command(cmd_name: str, content: str) -> str:
-        return f"{{\\{cmd_name} {content}}}"
 
     @staticmethod
     def _environment(env_name: str, content: str, options: Optional[List[str]] = None) -> str:
