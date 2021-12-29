@@ -2,7 +2,6 @@ from textwrap import dedent
 
 from marko import Markdown
 from marko.ext.latex_renderer import LatexRenderer
-from marko.ast_renderer import ASTRenderer
 
 
 def test_render_paragraph():
@@ -133,10 +132,10 @@ def test_render_headers():
         \\part*{Header 1}
         Paragraph 1.
 
-        \\section*{Header 2}
+        \\section{Header 2}
         Paragraph 2.
 
-        \\subsection*{Header 3}
+        \\subsection{Header 3}
         Paragraph 3.
 
         \\subsubsection*{Header 4}
@@ -151,12 +150,16 @@ def test_render_headers():
         \\part*{Alternate Header 1}
         Alternate 1
 
-        \\section*{Alternate Header 2}
+        \\section{Alternate Header 2}
         Alternate 2
         \\end{document}
         """
 
-    _assert_latex(markdown, latex)
+    md = Markdown()
+    parsed = md.parse(dedent(markdown))
+    renderer = LatexRenderer(numbered_headers=[2, "subsection"])  # number section and subsection
+    with renderer as r:
+        assert r.render(parsed) == dedent(latex)
 
 
 def test_render_code():
@@ -307,7 +310,5 @@ def test_render_html(caplog):
 
 
 def _assert_latex(markdown: str, latex: str):
-    ast_converter = Markdown(renderer=ASTRenderer)
-    print(ast_converter(dedent(markdown)))
-    latex_converter = Markdown(renderer=LatexRenderer)
-    assert latex_converter(dedent(markdown)) == dedent(latex)
+    md = Markdown(renderer=LatexRenderer)
+    assert md.convert(dedent(markdown)) == dedent(latex)
