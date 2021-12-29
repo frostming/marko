@@ -28,9 +28,9 @@ class LatexRenderer(Renderer):
         # should come first to collect needed packages
         children = self.render_children(element)
         # create document parts
-        items = [self._simple_command("documentclass", "article")]
+        items = ["\\documentclass{article}"]
         # add used packages
-        items.extend(self._simple_command("usepackage", p) for p in self.packages)
+        items.extend(f"\\usepackage{{{p}}}" for p in self.packages)
         # add inner content
         items.append(self._environment("document", children))
         return "\n".join(items)
@@ -84,31 +84,31 @@ class LatexRenderer(Renderer):
         header = headers[element.level - 1]
         if (element.level not in self.numbered_headers) and (header not in self.numbered_headers):
             header += "*"
-        return self._simple_command(header, children) + "\n"
+        return f"\\{header}{{{children}}}\n"
 
     def render_setext_heading(self, element):
         return self.render_heading(element)
 
     def render_emphasis(self, element):
         children = self.render_children(element)
-        return self._simple_command("textit", children)
+        return f"\\textit{{{children}}}"
 
     def render_strong_emphasis(self, element):
         children = self.render_children(element)
-        return self._simple_command("textbf", children)
+        return f"\\textbf{{{children}}}"
 
     def render_code_span(self, element):
         children = self._escape_latex(element.children)
-        return self._simple_command("texttt", children)
+        return f"\\texttt{{{children}}}"
 
     def render_link(self, element):
         if element.title:
             _logger.warning("Setting a title for links is not supported!")
         body = self.render_children(element)
-        return self._command("href", arguments=[element.dest, body])
+        return f"\\href{{{element.dest}}}{{{body}}}"
 
     def render_auto_link(self, element):
-        return self._simple_command("url", element.dest)
+        return f"\\url{{{element.dest}}}"
 
     def render_link_ref_def(self, element):
         return ""
@@ -116,7 +116,7 @@ class LatexRenderer(Renderer):
     def render_image(self, element):
         self.packages.add("graphicx")
         # TODO: check if alt (element.children) or element.title might be used!
-        return self._simple_command("includegraphics", element.dest)
+        return f"\\includegraphics{{{element.dest}}}"
 
     def render_html_block(self, element):
         _logger.warning("Rendering HTML is not supported!")
@@ -154,19 +154,6 @@ class LatexRenderer(Renderer):
         }
 
         return "".join(special.get(s, s) for s in text)
-
-    @staticmethod
-    def _command(cmd_name: str, arguments: Optional[List[str]] = None, options: Optional[List[str]] = None) -> str:
-        options_str = f"[{','.join(options)}]" if options else ""
-        arguments = arguments or []
-        arguments_str = "".join(f"{{{a}}}" for a in arguments)
-        return f"\\{cmd_name}{options_str}{arguments_str}"
-
-    @staticmethod
-    def _simple_command(cmd_name: str, content: Optional[str] = None) -> str:
-        if content is None:
-            return f"\\{cmd_name}"
-        return f"\\{cmd_name}{{{content}}}"
 
     @staticmethod
     def _environment(env_name: str, content: str, options: Optional[List[str]] = None) -> str:
