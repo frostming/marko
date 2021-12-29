@@ -2,7 +2,7 @@
 LaTeX renderer
 """
 import logging
-from typing import List, Optional, Set, Union
+from typing import Iterable, List, Set, Union
 
 from marko import Renderer
 
@@ -13,16 +13,28 @@ class LatexRenderer(Renderer):
     """Render the parsed Markdown to LaTeX format."""
 
     packages: Set[str]
+    _packages_back: Set[str]
 
     # Header levels that will be numbered. Default none.
     # It could be a list of header levels (ex. [1, 2]) or header names ['part', 'section']
     # TODO: add unit test
     numbered_headers: List[Union[int, str]]
 
-    def __init__(self):
+    def __init__(self,
+                 initial_packages: Iterable[str] = (),
+                 numbered_headers: Iterable[Union[int, str]] = ()):
+
         super().__init__()
-        self.packages = set()
-        self.numbered_headers = []
+        self.packages = set(initial_packages)
+        self.numbered_headers = list(numbered_headers)
+
+    def __enter__(self):
+        self._packages_back = self.packages.copy()
+        return super().__enter__()
+
+    def __exit__(self, *args):
+        self.packages = self._packages_back
+        super().__exit__(*args)
 
     def render_document(self, element):
         # should come first to collect needed packages
@@ -115,7 +127,7 @@ class LatexRenderer(Renderer):
 
     def render_image(self, element):
         self.packages.add("graphicx")
-        # TODO: check if alt (element.children) or element.title might be used!
+        # TODO: check how alt (element.children) and element.title could be used!
         return f"\\includegraphics{{{element.dest}}}"
 
     def render_html_block(self, element):
@@ -126,11 +138,6 @@ class LatexRenderer(Renderer):
         _logger.warning("Rendering HTML is not supported!")
         return ""
 
-    def render_plain_text(self, element):
-        if isinstance(element.children, str):
-            return self._escape_latex(element.children)
-        return self.render_children(element)
-
     def render_literal(self, element):
         return self.render_raw_text(element)
 
@@ -140,7 +147,7 @@ class LatexRenderer(Renderer):
     @staticmethod
     def _escape_latex(text: str) -> str:
         # Special LaTeX Character:  # $ % ^ & _ { } ~ \
-        special = {
+        specials = {
             "#": "\\#",
             "$": "\\$",
             "%": "\\%",
@@ -153,9 +160,9 @@ class LatexRenderer(Renderer):
             "\\": "\\textbackslash{}",
         }
 
-        return "".join(special.get(s, s) for s in text)
+        return "".join(specials.get(s, s) for s in text)
 
     @staticmethod
-    def _environment(env_name: str, content: str, options: Optional[List[str]] = None) -> str:
+    def _environment(env_name: str, content: str, options: Iterable[str] = ()) -> str:
         options_str = f"[{','.join(options)}]" if options else ""
         return f"\\begin{{{env_name}}}{options_str}\n{content}\\end{{{env_name}}}\n"
