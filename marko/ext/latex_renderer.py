@@ -2,7 +2,7 @@
 LaTeX renderer
 """
 import logging
-from typing import Iterable, List, Set, Union
+from typing import Iterable, Set
 
 from marko import Renderer
 
@@ -12,28 +12,18 @@ _logger = logging.getLogger(__name__)
 class LatexRenderer(Renderer):
     """Render the parsed Markdown to LaTeX format."""
 
-    packages: Set[str]
-    _packages_back: Set[str]
+    _packages: Set[str]
 
-    # Header levels that will be numbered. Default none.
-    # It could be a list of header levels (ex. [1, 2]) or header names ['part', 'section']
-    # TODO: add unit test
-    numbered_headers: List[Union[int, str]]
-
-    def __init__(self,
-                 initial_packages: Iterable[str] = (),
-                 numbered_headers: Iterable[Union[int, str]] = ()):
-
+    def __init__(self):
         super().__init__()
-        self.packages = set(initial_packages)
-        self.numbered_headers = list(numbered_headers)
+        self._packages = set()
 
     def __enter__(self):
-        self._packages_back = self.packages.copy()
+        self._packages_back = self._packages.copy()
         return super().__enter__()
 
     def __exit__(self, *args):
-        self.packages = self._packages_back
+        self._packages = self._packages_back
         super().__exit__(*args)
 
     def render_document(self, element):
@@ -42,25 +32,20 @@ class LatexRenderer(Renderer):
         # create document parts
         items = ["\\documentclass{article}"]
         # add used packages
-        items.extend(f"\\usepackage{{{p}}}" for p in self.packages)
+        items.extend(f"\\usepackage{{{p}}}" for p in self._packages)
         # add inner content
         items.append(self._environment("document", children))
         return "\n".join(items)
 
     def render_paragraph(self, element):
         children = self.render_children(element)
-        if element._tight:
-            return children
-        else:
-            return f"{children}\n"
+        return children if element._tight else f"{children}\n"
 
     def render_blank_line(self, element):
         return "\n"
 
     def render_line_break(self, element):
-        if element.soft:
-            return "\n"
-        return "\\\\\n"
+        return "\n" if element.soft else "\\\\\n"
 
     def render_list(self, element):
         children = self.render_children(element)
@@ -75,12 +60,12 @@ class LatexRenderer(Renderer):
         return f"\\item {children}\n"
 
     def render_quote(self, element):
-        self.packages.add("csquotes")
+        self._packages.add("csquotes")
         children = self.render_children(element)
         return self._environment("displayquote", children)
 
     def render_fenced_code(self, element):
-        self.packages.add("listings")
+        self._packages.add("listings")
         language = self._escape_latex(element.lang)
         return self._environment("lstlisting", element.children[0].children, [f"language={language}"])
 
@@ -93,9 +78,7 @@ class LatexRenderer(Renderer):
     def render_heading(self, element):
         children = self.render_children(element)
         headers = ["part", "section", "subsection", "subsubsection", "paragraph", "subparagraph"]
-        header = headers[element.level - 1]
-        if (element.level not in self.numbered_headers) and (header not in self.numbered_headers):
-            header += "*"
+        header = headers[element.level - 1] + "*"
         return f"\\{header}{{{children}}}\n"
 
     def render_setext_heading(self, element):
@@ -126,7 +109,7 @@ class LatexRenderer(Renderer):
         return ""
 
     def render_image(self, element):
-        self.packages.add("graphicx")
+        self._packages.add("graphicx")
         # TODO: check how alt (element.children) and element.title could be used!
         return f"\\includegraphics{{{element.dest}}}"
 

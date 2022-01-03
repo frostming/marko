@@ -132,10 +132,10 @@ def test_render_headers():
         \\part*{Header 1}
         Paragraph 1.
 
-        \\section{Header 2}
+        \\section*{Header 2}
         Paragraph 2.
 
-        \\subsection{Header 3}
+        \\subsection*{Header 3}
         Paragraph 3.
 
         \\subsubsection*{Header 4}
@@ -150,16 +150,12 @@ def test_render_headers():
         \\part*{Alternate Header 1}
         Alternate 1
 
-        \\section{Alternate Header 2}
+        \\section*{Alternate Header 2}
         Alternate 2
         \\end{document}
         """
 
-    md = Markdown()
-    parsed = md.parse(dedent(markdown))
-    renderer = LatexRenderer(numbered_headers=[2, "subsection"])  # number section and subsection
-    with renderer as r:
-        assert r.render(parsed) == dedent(latex)
+    _assert_latex(markdown, latex)
 
 
 def test_render_code():
