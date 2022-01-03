@@ -51,7 +51,7 @@ class LatexRenderer(Renderer):
         children = self.render_children(element)
         env = "enumerate" if element.ordered else "itemize"
         # TODO: check how to handle element.start with ordered list
-        if element.start:
+        if element.start and element.start != 1:
             _logger.warning("Setting the starting number of the list is not supported!")
         return self._environment(env, children)
 

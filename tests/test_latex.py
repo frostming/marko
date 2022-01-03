@@ -57,6 +57,7 @@ def test_render_format():
 def test_render_unordered_list():
     markdown = """\
         Items:
+        
         * Item 1
         * Item 2
         * Item 3
@@ -65,6 +66,7 @@ def test_render_unordered_list():
         \\documentclass{article}
         \\begin{document}
         Items:
+        
         \\begin{itemize}
         \\item Item 1
         \\item Item 2
@@ -79,6 +81,7 @@ def test_render_unordered_list():
 def test_render_ordered_list():
     markdown = """\
         Items:
+        
         1. Item 1
         1. Item 2
         1. Item 3
@@ -87,6 +90,7 @@ def test_render_ordered_list():
         \\documentclass{article}
         \\begin{document}
         Items:
+        
         \\begin{enumerate}
         \\item Item 1
         \\item Item 2
@@ -96,6 +100,29 @@ def test_render_ordered_list():
         """
 
     _assert_latex(markdown, latex)
+
+
+def test_render_ordered_list_change_start(caplog):
+    markdown = """\
+        Items:
+        
+        5. Item 5
+        5. Item 6
+        """
+    latex = """\
+        \\documentclass{article}
+        \\begin{document}
+        Items:
+        
+        \\begin{enumerate}
+        \\item Item 5
+        \\item Item 6
+        \\end{enumerate}
+        \\end{document}
+        """
+
+    _assert_latex(markdown, latex)
+    assert "Setting the starting number of the list is not supported!" in caplog.text
 
 
 def test_render_headers():
