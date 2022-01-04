@@ -75,6 +75,7 @@ They are useful to see how parsing works when you are developing your own parsin
 
 * ``marko.ast_renderer.ASTRenderer``: renders elements as JSON objects.
 * ``marko.ast_renderer.XMLRenderer``: renders elements as XML format AST.
+* ``marko.ext.latex_renderer.LatexRenderer``: renders elements as LaTeX document.
 
 Create an extension object
 --------------------------
