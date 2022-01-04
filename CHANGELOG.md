@@ -1,6 +1,7 @@
-## Unreleased
+## v1.2.0(2022-01-04)
 
 - Forbid delegation to element-specific render methods for AST renderers.
+- Add LaTeX renderer to the `marko.ext` namespace.
 
 ## v1.1.0(2021-07-23)
 
