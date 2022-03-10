@@ -15,7 +15,7 @@ Now subclass ``marko.inline.InlineElement`` to create a new element type::
 
     class GitHubWiki(inline.InlineElement):
 
-        pattern = r'\[\[ *(.+?) *| *(.+?) *\]\]'
+        pattern = r'\[\[ *(.+?) *\| *(.+?) *\]\]'
         parse_children = True
 
 Inline elements use the ``pattern`` attribute to look for the matches in the text. To get more control of the scan process,
