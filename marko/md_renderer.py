@@ -2,6 +2,7 @@
 Markdown renderer
 """
 from contextlib import contextmanager
+import re
 
 from .renderer import Renderer
 
@@ -139,7 +140,9 @@ class MarkdownRenderer(Renderer):
         return "\\" + element.children
 
     def render_raw_text(self, element):
-        return element.children
+        from .ext.pangu import PANGU_RE
+
+        return re.sub(PANGU_RE, " ", element.children)
 
     def render_line_break(self, element):
         return "\n" if element.soft else "\\\n"
