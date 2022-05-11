@@ -3,23 +3,23 @@ Parse inline elements
 """
 import re
 import string
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Match, Optional, Tuple, Type, Union
 
-from .helpers import is_paired, normalize_label
 from . import patterns
+from .helpers import is_paired, normalize_label
 
 if TYPE_CHECKING:
-    from typing import Type, List, Optional, Match, Tuple, Union
-    from .inline import InlineElement
     from .block import Document
+    from .inline import InlineElement
 
     ElementType = Type[InlineElement]
     Group = Tuple[int, int, Optional[str]]
     _Match = Union[Match[str], "MatchObj"]
 
 
-def parse(text, elements, fallback):
-    # type: (str, List[ElementType], ElementType) -> List[InlineElement]
+def parse(
+    text: str, elements: List["ElementType"], fallback: "ElementType"
+) -> List["InlineElement"]:
     """Parse given text and produce a list of inline elements.
 
     :param text: the text to be parsed.
@@ -27,7 +27,7 @@ def parse(text, elements, fallback):
     :param fallback: fallback class when no other element type is matched.
     """
     # this is a raw list of elements that may contain overlaps.
-    tokens = []  # type: List[Token]
+    tokens: List[Token] = []
     for etype in elements:
         for match in etype.find(text):
             tokens.append(Token(etype, match, text, fallback))
@@ -36,8 +36,7 @@ def parse(text, elements, fallback):
     return make_elements(tokens, text, fallback=fallback)
 
 
-def _resolve_overlap(tokens):
-    # type: (List[Token]) -> List[Token]
+def _resolve_overlap(tokens: List["Token"]) -> List["Token"]:
     if not tokens:
         return tokens
     result = []
@@ -55,8 +54,13 @@ def _resolve_overlap(tokens):
     return result
 
 
-def make_elements(tokens, text, start=0, end=None, fallback=None):
-    # type: (List[Token], str, int, Optional[int], ElementType) -> List[InlineElement]
+def make_elements(
+    tokens: List["Token"],
+    text: str,
+    start: int = 0,
+    end: Optional[int] = None,
+    fallback: "ElementType" = None,
+) -> List["InlineElement"]:
     """Make elements from a list of parsed tokens.
     It will turn all unmatched holes into fallback elements.
 
@@ -67,7 +71,7 @@ def make_elements(tokens, text, start=0, end=None, fallback=None):
     :param fallback: fallback element type.
     :returns: a list of inline elements.
     """
-    result = []  # type: List[InlineElement]
+    result: List["InlineElement"] = []
     end = end or len(text)
     prev_end = start
     for token in tokens:
@@ -90,8 +94,9 @@ class Token:
     CONTAIN = 2
     SHADE = 3
 
-    def __init__(self, etype, match, text, fallback):
-        # type: (ElementType, _Match, str, ElementType) -> None
+    def __init__(
+        self, etype: "ElementType", match: "_Match", text: str, fallback: "ElementType"
+    ) -> None:
         self.etype = etype
         self.match = match
         self.start = match.start()
@@ -100,9 +105,9 @@ class Token:
         self.inner_end = match.end(etype.parse_group)
         self.text = text
         self.fallback = fallback
-        self.children = []  # type: List[Token]
+        self.children: List[Token] = []
 
-    def relation(self, other):  # type: (Token) -> int
+    def relation(self, other: "Token") -> int:
         if self.end <= other.start:
             return Token.PRECEDE
         if self.end >= other.end:
@@ -116,12 +121,12 @@ class Token:
                 return Token.SHADE
         return Token.INTERSECT
 
-    def append_child(self, child):  # type: (Token) -> None
+    def append_child(self, child: "Token") -> None:
         if not self.etype.parse_children:
             return
         self.children.append(child)
 
-    def as_element(self):  # type: () -> InlineElement
+    def as_element(self) -> "InlineElement":
         e = self.etype(self.match)
         if e.parse_children:
             self.children = _resolve_overlap(self.children)
@@ -134,16 +139,16 @@ class Token:
             )
         return e
 
-    def __repr__(self):  # type: () -> str
+    def __repr__(self) -> str:
         return "<{}: {} start={} end={}>".format(
             self.__class__.__name__, self.etype.__name__, self.start, self.end
         )
 
-    def __lt__(self, o):  # type: (Token) -> bool
+    def __lt__(self, o: "Token") -> bool:
         return self.start < o.start
 
 
-def find_links_or_emphs(text, root_node):  # type: (str, Document) -> List[MatchObj]
+def find_links_or_emphs(text: str, root_node: "Document") -> List["MatchObj"]:
     """Fink links/images or emphasis from text.
 
     :param text: the original text.
@@ -152,9 +157,9 @@ def find_links_or_emphs(text, root_node):  # type: (str, Document) -> List[Match
     """
     delimiters_re = re.compile(r"(?:!?\[|\*+|_+)")
     i = 0
-    delimiters = []  # type: List[Delimiter]
+    delimiters: List[Delimiter] = []
     escape = False
-    matches = []  # type: List[MatchObj]
+    matches: List[MatchObj] = []
     code_pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
     while i < len(text):
@@ -184,8 +189,13 @@ def find_links_or_emphs(text, root_node):  # type: (str, Document) -> List[Match
     return matches
 
 
-def look_for_image_or_link(text, delimiters, close, root_node, matches):
-    # type: (str, List[Delimiter], int, Document, List[MatchObj]) -> Optional[MatchObj]
+def look_for_image_or_link(
+    text: str,
+    delimiters: List["Delimiter"],
+    close: int,
+    root_node: "Document",
+    matches: List["MatchObj"],
+) -> Optional["MatchObj"]:
     for i, d in list(enumerate(delimiters))[::-1]:
         if d.content not in ("[", "!["):
             continue
@@ -217,12 +227,13 @@ def look_for_image_or_link(text, delimiters, close, root_node, matches):
     return None
 
 
-def _is_legal_link_text(text):  # type: (str) -> bool
+def _is_legal_link_text(text: str) -> bool:
     return is_paired(text, "[", "]")
 
 
-def _expect_inline_link(text, start):
-    # type: (str, int) -> Optional[Tuple[Group, Group, int]]
+def _expect_inline_link(
+    text: str, start: int
+) -> Optional[Tuple["Group", "Group", int]]:
     """(link_dest "link_title")"""
     if start >= len(text) - 1 or text[start] != "(":
         return None
@@ -269,8 +280,9 @@ def _expect_inline_link(text, start):
     return (link_dest, link_title, m.end())
 
 
-def _expect_reference_link(text, start, link_text, root_node):
-    # type: (str, int, str, Document) -> Optional[Tuple[Group, Group, int]]
+def _expect_reference_link(
+    text: str, start: int, link_text: str, root_node: "Document"
+) -> Optional[Tuple["Group", "Group", int]]:
     match = patterns.optional_label.match(text, start)
     link_label = link_text
     if match and match.group()[1:-1]:
@@ -283,14 +295,19 @@ def _expect_reference_link(text, start, link_text, root_node):
     return (link_dest, link_title, match and match.end() or start)
 
 
-def _get_reference_link(link_label, root_node):
-    # type: (str, Document) -> Optional[Tuple[str, str]]
+def _get_reference_link(
+    link_label: str, root_node: "Document"
+) -> Optional[Tuple[str, str]]:
     normalized_label = normalize_label(link_label)
     return root_node.link_ref_defs.get(normalized_label, None)
 
 
-def process_emphasis(text, delimiters, stack_bottom, matches):
-    # type: (str, List[Delimiter], Optional[int], List[MatchObj]) -> None
+def process_emphasis(
+    text: str,
+    delimiters: List["Delimiter"],
+    stack_bottom: Optional[int],
+    matches: List["MatchObj"],
+) -> None:
     star_bottom = underscore_bottom = stack_bottom
     cur = _next_closer(delimiters, stack_bottom)
     while cur is not None:
@@ -329,8 +346,7 @@ def process_emphasis(text, delimiters, stack_bottom, matches):
     del delimiters[lower:]
 
 
-def _next_closer(delimiters, bound):
-    # type: (List[Delimiter], Optional[int]) -> Optional[int]
+def _next_closer(delimiters: List["Delimiter"], bound: Optional[int]) -> Optional[int]:
     i = bound + 1 if bound is not None else 0
     while i < len(delimiters):
         d = delimiters[i]
@@ -340,8 +356,9 @@ def _next_closer(delimiters, bound):
     return None
 
 
-def _nearest_opener(delimiters, higher, lower):
-    # type: (List[Delimiter], int, Optional[int]) -> Optional[int]
+def _nearest_opener(
+    delimiters: List["Delimiter"], higher: int, lower: Optional[int]
+) -> Optional[int]:
     i = higher - 1
     lower = lower if lower is not None else -1
     while i > lower:
@@ -355,7 +372,7 @@ def _nearest_opener(delimiters, higher, lower):
 class Delimiter:
     whitespace_re = re.compile(r"\s", flags=re.UNICODE)
 
-    def __init__(self, match, text):  # type: (_Match, str) -> None
+    def __init__(self, match: "_Match", text: str) -> None:
         self.start = match.start()
         self.end = match.end()
         self.content = match.group()
@@ -365,21 +382,21 @@ class Delimiter:
             self.can_open = self._can_open()
             self.can_close = self._can_close()
 
-    def _can_open(self):  # type: () -> bool
+    def _can_open(self) -> bool:
         if self.content[0] == "*":
             return self.is_left_flanking()
         return self.is_left_flanking() and (
             not self.is_right_flanking() or self.preceded_by_punc()
         )
 
-    def _can_close(self):  # type: () -> bool
+    def _can_close(self) -> bool:
         if self.content[0] == "*":
             return self.is_right_flanking()
         return self.is_right_flanking() and (
             not self.is_left_flanking() or self.followed_by_punc()
         )
 
-    def is_left_flanking(self):  # type: () -> bool
+    def is_left_flanking(self) -> bool:
         return (
             self.end < len(self.text)
             and self.whitespace_re.match(self.text, self.end) is None
@@ -390,7 +407,7 @@ class Delimiter:
             or self.whitespace_re.match(self.text, self.start - 1) is not None
         )
 
-    def is_right_flanking(self):  # type: () -> bool
+    def is_right_flanking(self) -> bool:
         return (
             self.start > 0
             and self.whitespace_re.match(self.text, self.start - 1) is None
@@ -401,19 +418,19 @@ class Delimiter:
             or self.whitespace_re.match(self.text, self.end) is not None
         )
 
-    def followed_by_punc(self):  # type: () -> bool
+    def followed_by_punc(self) -> bool:
         return (
             self.end < len(self.text)
             and patterns.punctuation.match(self.text, self.end) is not None
         )
 
-    def preceded_by_punc(self):  # type: () -> bool
+    def preceded_by_punc(self) -> bool:
         return (
             self.start > 0
             and patterns.punctuation.match(self.text[self.start - 1]) is not None
         )
 
-    def closed_by(self, other):  # type: (Delimiter) -> bool
+    def closed_by(self, other: "Delimiter") -> bool:
         return not (
             self.content[0] != other.content[0]
             or (self.can_open and self.can_close or other.can_open and other.can_close)
@@ -421,7 +438,7 @@ class Delimiter:
             and not all(len(d.content) % 3 == 0 for d in [self, other])
         )
 
-    def remove(self, n, left=False):  # type: (int, bool) -> bool
+    def remove(self, n: int, left: bool = False) -> bool:
         if len(self.content) <= n:
             return True
         if left:
@@ -431,7 +448,7 @@ class Delimiter:
         self.content = self.content[n:]
         return False
 
-    def __repr__(self):  # type: () -> str
+    def __repr__(self) -> str:
         return "<Delimiter {!r} start={} end={}>".format(
             self.content, self.start, self.end
         )
@@ -440,25 +457,26 @@ class Delimiter:
 class MatchObj:
     """A fake match object that memes re.match methods"""
 
-    def __init__(self, etype, text, start, end, *groups):
-        # type: (str, str, int, int, Group) -> None
+    def __init__(
+        self, etype: str, text: str, start: int, end: int, *groups: "Group"
+    ) -> None:
         self._text = text
         self._start = start
         self._end = end
         self._groups = groups
         self.etype = etype
 
-    def group(self, n=0):  # type: (int) -> str
+    def group(self, n: int = 0) -> str:
         if n == 0:
             return self._text[self._start : self._end]
         return self._groups[n - 1][2]  # type: ignore
 
-    def start(self, n=0):  # type: (int) -> int
+    def start(self, n: int = 0) -> int:
         if n == 0:
             return self._start
         return self._groups[n - 1][0]
 
-    def end(self, n=0):  # type: (int) -> int
+    def end(self, n: int = 0) -> int:
         if n == 0:
             return self._end
         return self._groups[n - 1][1]

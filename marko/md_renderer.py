@@ -1,10 +1,14 @@
 """
 Markdown renderer
 """
-from contextlib import contextmanager
 import re
+from contextlib import contextmanager
+from typing import TYPE_CHECKING, Generator, cast
 
 from .renderer import Renderer
+
+if TYPE_CHECKING:
+    from . import block, inline
 
 
 class MarkdownRenderer(Renderer):
@@ -15,13 +19,15 @@ class MarkdownRenderer(Renderer):
     and those from common extensions.
     """
 
-    def __enter__(self):  # type: () -> Renderer
+    def __enter__(self) -> "MarkdownRenderer":
         self._prefix = ""
         self._second_prefix = ""
         return super().__enter__()
 
     @contextmanager
-    def container(self, prefix, second_prefix=""):
+    def container(
+        self, prefix: str, second_prefix: str = ""
+    ) -> Generator[None, None, None]:
         old_prefix = self._prefix
         old_second_prefix = self._second_prefix
         self._prefix += prefix
@@ -30,13 +36,13 @@ class MarkdownRenderer(Renderer):
         self._prefix = old_prefix
         self._second_prefix = old_second_prefix
 
-    def render_paragraph(self, element):
+    def render_paragraph(self, element: "block.Paragraph") -> str:
         children = self.render_children(element)
         line = self._prefix + children + "\n"
         self._prefix = self._second_prefix
         return line
 
-    def render_list(self, element):
+    def render_list(self, element: "block.List") -> str:
         result = []
         if element.ordered:
             num = element.start
@@ -50,16 +56,16 @@ class MarkdownRenderer(Renderer):
         self._prefix = self._second_prefix
         return "".join(result)
 
-    def render_list_item(self, element):
+    def render_list_item(self, element: "block.ListItem") -> str:
         return self.render_children(element)
 
-    def render_quote(self, element):
+    def render_quote(self, element: "block.Quote") -> str:
         with self.container("> ", "> "):
             result = self.render_children(element)
         self._prefix = self._second_prefix
         return result + "\n"
 
-    def render_fenced_code(self, element):
+    def render_fenced_code(self, element: "block.FencedCode") -> str:
         extra = f" {element.extra}" if element.extra else ""
         lines = [self._prefix + f"```{element.lang}{extra}"]
         lines.extend(
@@ -70,7 +76,7 @@ class MarkdownRenderer(Renderer):
         self._prefix = self._second_prefix
         return "\n".join(lines) + "\n"
 
-    def render_code_block(self, element):
+    def render_code_block(self, element: "block.CodeBlock") -> str:
         indent = " " * 4
         lines = self.render_children(element).splitlines()
         lines = [self._prefix + indent + lines[0]] + [
@@ -79,17 +85,17 @@ class MarkdownRenderer(Renderer):
         self._prefix = self._second_prefix
         return "\n".join(lines) + "\n"
 
-    def render_html_block(self, element):
+    def render_html_block(self, element: "block.HTMLBlock") -> str:
         result = self._prefix + element.children + "\n"
         self._prefix = self._second_prefix
         return result
 
-    def render_thematic_break(self, element):
+    def render_thematic_break(self, element: "block.ThematicBreak") -> str:
         result = self._prefix + "* * *\n"
         self._prefix = self._second_prefix
         return result
 
-    def render_heading(self, element):
+    def render_heading(self, element: "block.Heading") -> str:
         result = (
             self._prefix
             + "#" * element.level
@@ -100,54 +106,54 @@ class MarkdownRenderer(Renderer):
         self._prefix = self._second_prefix
         return result
 
-    def render_setext_heading(self, element):
-        return self.render_heading(element)
+    def render_setext_heading(self, element: "block.SetextHeading") -> str:
+        return self.render_heading(cast("block.Heading", element))
 
-    def render_blank_line(self, element):
+    def render_blank_line(self, element: "block.BlankLine") -> str:
         result = self._prefix + "\n"
         self._prefix = self._second_prefix
         return result
 
-    def render_link_ref_def(self, element):
+    def render_link_ref_def(self, element: "block.LinkRefDef") -> str:
         return ""
 
-    def render_emphasis(self, element):
+    def render_emphasis(self, element: "inline.Emphasis") -> str:
         return f"*{self.render_children(element)}*"
 
-    def render_strong_emphasis(self, element):
+    def render_strong_emphasis(self, element: "inline.StrongEmphasis") -> str:
         return f"**{self.render_children(element)}**"
 
-    def render_inline_html(self, element):
-        return element.children
+    def render_inline_html(self, element: "inline.InlineHTML") -> str:
+        return cast(str, element.children)
 
-    def render_link(self, element):
+    def render_link(self, element: "inline.Link") -> str:
         title = (
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
         return f"[{self.render_children(element)}]({element.dest}{title})"
 
-    def render_auto_link(self, element):
+    def render_auto_link(self, element: "inline.AutoLink") -> str:
         return f"<{element.dest}>"
 
-    def render_image(self, element):
+    def render_image(self, element: "inline.Image") -> str:
         template = "![{}]({}{})"
         title = (
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
         return template.format(self.render_children(element), element.dest, title)
 
-    def render_literal(self, element):
-        return "\\" + element.children
+    def render_literal(self, element: "inline.Literal") -> str:
+        return f"\\{element.children}"
 
-    def render_raw_text(self, element):
+    def render_raw_text(self, element: "inline.RawText") -> str:
         from .ext.pangu import PANGU_RE
 
         return re.sub(PANGU_RE, " ", element.children)
 
-    def render_line_break(self, element):
+    def render_line_break(self, element: "inline.LineBreak") -> str:
         return "\n" if element.soft else "\\\n"
 
-    def render_code_span(self, element):
+    def render_code_span(self, element: "inline.CodeSpan") -> str:
         text = element.children
         if text and text[0] == "`" or text[-1] == "`":
             return f"`` {text} ``"

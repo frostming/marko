@@ -2,13 +2,12 @@
 Inline(span) level elements
 """
 import re
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterator, Match, Pattern, Sequence, Union
 
 from . import inline_parser, patterns
 from .element import Element
 
 if TYPE_CHECKING:
-    from typing import Pattern, Match, Iterator, Union, Sequence
     from .inline_parser import _Match
 
 __all__ = (
@@ -32,7 +31,7 @@ class InlineElement(Element):
     #: Use to denote the precedence in parsing.
     priority = 5
     #: element regex pattern.
-    pattern = None  # type: Union[Pattern[str], str]
+    pattern: Union[Pattern[str], str] = ""
     #: whether to parse children.
     parse_children = False
     #: which match group to parse.
@@ -46,13 +45,13 @@ class InlineElement(Element):
     if TYPE_CHECKING:
         children: "str | Sequence[Element]"
 
-    def __init__(self, match):  # type: (_Match) -> None
+    def __init__(self, match: "_Match") -> None:
         """Parses the matched object into an element"""
         if not self.parse_children:
             self.children = match.group(self.parse_group)
 
     @classmethod
-    def find(cls, text):  # type: (str) -> Iterator[Match]
+    def find(cls, text: str) -> Iterator[Match]:
         """This method should return an iterable containing matches of this element."""
         if isinstance(cls.pattern, str):
             cls.pattern = re.compile(cls.pattern)
@@ -66,7 +65,7 @@ class Literal(InlineElement):
     pattern = re.compile(r'\\([!"#\$%&\'()*+,\-./:;<=>?@\[\\\]^_`{|}~])')
 
     @classmethod
-    def strip_backslash(cls, text):  # type: (str) -> str
+    def strip_backslash(cls, text: str) -> str:
         return cls.pattern.sub(r"\1", text)
 
 
@@ -79,7 +78,7 @@ class LineBreak(InlineElement):
     priority = 2
     pattern = r"( *|\\)\n(?!\Z)"
 
-    def __init__(self, match):  # type: (_Match) -> None
+    def __init__(self, match: "_Match") -> None:
         self.soft = not match.group(1).startswith(("  ", "\\"))
 
 
@@ -104,11 +103,11 @@ class LinkOrEmph(InlineElement):
 
     parse_children = True
 
-    def __new__(cls, match):  # type: (_Match) -> LinkOrEmph
+    def __new__(cls, match: "_Match") -> "LinkOrEmph":
         return parser.inline_elements[match.etype](match)  # type: ignore
 
     @classmethod
-    def find(cls, text):  # type: (str) -> Iterator[Match]
+    def find(cls, text: str) -> Iterator[Match]:
         return inline_parser.find_links_or_emphs(text, _root_node)  # type: ignore
 
 
@@ -132,7 +131,7 @@ class Link(InlineElement):
     virtual = True
     parse_children = True
 
-    def __init__(self, match):  # type: (_Match) -> None
+    def __init__(self, match: "_Match") -> None:
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
@@ -149,7 +148,7 @@ class Image(InlineElement):
     virtual = True
     parse_children = True
 
-    def __init__(self, match):  # type: (_Match) -> None
+    def __init__(self, match: "_Match") -> None:
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
@@ -166,7 +165,7 @@ class CodeSpan(InlineElement):
     priority = 7
     pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
-    def __init__(self, match):  # type: (_Match) -> None
+    def __init__(self, match: "_Match") -> None:
         self.children = match.group(2).replace("\n", " ")
         if self.children.strip() and self.children[0] == self.children[-1] == " ":
             self.children = self.children[1:-1]
@@ -178,7 +177,7 @@ class AutoLink(InlineElement):
     priority = 7
     pattern = re.compile(rf"<({patterns.uri}|{patterns.email})>")
 
-    def __init__(self, match):  # type: (_Match) -> None
+    def __init__(self, match: "_Match") -> None:
         self.dest = match.group(1)
         if re.match(patterns.email, self.dest):
             self.dest = "mailto:" + self.dest
@@ -191,7 +190,10 @@ class RawText(InlineElement):
 
     virtual = True
 
-    def __init__(self, match, escape=True):  # type: (str, bool) -> None
+    if TYPE_CHECKING:
+        children: str
+
+    def __init__(self, match: str, escape: bool = True) -> None:
         self.children = match
         self.escape = escape
 

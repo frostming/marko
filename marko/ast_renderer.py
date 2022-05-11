@@ -1,12 +1,18 @@
 """
 AST renderers for inspecting the markdown parsing result.
 """
-import json
 import html
+import json
+from typing import TYPE_CHECKING, Any, Dict, List, overload
+
 from marko.html_renderer import HTMLRenderer
 
-from .renderer import Renderer, force_delegate
 from .helpers import camel_to_snake_case
+from .renderer import Renderer, force_delegate
+
+if TYPE_CHECKING:
+    from marko import inline
+    from marko.element import Element
 
 
 class ASTRenderer(Renderer):
@@ -24,7 +30,7 @@ class ASTRenderer(Renderer):
     delegate = False
 
     @force_delegate
-    def render_raw_text(self, element):
+    def render_raw_text(self, element: "inline.RawText") -> Dict[str, Any]:
         return {
             "element": "raw_text",
             "children": html.unescape(element.children)
@@ -32,6 +38,18 @@ class ASTRenderer(Renderer):
             else element.children,
             "escape": element.escape,
         }
+
+    @overload
+    def render_children(self, element: List["Element"]) -> List[Dict[str, Any]]:
+        ...
+
+    @overload
+    def render_children(self, element: "Element") -> Dict[str, Any]:
+        ...
+
+    @overload
+    def render_children(self, element: str) -> str:
+        ...
 
     def render_children(self, element):
         if isinstance(element, list):
@@ -65,15 +83,15 @@ class XMLRenderer(Renderer):
 
     delegate = False
 
-    def __enter__(self):
+    def __enter__(self) -> "XMLRenderer":
         self.indent = 0
         return super().__enter__()
 
-    def __exit__(self, *args):
+    def __exit__(self, *args: Any) -> None:
         self.indent = 0
         return super().__exit__(*args)
 
-    def render_children(self, element):
+    def render_children(self, element: "Element") -> str:
         lines = []
         if element is self.root_node:
             lines.append(" " * self.indent + '<?xml version="1.0" encoding="UTF-8"?>')
@@ -90,13 +108,13 @@ class XMLRenderer(Renderer):
         lines.append(" " * self.indent + f"<{element_name}{attr_str}>")
         if getattr(element, "children", None):
             self.indent += 2
-            if isinstance(element.children, str):
+            if isinstance(element.children, str):  # type: ignore
                 lines.append(
                     " " * self.indent
-                    + HTMLRenderer.escape_html(json.dumps(element.children)[1:-1])
+                    + HTMLRenderer.escape_html(json.dumps(element.children)[1:-1])  # type: ignore
                 )
             else:
-                lines.extend(self.render(child) for child in element.children)
+                lines.extend(self.render(child) for child in element.children)  # type: ignore
             self.indent -= 2
             lines.append(" " * self.indent + f"</{element_name}>")
         else:

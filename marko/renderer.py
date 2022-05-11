@@ -3,12 +3,12 @@ Base renderer class
 """
 import html
 import re
-from typing import TYPE_CHECKING
-
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 if TYPE_CHECKING:
-    from typing import Any
     from .element import Element
+
+_T = TypeVar("_T", bound="Renderer")
 
 
 class Renderer:
@@ -34,19 +34,19 @@ class Renderer:
         r"&(#[0-9]{1,7};" r"|#[xX][0-9a-fA-F]{1,6};" r"|[^\t\n\f <&#;]{1,32};)"
     )
 
-    def __init__(self):  # type: () -> None
+    def __init__(self) -> None:
         self.root_node = None
 
-    def __enter__(self):  # type: () -> Renderer
+    def __enter__(self: _T) -> _T:
         """Provide a context so that root_node can be reset after render."""
         self._charref_bak = html._charref  # type: ignore[attr-defined]
         html._charref = self._charref  # type: ignore[attr-defined]
         return self
 
-    def __exit__(self, *args):  # type: (Any) -> None
+    def __exit__(self, *args: Any) -> None:
         html._charref = self._charref_bak  # type: ignore[attr-defined]
 
-    def render(self, element):  # type: (Element) -> str
+    def render(self, element: "Element") -> str:
         """Renders the given element to string.
 
         :param element: a element to be rendered.
@@ -64,7 +64,7 @@ class Renderer:
                 return render_func(element)
         return self.render_children(element)
 
-    def render_children(self, element):  # type: (Element) -> str
+    def render_children(self, element: Any) -> Any:
         """
         Recursively renders child elements. Joins the rendered
         strings with no space in between.
@@ -80,9 +80,12 @@ class Renderer:
         return "".join(rendered)
 
 
-def force_delegate(func):
+_F = TypeVar("_F", bound=Callable)
+
+
+def force_delegate(func: _F) -> _F:
     """
     A decorator to allow delegation for the specified method even if cls.delegate = False
     """
-    func._force_delegate = True
+    func._force_delegate = True  # type: ignore[attr-defined]
     return func

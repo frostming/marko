@@ -9,7 +9,7 @@ r"""
  Licensed under MIT.
  Created by Frost Ming<mianghong@gmail.com>
 """
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, List, Optional, Type
 
 from .helpers import load_extension_object
 from .html_renderer import HTMLRenderer
@@ -17,7 +17,6 @@ from .parser import Parser
 from .renderer import Renderer
 
 if TYPE_CHECKING:
-    from typing import Any, List, Optional, Type
 
     from .block import Document
     from .parser import ElementType
@@ -26,7 +25,7 @@ __version__ = "1.2.0"
 
 
 class SetupDone(Exception):
-    def __str__(self):
+    def __str__(self) -> str:
         return "Unable to register more extensions after setup done."
 
 
@@ -43,24 +42,28 @@ class Markdown:
         See document of :meth:`Markdown.use()`.
     """
 
-    def __init__(self, parser=Parser, renderer=HTMLRenderer, extensions=None):
-        # type: (Type[Parser], Type[Renderer], Optional[Any]) -> None
-        assert issubclass(parser, Parser)
+    def __init__(
+        self,
+        parser: Type[Parser] = Parser,
+        renderer: Type[Renderer] = HTMLRenderer,
+        extensions: Optional[Any] = None,
+    ) -> None:
+        if not issubclass(parser, Parser):
+            raise TypeError("parser must be a subclass of Parser.")
         self._base_parser = parser
-        self._parser_mixins = []  # type: List[Any]
+        self._parser_mixins: List[Any] = []
 
-        assert issubclass(renderer, Renderer)
+        if not issubclass(renderer, Renderer):
+            raise TypeError("renderer must be a subclass of Renderer.")
         self._base_renderer = renderer
-        self._renderer_mixins = []  # type: List[Any]
+        self._renderer_mixins: List[Any] = []
 
-        self._extra_elements = []  # type: List[ElementType]
-
+        self._extra_elements: List[ElementType] = []
         self._setup_done = False
-
         if extensions:
             self.use(*extensions)
 
-    def use(self, *extensions):  # type: (Any) -> None
+    def use(self, *extensions: Any) -> None:
         r"""Register extensions to Markdown object.
         An extension should be either an object providing ``elements``, `parser_mixins``
         , ``renderer_mixins`` or all attributes, or a string representing the
@@ -85,7 +88,7 @@ class Markdown:
             )
             self._extra_elements.extend(getattr(extension, "elements", []))
 
-    def _setup_extensions(self):  # type: () -> None
+    def _setup_extensions(self) -> None:
         """Install all extensions and set things up."""
         if self._setup_done:
             return
@@ -101,14 +104,14 @@ class Markdown:
         )()
         self._setup_done = True
 
-    def convert(self, text):  # type: (str) -> str
+    def convert(self, text: str) -> str:
         """Parse and render the given text."""
         return self.render(self.parse(text))
 
-    def __call__(self, text):  # type: (str) -> str
+    def __call__(self, text: str) -> str:
         return self.convert(text)
 
-    def parse(self, text):  # type: (str) -> Document
+    def parse(self, text: str) -> "Document":
         """Call ``self.parser.parse(text)``.
 
         Override this to preprocess text or handle parsed result.
@@ -116,7 +119,7 @@ class Markdown:
         self._setup_extensions()
         return self.parser.parse(text)
 
-    def render(self, parsed):  # type: (Document) -> str
+    def render(self, parsed: "Document") -> str:
         """Call ``self.renderer.render(text)``.
 
         Override this to handle parsed result.
@@ -130,7 +133,7 @@ class Markdown:
 _markdown = Markdown()
 
 
-def convert(text):  # type: (str) -> str
+def convert(text: str) -> str:
     """Parse and render the given text.
 
     :param text: text to convert.
@@ -139,7 +142,7 @@ def convert(text):  # type: (str) -> str
     return _markdown.convert(text)
 
 
-def parse(text):  # type: (str) -> Document
+def parse(text: str) -> "Document":
     """Parse the text to a structured data object.
 
     :param text: text to parse.
@@ -148,7 +151,7 @@ def parse(text):  # type: (str) -> Document
     return _markdown.parse(text)
 
 
-def render(parsed):  # type: (Document) -> str
+def render(parsed: "Document") -> str:
     """Render the parsed object to text.
 
     :param parsed: the parsed object

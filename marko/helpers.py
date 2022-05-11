@@ -5,21 +5,29 @@ import functools
 import re
 from contextlib import contextmanager
 from importlib import import_module
-from typing import TYPE_CHECKING
+from typing import (
+    TYPE_CHECKING,
+    Callable,
+    Generator,
+    List,
+    Match,
+    Optional,
+    Pattern,
+    Union,
+)
 
 if TYPE_CHECKING:
-    from typing import Generator, List, Match, Optional, Pattern, Union
 
     from .block import BlockElement
 
 
-def camel_to_snake_case(name):  # type: (str) -> str
+def camel_to_snake_case(name: str) -> str:
     """Takes a camelCased string and converts to snake_case."""
     pattern = r"[A-Z][a-z]+|[A-Z]+(?![a-z])"
     return "_".join(map(str.lower, re.findall(pattern, name)))
 
 
-def is_paired(text, open="(", close=")"):  # type: (str, str, str) -> bool
+def is_paired(text: str, open: str = "(", close: str = ")") -> bool:
     """Check if the text only contains:
     1. blackslash escaped parentheses, or
     2. parentheses paired.
@@ -40,69 +48,69 @@ def is_paired(text, open="(", close=")"):  # type: (str, str, str) -> bool
     return count == 0
 
 
-def _preprocess_text(text):  # type: (str) -> str
+def _preprocess_text(text: str) -> str:
     return text.replace("\r\n", "\n")
 
 
 class Source:
     """Wrapper class on content to be parsed"""
 
-    def __init__(self, text):  # type: (str) -> None
+    def __init__(self, text: str) -> None:
         self._buffer = _preprocess_text(text)
         self.pos = 0
         self._anchor = 0
-        self._states = []  # type: List[BlockElement]
-        self.match = None  # type: Optional[Match[str]]
+        self._states: List["BlockElement"] = []
+        self.match: Optional[Match[str]] = None
 
     @property
-    def state(self):  # type: () -> BlockElement
+    def state(self) -> "BlockElement":
         """Returns the current element state."""
         if not self._states:
             raise RuntimeError("Need to push a state first.")
         return self._states[-1]
 
     @property
-    def root(self):  # type: () -> BlockElement
+    def root(self) -> "BlockElement":
         """Returns the root element, which is at the bottom of self._states."""
         if not self._states:
             raise RuntimeError("Need to push a state first.")
         return self._states[0]
 
-    def push_state(self, element):  # type: (BlockElement) -> None
+    def push_state(self, element: "BlockElement") -> None:
         """Push a new state to the state stack."""
         self._states.append(element)
 
-    def pop_state(self):  # type: () -> BlockElement
+    def pop_state(self) -> "BlockElement":
         """Pop the top most state."""
         return self._states.pop()
 
     @contextmanager
-    def under_state(self, element):
-        # type: (BlockElement) -> Generator[Source, None, None]
+    def under_state(self, element: "BlockElement") -> Generator["Source", None, None]:
         """A context manager to enable a new state temporarily."""
         self.push_state(element)
         yield self
         self.pop_state()
 
     @property
-    def exhausted(self):  # type: () -> bool
+    def exhausted(self) -> bool:
         """Indicates whether the source reaches the end."""
         return self.pos >= len(self._buffer)
 
     @property
-    def prefix(self):  # type: () -> str
+    def prefix(self) -> str:
         """The prefix of each line when parsing."""
         return "".join(s._prefix for s in self._states)
 
-    def _expect_re(self, regexp, pos):
-        # type: (Union[Pattern[str], str], int) -> Optional[Match[str]]
+    def _expect_re(
+        self, regexp: Union[Pattern[str], str], pos: int
+    ) -> Optional[Match[str]]:
         if isinstance(regexp, str):
             regexp = re.compile(regexp)
         return regexp.match(self._buffer, pos)
 
     @staticmethod
     @functools.lru_cache()
-    def match_prefix(prefix, line):  # type: (str, str) -> int
+    def match_prefix(prefix: str, line: str) -> int:
         """Check if the line starts with given prefix and
         return the position of the end of prefix.
         If the prefix is not matched, return -1.
@@ -120,9 +128,7 @@ class Source:
                 return i
         return -1  # pragma: no cover
 
-    def expect_re(
-        self, regexp
-    ):  # type: (Union[Pattern[str], str]) -> Optional[Match[str]]
+    def expect_re(self, regexp: Union[Pattern[str], str]) -> Optional[Match[str]]:
         """Test against the given regular expression and returns the match object.
 
         :param regexp: the expression to be tested.
@@ -138,7 +144,7 @@ class Source:
         else:
             return None
 
-    def next_line(self, require_prefix=True):  # type: (bool) -> Optional[str]
+    def next_line(self, require_prefix: bool = True) -> Optional[str]:
         """Return the next line in the source.
 
         :param require_prefix:  if False, the whole line will be returned.
@@ -154,7 +160,7 @@ class Source:
             return m.group()
         return None
 
-    def consume(self):  # type: () -> None
+    def consume(self) -> None:
         """Consume the body of source. ``pos`` will move forward."""
         if self.match:
             self.pos = self.match.end()
@@ -162,26 +168,26 @@ class Source:
                 self._update_prefix()
             self.match = None
 
-    def anchor(self):  # type: () -> None
+    def anchor(self) -> None:
         """Pin the current parsing position."""
         self._anchor = self.pos
 
-    def reset(self):  # type: () -> None
+    def reset(self) -> None:
         """Reset the position to the last anchor."""
         self.pos = self._anchor
 
-    def _update_prefix(self):  # type: () -> None
+    def _update_prefix(self) -> None:
         for s in self._states:
             if hasattr(s, "_second_prefix"):
                 s._prefix = s._second_prefix  # type: ignore
 
 
-def normalize_label(label):  # type: (str) -> str
+def normalize_label(label: str) -> str:
     """Return the normalized form of link label."""
     return re.sub(r"\s+", " ", label).strip().casefold()
 
 
-def load_extension_object(name):
+def load_extension_object(name: str) -> Callable:
     """Load extension object from a string.
     First try `marko.ext.<name>` if possible
     """

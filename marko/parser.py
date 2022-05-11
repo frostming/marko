@@ -2,7 +2,8 @@
 Base parser
 """
 import itertools
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, AnyStr, Dict, List, Type, Union
+
 from .helpers import Source
 
 
@@ -18,9 +19,9 @@ class Parser:
     :param \*extras: extra elements to be included in parsing process.
     """
 
-    def __init__(self):  # type: () -> None
-        self.block_elements = {}  # type: Dict[str, BlockElementType]
-        self.inline_elements = {}  # type: Dict[str, InlineElementType]
+    def __init__(self) -> None:
+        self.block_elements: Dict[str, "BlockElementType"] = {}
+        self.inline_elements: Dict[str, "InlineElementType"] = {}
 
         for el in itertools.chain(
             (getattr(block, name) for name in block.__all__),
@@ -28,7 +29,7 @@ class Parser:
         ):
             self.add_element(el)
 
-    def add_element(self, element):  # type: (ElementType) -> None
+    def add_element(self, element: "ElementType") -> None:
         """Add an element to the parser.
 
         :param element: the element class.
@@ -36,7 +37,7 @@ class Parser:
         .. note:: If one needs to call it inside ``__init__()``, please call it after
              ``super().__init__()`` is called.
         """
-        dest = {}  # type: Dict[str, ElementType]
+        dest: Dict[str, "ElementType"] = {}
         if issubclass(element, inline.InlineElement):
             dest = self.inline_elements  # type: ignore
         elif issubclass(element, block.BlockElement):
@@ -48,8 +49,9 @@ class Parser:
             )
         dest[element.get_type()] = element
 
-    def parse(self, source_or_text):
-        # type: (Union[Source, AnyStr]) -> Union[List[block.BlockElement], block.BlockElement]
+    def parse(
+        self, source_or_text: Union[Source, AnyStr]
+    ) -> Union[List["block.BlockElement"], "block.BlockElement"]:
         """Do the actual parsing and returns an AST or parsed element.
 
         :param source_or_text: the text or source object.
@@ -62,7 +64,7 @@ class Parser:
             inline.parser = self  # type: ignore
             return self.block_elements["Document"](source_or_text)  # type: ignore
         element_list = self._build_block_element_list()
-        ast = []  # type: List[block.BlockElement]
+        ast: List[block.BlockElement] = []
         assert isinstance(source_or_text, Source)
         while not source_or_text.exhausted:
             for ele_type in element_list:
@@ -80,7 +82,7 @@ class Parser:
                 break
         return ast
 
-    def parse_inline(self, text):  # type: (str) -> List[inline.InlineElement]
+    def parse_inline(self, text: str) -> List["inline.InlineElement"]:
         """Parses text into inline elements.
         RawText is not considered in parsing but created as a wrapper of holes
         that don't match any other elements.
@@ -93,7 +95,7 @@ class Parser:
             text, element_list, fallback=self.inline_elements["RawText"]
         )
 
-    def _build_block_element_list(self):  # type: () -> List[BlockElementType]
+    def _build_block_element_list(self) -> List["BlockElementType"]:
         """Return a list of block elements, ordered from highest priority to lowest."""
         return sorted(
             (e for e in self.block_elements.values() if not e.virtual),
@@ -101,18 +103,16 @@ class Parser:
             reverse=True,
         )
 
-    def _build_inline_element_list(self):  # type: () -> List[InlineElementType]
+    def _build_inline_element_list(self) -> List["InlineElementType"]:
         """Return a list of elements, each item is a list of elements
         with the same priority.
         """
         return [e for e in self.inline_elements.values() if not e.virtual]
 
 
-from . import block, inline, inline_parser, element  # noqa
+from . import block, element, inline, inline_parser  # noqa
 
 if TYPE_CHECKING:
-    from typing import Type, Union, Dict, AnyStr, List
-
     BlockElementType = Type[block.BlockElement]
     InlineElementType = Type[inline.InlineElement]
     ElementType = Type[element.Element]
