@@ -2,13 +2,14 @@
 Block level elements
 """
 import re
+from typing import cast, Tuple
 from . import inline, patterns
 from .helpers import Source, is_paired, normalize_label, is_type_check
 from .parser import Parser
 from .element import Element
 
 if is_type_check():
-    from typing import Any, Optional, Match, Dict, Union, Tuple, List as _List
+    from typing import Any, Optional, Match, Dict, Union, List as _List
 
 __all__ = (
     "Document",
@@ -371,7 +372,9 @@ class Paragraph(BlockElement):
         ):
             return True
         if parser.block_elements["List"].match(source):
-            result = parser.block_elements["ListItem"].parse_leading(source.next_line())
+            result = parser.block_elements["ListItem"].parse_leading(
+                source.next_line(), 0
+            )
             if lazy or (result[1][:-1] == "1" or result[1] in "*-+") and result[3]:
                 return True
         html_type = parser.block_elements["HTMLBlock"].match(source)
@@ -509,18 +512,19 @@ class ListItem(BlockElement):
         self._second_prefix = " " * (len(bullet) + indent + (mid or 1))
 
     @classmethod
-    def parse_leading(cls, line):  # type: (str) -> Tuple[int, str, int, str]
-        line = line.expandtabs(4)
-        stripped_line = line.lstrip()
-        indent = len(line) - len(stripped_line)
+    def parse_leading(cls, line: str, prefix_pos: int) -> Tuple[int, str, int, str]:
+        stripped_line = line[prefix_pos:].expandtabs(4).lstrip()
+        indent = len(line) - prefix_pos - len(stripped_line)
         temp = stripped_line.split(None, 1)
         bullet = temp[0]
         if len(temp) == 1:
+            # Bare bullets (* \n)
             mid = 0
             tail = ""
         else:
             mid = len(stripped_line) - len("".join(temp))
             if mid > 4:
+                # If indented more than 4 spaces, it should be a indented code block
                 mid = 1
             tail = temp[1]
         return indent, bullet, mid, tail
@@ -531,18 +535,12 @@ class ListItem(BlockElement):
             return False
         if not source.expect_re(cls.pattern):
             return False
-        next_line = source.next_line(False)
-        assert next_line is not None
+        next_line = cast(str, source.next_line(False)).expandtabs(4)
         prefix_pos = 0
-        stripped_line = next_line
-        for i in range(1, len(next_line) + 1):
-            m = re.match(source.prefix, next_line[:i].expandtabs(4))
-            if not m:
-                continue
-            if m.end() > prefix_pos:
-                prefix_pos = m.end()
-                stripped_line = next_line[:i].expandtabs(4)[prefix_pos:] + next_line[i:]
-        indent, bullet, mid, tail = cls.parse_leading(stripped_line)  # type: ignore
+        m = re.match(source.prefix, next_line)
+        if m is not None:
+            prefix_pos = m.end()
+        indent, bullet, mid, tail = cls.parse_leading(next_line, prefix_pos)  # type: ignore
         parent = source.state
         assert isinstance(parent, List)
         if (

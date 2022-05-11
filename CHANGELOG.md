@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fix a bug that tabs between the list bullet and item are not expanded properly.
+
 ## v1.2.0(2022-01-04)
 
 - Forbid delegation to element-specific render methods for AST renderers.
