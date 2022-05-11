@@ -2,7 +2,8 @@
 Base parser
 """
 import itertools
-from .helpers import is_type_check, Source
+from typing import TYPE_CHECKING
+from .helpers import Source
 
 
 class Parser:
@@ -109,7 +110,7 @@ class Parser:
 
 from . import block, inline, inline_parser, element  # noqa
 
-if is_type_check():
+if TYPE_CHECKING:
     from typing import Type, Union, Dict, AnyStr, List
 
     BlockElementType = Type[block.BlockElement]

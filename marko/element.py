@@ -1,7 +1,4 @@
-from .helpers import camel_to_snake_case, is_type_check
-
-if is_type_check():
-    from typing import Any
+from .helpers import camel_to_snake_case
 
 
 class Element:
@@ -9,8 +6,11 @@ class Element:
     InlineElement classes.
     This class should not be subclassed by any other classes beside these.
     """
+
+    override: bool
+
     @classmethod
-    def get_type(cls, snake_case=False):  # type: (Any) -> str
+    def get_type(cls, snake_case: bool = False) -> str:
         """
         Return the Markdown element type that the object represents.
 

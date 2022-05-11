@@ -2,14 +2,17 @@
 Block level elements
 """
 import re
-from typing import cast, Tuple
-from . import inline, patterns
-from .helpers import Source, is_paired, normalize_label, is_type_check
-from .parser import Parser
-from .element import Element
+from typing import TYPE_CHECKING, Tuple, cast
 
-if is_type_check():
-    from typing import Any, Optional, Match, Dict, Union, List as _List
+from . import inline, patterns
+from .element import Element
+from .helpers import Source, is_paired, normalize_label
+from .parser import Parser
+
+if TYPE_CHECKING:
+    from typing import Any, Dict
+    from typing import List as _List
+    from typing import Match, Optional, Union
 
 __all__ = (
     "Document",
@@ -289,6 +292,7 @@ class HTMLBlock(BlockElement):
     @classmethod
     def match(cls, source):  # type: (Source) -> Union[int, bool]
         if source.expect_re(r"(?i) {,3}<(script|pre|style|textarea)[>\s]"):
+            assert source.match
             cls._end_cond = re.compile(rf"(?i)</{source.match.group(1)}>")
             return 1
         if source.expect_re(r" {,3}<!--"):

@@ -3,8 +3,14 @@ Helper functions and data structures
 """
 import functools
 import re
+import typing
 from contextlib import contextmanager
 from importlib import import_module
+
+if typing.TYPE_CHECKING:
+    from typing import Generator, List, Match, Optional, Pattern, Union
+
+    from .block import BlockElement
 
 
 def camel_to_snake_case(name):  # type: (str) -> str
@@ -46,7 +52,7 @@ class Source:
         self.pos = 0
         self._anchor = 0
         self._states = []  # type: List[BlockElement]
-        self.match = None  # type: Optional[Match]
+        self.match = None  # type: Optional[Match[str]]
 
     @property
     def state(self):  # type: () -> BlockElement
@@ -89,7 +95,7 @@ class Source:
         return "".join(s._prefix for s in self._states)
 
     def _expect_re(self, regexp, pos):
-        # type: (Union[Pattern, str], int) -> Optional[Match]
+        # type: (Union[Pattern[str], str], int) -> Optional[Match[str]]
         if isinstance(regexp, str):
             regexp = re.compile(regexp)
         return regexp.match(self._buffer, pos)
@@ -114,7 +120,9 @@ class Source:
                 return i
         return -1  # pragma: no cover
 
-    def expect_re(self, regexp):  # type: (Union[Pattern, str]) -> Optional[Match]
+    def expect_re(
+        self, regexp
+    ):  # type: (Union[Pattern[str], str]) -> Optional[Match[str]]
         """Test against the given regular expression and returns the match object.
 
         :param regexp: the expression to be tested.
@@ -198,17 +206,3 @@ def load_extension_object(name):
             f"Module {name} does not have 'make_extension' attributte."
         )
     return maker
-
-
-def is_type_check() -> bool:  # pragma: no cover
-    try:
-        from typing import TYPE_CHECKING
-    except ImportError:
-        return False
-    else:
-        return TYPE_CHECKING
-
-
-if is_type_check():
-    from .block import BlockElement
-    from typing import Optional, List, Generator, Union, Pattern, Match

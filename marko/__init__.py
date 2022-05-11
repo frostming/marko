@@ -9,13 +9,16 @@ r"""
  Licensed under MIT.
  Created by Frost Ming<mianghong@gmail.com>
 """
-from .html_renderer import HTMLRenderer
-from .renderer import Renderer
-from .parser import Parser
-from .helpers import is_type_check, load_extension_object
+from typing import TYPE_CHECKING
 
-if is_type_check():
-    from typing import Type, List, Any, Optional
+from .helpers import load_extension_object
+from .html_renderer import HTMLRenderer
+from .parser import Parser
+from .renderer import Renderer
+
+if TYPE_CHECKING:
+    from typing import Any, List, Optional, Type
+
     from .block import Document
     from .parser import ElementType
 

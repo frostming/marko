@@ -3,10 +3,10 @@ Base renderer class
 """
 import html
 import re
+from typing import TYPE_CHECKING
 
-from .helpers import is_type_check
 
-if is_type_check():
+if TYPE_CHECKING:
     from typing import Any
     from .element import Element
 
@@ -39,12 +39,12 @@ class Renderer:
 
     def __enter__(self):  # type: () -> Renderer
         """Provide a context so that root_node can be reset after render."""
-        self._charref_bak = html._charref
-        html._charref = self._charref
+        self._charref_bak = html._charref  # type: ignore[attr-defined]
+        html._charref = self._charref  # type: ignore[attr-defined]
         return self
 
     def __exit__(self, *args):  # type: (Any) -> None
-        html._charref = self._charref_bak
+        html._charref = self._charref_bak  # type: ignore[attr-defined]
 
     def render(self, element):  # type: (Element) -> str
         """Renders the given element to string.

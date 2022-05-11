@@ -3,17 +3,19 @@ Parse inline elements
 """
 import re
 import string
+from typing import TYPE_CHECKING
 
-from .helpers import is_paired, normalize_label, is_type_check
+from .helpers import is_paired, normalize_label
 from . import patterns
 
-if is_type_check():
+if TYPE_CHECKING:
     from typing import Type, List, Optional, Match, Tuple, Union
     from .inline import InlineElement
     from .block import Document
 
     ElementType = Type[InlineElement]
     Group = Tuple[int, int, Optional[str]]
+    _Match = Union[Match[str], "MatchObj"]
 
 
 def parse(text, elements, fallback):
@@ -460,7 +462,3 @@ class MatchObj:
         if n == 0:
             return self._end
         return self._groups[n - 1][1]
-
-
-if is_type_check():
-    _Match = Union[Match, MatchObj]

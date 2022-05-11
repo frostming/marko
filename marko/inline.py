@@ -2,13 +2,13 @@
 Inline(span) level elements
 """
 import re
+from typing import TYPE_CHECKING
 
-from .helpers import is_type_check
 from . import inline_parser, patterns
 from .element import Element
 
-if is_type_check():
-    from typing import Pattern, Match, Iterator, Union
+if TYPE_CHECKING:
+    from typing import Pattern, Match, Iterator, Union, Sequence
     from .inline_parser import _Match
 
 __all__ = (
@@ -42,6 +42,9 @@ class InlineElement(Element):
     virtual = False
     #: If true, will replace the element which it derives from.
     override = False
+
+    if TYPE_CHECKING:
+        children: "str | Sequence[Element]"
 
     def __init__(self, match):  # type: (_Match) -> None
         """Parses the matched object into an element"""
@@ -173,7 +176,7 @@ class AutoLink(InlineElement):
     """Autolinks: <http://example.org>"""
 
     priority = 7
-    pattern = re.compile(fr"<({patterns.uri}|{patterns.email})>")
+    pattern = re.compile(rf"<({patterns.uri}|{patterns.email})>")
 
     def __init__(self, match):  # type: (_Match) -> None
         self.dest = match.group(1)
