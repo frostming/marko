@@ -3,11 +3,11 @@ Helper functions and data structures
 """
 import functools
 import re
-import typing
 from contextlib import contextmanager
 from importlib import import_module
+from typing import TYPE_CHECKING
 
-if typing.TYPE_CHECKING:
+if TYPE_CHECKING:
     from typing import Generator, List, Match, Optional, Pattern, Union
 
     from .block import BlockElement
