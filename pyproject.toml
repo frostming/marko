@@ -34,13 +34,6 @@ Documentation = "https://marko-py.readthedocs.io"
 [project.optional-dependencies]
 toc = ["python-slugify"]
 codehilite = ["pygments"]
-benchmark = [
-    "commonmark~=0.9",
-    "markdown~=3.3",
-    "markdown-it-py~=2.0",
-    "mistune~=2.0",
-    "mistletoe~=0.7",
-]
 
 [project.scripts]
 marko = "marko.cli:main"
@@ -49,9 +42,15 @@ marko = "marko.cli:main"
 version = {from = "marko/__init__.py"}
 
 [tool.pdm.dev-dependencies]
+benchmark = [
+    "commonmark>=0.9",
+    "markdown>=3.3",
+    "markdown-it-py>=2.0; python_version >= '3.7'",
+    "mistune>=2.0",
+    "mistletoe>=0.7",
+]
 dev = [
-    "pytest<7.0.0,>=6.1.2",
-    "pytest-cov<3.0.0,>=2.10.1",
-    "mypy",
-    "nox~=2020.12",
+    "pytest",
+    "pytest-cov",
+    "mypy>=0.950",
 ]
