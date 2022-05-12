@@ -12,5 +12,5 @@ def tests(session):
 
 @nox.session
 def benchmark(session):
-    session.run("pdm", "install", "-s", "benchmark", external=True)
+    session.run("pdm", "install", "-dG", "benchmark", external=True)
     session.run("python", "-m", "tests.benchmark")
