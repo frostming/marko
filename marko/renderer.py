@@ -3,10 +3,11 @@ Base renderer class
 """
 import html
 import re
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar
 
 if TYPE_CHECKING:
     from .element import Element
+    from .block import Document
 
 _T = TypeVar("_T", bound="Renderer")
 
@@ -35,7 +36,7 @@ class Renderer:
     )
 
     def __init__(self) -> None:
-        self.root_node = None
+        self.root_node: Optional["Document"] = None
 
     def __enter__(self: _T) -> _T:
         """Provide a context so that root_node can be reset after render."""
@@ -53,7 +54,7 @@ class Renderer:
         :returns: the output string or any values.
         """
         # Store the root node to provide some context to render functions
-        if not self.root_node:
+        if not self.root_node:  # pragma: no cover
             self.root_node = element  # type: ignore
         if hasattr(element, "get_type"):
             func_name = "render_" + element.get_type(snake_case=True)

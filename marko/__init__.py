@@ -9,7 +9,7 @@ r"""
  Licensed under MIT.
  Created by Frost Ming<mianghong@gmail.com>
 """
-from typing import TYPE_CHECKING, Any, List, Optional, Type
+from typing import TYPE_CHECKING, Any, List, Optional, Type, cast
 
 from .helpers import load_extension_object
 from .html_renderer import HTMLRenderer
@@ -92,12 +92,12 @@ class Markdown:
         """Install all extensions and set things up."""
         if self._setup_done:
             return
-        self.parser = type(
+        self.parser: Parser = type(
             "MarkdownParser", tuple(self._parser_mixins) + (self._base_parser,), {}
         )()
         for e in self._extra_elements:
             self.parser.add_element(e)
-        self.renderer = type(
+        self.renderer: Renderer = type(
             "MarkdownRenderer",
             tuple(self._renderer_mixins) + (self._base_renderer,),
             {},
@@ -117,7 +117,7 @@ class Markdown:
         Override this to preprocess text or handle parsed result.
         """
         self._setup_extensions()
-        return self.parser.parse(text)
+        return cast("Document", self.parser.parse(text))
 
     def render(self, parsed: "Document") -> str:
         """Call ``self.renderer.render(text)``.
