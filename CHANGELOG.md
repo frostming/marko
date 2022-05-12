@@ -1,4 +1,4 @@
-## Unreleased
+## v1.2.1(2022-05-12)
 
 - Fix a bug that tabs between the list bullet and item are not expanded properly.
 - Upgrade from type comments to Py 3.5+ style annotations.
