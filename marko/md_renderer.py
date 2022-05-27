@@ -49,6 +49,7 @@ class MarkdownRenderer(Renderer):
             for child in element.children:
                 with self.container(f"{num}. ", " " * (len(str(num)) + 2)):
                     result.append(self.render(child))
+                num += 1
         else:
             for child in element.children:
                 with self.container(f"{element.bullet} ", "  "):
