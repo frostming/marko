@@ -46,7 +46,7 @@ class MarkdownRenderer(Renderer):
         result = []
         if element.ordered:
             num = element.start
-            for child in element.children:
+            for num, child in enumerate(element.children, element.start):
                 with self.container(f"{num}. ", " " * (len(str(num)) + 2)):
                     result.append(self.render(child))
                 num += 1
