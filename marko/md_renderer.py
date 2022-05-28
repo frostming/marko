@@ -45,11 +45,9 @@ class MarkdownRenderer(Renderer):
     def render_list(self, element: "block.List") -> str:
         result = []
         if element.ordered:
-            num = element.start
             for num, child in enumerate(element.children, element.start):
                 with self.container(f"{num}. ", " " * (len(str(num)) + 2)):
                     result.append(self.render(child))
-                num += 1
         else:
             for child in element.children:
                 with self.container(f"{element.bullet} ", "  "):
