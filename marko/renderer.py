@@ -28,7 +28,10 @@ class Renderer:
     :meth:`Renderer.render_children`.
     """
 
-    #: Whether to delegate rendering to specific render functions
+    #: Whether to delegate rendering to specific render functions.
+    # It is useful when the renderer is to be mixed with other renderers. When set to False,
+    # the render functions from the base renderer will be ignored unless decorated by
+    # ``@force_delegate``.
     delegate: bool = True
 
     _charref = re.compile(
@@ -47,13 +50,13 @@ class Renderer:
     def __exit__(self, *args: Any) -> None:
         html._charref = self._charref_bak  # type: ignore[attr-defined]
 
-    def render(self, element: "Element") -> str:
+    def render(self, element: "Element") -> Any:
         """Renders the given element to string.
 
         :param element: a element to be rendered.
         :returns: the output string or any values.
         """
-        # Store the root node to provide some context to render functions
+        # Store the root node since it may be required by the render functions
         if not self.root_node:  # pragma: no cover
             self.root_node = element  # type: ignore
         if hasattr(element, "get_type"):
