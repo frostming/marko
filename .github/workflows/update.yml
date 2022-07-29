@@ -1,9 +1,8 @@
 name: Update dependencies
 
 on:
-  push:
-    branches:
-      - "update/*"
+  schedule:
+    cron: "0 0 * * *"
 
 jobs:
   update-dependencies:
