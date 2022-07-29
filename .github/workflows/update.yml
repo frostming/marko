@@ -1,0 +1,15 @@
+name: Update dependencies
+
+on:
+  push:
+    branches:
+      - "update/*"
+
+jobs:
+  update-dependencies:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Update dependencies
+        uses: pdm-project/update-deps-action@main
