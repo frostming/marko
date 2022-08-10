@@ -68,7 +68,7 @@ class Renderer:
                 return render_func(element)
         return self.render_children(element)
 
-    def render_children(self, element: Any) -> Any:
+    def render_children(self, element: "Element") -> str:
         """
         Recursively renders child elements. Joins the rendered
         strings with no space in between.
