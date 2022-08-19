@@ -80,8 +80,8 @@ summary = "Markdown URL utilities"
 
 [[package]]
 name = "mistletoe"
-version = "0.8.2"
-requires_python = "~=3.3"
+version = "0.9.0"
+requires_python = "~=3.5"
 summary = "A fast, extensible Markdown parser in pure Python."
 
 [[package]]
@@ -297,9 +297,9 @@ content_hash = "sha256:5033e9f98261ee07a56c42ce8a23188ede9e08ea0f131e021f7715b83
     {url = "https://files.pythonhosted.org/packages/00/3f/571221facbf1c158a78dbad166b512fc718e76a1ed16382ee919816b0015/mdurl-0.1.1-py3-none-any.whl", hash = "sha256:6a8f6804087b7128040b2fb2ebe242bdc2affaeaa034d5fc9feeed30b443651b"},
     {url = "https://files.pythonhosted.org/packages/d1/ff/2f02e94382daee347ca6cfd33fde421e891398d83c51d05f25941f7f93e9/mdurl-0.1.1.tar.gz", hash = "sha256:f79c9709944df218a4cdb0fcc0b0c7ead2f44594e3e84dc566606f04ad749c20"},
 ]
-"mistletoe 0.8.2" = [
-    {url = "https://files.pythonhosted.org/packages/00/5b/c0dabe8c625fb1705b250951052a818ecdeae7a189d8bd1f6273b24d21cd/mistletoe-0.8.2.tar.gz", hash = "sha256:a2e354e653f29bcaf5599d8948512119ac6037e9c2f8ee77f39d55450e7d1a6c"},
-    {url = "https://files.pythonhosted.org/packages/71/0f/20f78ab0b9e75f566e438137dda328d589792d66efa59c78c806a003aed3/mistletoe-0.8.2-py3-none-any.whl", hash = "sha256:3c82cbcf01ed0a79944ba7ba2b715e6da633d1eef24812904e9008160a74e93e"},
+"mistletoe 0.9.0" = [
+    {url = "https://files.pythonhosted.org/packages/43/94/525e5c7d5bb9c56129684bb3c91d0081e6330baaa558926773b1091808a5/mistletoe-0.9.0.tar.gz", hash = "sha256:3cb96d78226d08f0d3bf09efcaf330d23902492006e18b2c06558e8b86bf7faf"},
+    {url = "https://files.pythonhosted.org/packages/db/87/10480abe76138bc06a2760c5775af071cb80cb55345bd9455171308f6a57/mistletoe-0.9.0-py3-none-any.whl", hash = "sha256:11316e2fe0be422a8248293ad0efbee9ad0c6f3683b2f45bc6b989ea17a68c74"},
 ]
 "mistune 2.0.4" = [
     {url = "https://files.pythonhosted.org/packages/3a/c7/b0a4413a4d9b7a4fda0d710fd90dba62375f0d0c4544e848dc7656757c0c/mistune-2.0.4-py2.py3-none-any.whl", hash = "sha256:182cc5ee6f8ed1b807de6b7bb50155df7b66495412836b9a74c8fbdfc75fe36d"},
