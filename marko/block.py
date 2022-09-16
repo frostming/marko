@@ -8,7 +8,7 @@ from typing import Match, Optional, Tuple, Union, cast
 
 from . import inline, patterns
 from .element import Element
-from .helpers import Source, is_paired, normalize_label
+from .helpers import Source, is_paired, normalize_label, partition_by_spaces
 from .parser import Parser
 
 __all__ = (
@@ -231,7 +231,7 @@ class FencedCode(BlockElement):
         prefix, leading, info = m.groups()
         if leading[0] == "`" and "`" in info:
             return None
-        lang, extra = (info.split(None, 1) + [""] * 2)[:2]
+        lang, _, extra = partition_by_spaces(info)
         cls._parse_info = prefix, leading, lang, extra
         return m
 
@@ -374,7 +374,7 @@ class Paragraph(BlockElement):
             return True
         if parser.block_elements["List"].match(source):
             result = parser.block_elements["ListItem"].parse_leading(
-                source.next_line(), 0
+                source.next_line().rstrip(), 0
             )
             if lazy or (result[1][:-1] == "1" or result[1] in "*-+") and result[3]:
                 return True
@@ -501,13 +501,13 @@ class List(BlockElement):
 class ListItem(BlockElement):
     """List item element. It can only be created by List.parse"""
 
-    _parse_info = (0, "", 0, "")
+    _parse_info = (0, "", 0)
     virtual = True
     _tight = False
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
 
     def __init__(self) -> None:
-        indent, bullet, mid, tail = self._parse_info
+        indent, bullet, mid = self._parse_info
         self._prefix = " " * indent + re.escape(bullet) + " " * mid
         self._second_prefix = " " * (len(bullet) + indent + (mid or 1))
 
@@ -515,18 +515,10 @@ class ListItem(BlockElement):
     def parse_leading(cls, line: str, prefix_pos: int) -> Tuple[int, str, int, str]:
         stripped_line = line[prefix_pos:].expandtabs(4).lstrip()
         indent = len(line) - prefix_pos - len(stripped_line)
-        temp = stripped_line.split(None, 1)
-        bullet = temp[0]
-        if len(temp) == 1:
-            # Bare bullets (* \n)
-            mid = 0
-            tail = ""
-        else:
-            mid = len(stripped_line) - len("".join(temp))
-            if mid > 4:
-                # If indented more than 4 spaces, it should be a indented code block
-                mid = 1
-            tail = temp[1]
+        bullet, spaces, tail = partition_by_spaces(stripped_line)
+        mid = len(spaces)
+        if mid > 4:
+            mid = 1
         return indent, bullet, mid, tail
 
     @classmethod
@@ -540,7 +532,7 @@ class ListItem(BlockElement):
         m = re.match(source.prefix, next_line)
         if m is not None:
             prefix_pos = m.end()
-        indent, bullet, mid, tail = cls.parse_leading(next_line, prefix_pos)  # type: ignore
+        indent, bullet, mid, _ = cls.parse_leading(next_line.rstrip(), prefix_pos)  # type: ignore
         parent = source.state
         assert isinstance(parent, List)
         if (
@@ -551,7 +543,7 @@ class ListItem(BlockElement):
             return False
         if not parent.ordered and bullet != parent.bullet:
             return False
-        cls._parse_info = (indent, bullet, mid, tail)
+        cls._parse_info = (indent, bullet, mid)
         return True
 
     @classmethod

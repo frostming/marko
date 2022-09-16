@@ -13,6 +13,7 @@ from typing import (
     Match,
     Optional,
     Pattern,
+    Tuple,
     Union,
 )
 
@@ -185,6 +186,25 @@ class Source:
 def normalize_label(label: str) -> str:
     """Return the normalized form of link label."""
     return re.sub(r"\s+", " ", label).strip().casefold()
+
+
+def partition_by_spaces(text: str) -> Tuple[str, str, str]:
+    """Split the given text by spaces or tabs, and return a tuple of
+    (start, delimiter, remaining). If spaces are not found, the latter
+    two elements will be empty.
+    """
+    start = end = -1
+    for i, c in enumerate(text):
+        if c in " \t":
+            if start >= 0:
+                continue
+            start = i
+        elif start >= 0:
+            end = i
+            break
+    if start < 0:
+        return text, "", ""
+    return text[:start], text[start:end], text[end:]
 
 
 def load_extension_object(name: str) -> Callable:

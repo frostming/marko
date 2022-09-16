@@ -16,6 +16,11 @@ class TestCommonMark(SpecTestSuite):
         )
         self.assert_case(md, html)
 
+    def test_parse_nbsp_no_crash(self):
+        md = "- \xa0A"
+        html = "<ul>\n<li>A</li>\n</ul>"
+        self.assert_case(md, html)
+
 
 TestCommonMark.load_spec("commonmark")
 
