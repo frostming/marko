@@ -57,3 +57,17 @@ def test_load_illegal_extension_object():
         match="Module marko.block does not have 'make_extension' attributte",
     ):
         helpers.load_extension_object("marko.block")()
+
+
+@pytest.mark.parametrize(
+    "text, expected",
+    [
+        ("hello world", ("hello", " ", "world")),
+        ("hello", ("hello", "", "")),
+        ("hello ", ("hello", " ", "")),
+        (" hello", ("", " ", "hello")),
+        ("hello\t  wor ld", ("hello", "\t  ", "wor ld")),
+    ],
+)
+def test_partition_by_spaces(text, expected):
+    assert helpers.partition_by_spaces(text) == expected
