@@ -204,6 +204,8 @@ def partition_by_spaces(text: str) -> Tuple[str, str, str]:
             break
     if start < 0:
         return text, "", ""
+    if end < 0:
+        return text[:start], text[start:], ""
     return text[:start], text[start:end], text[end:]
 
 
