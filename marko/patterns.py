@@ -77,16 +77,8 @@ attribute_no_lf = (
     r"[^\n\S]+[A-Za-z:_][A-Za-z0-9\-_\.:]*"
     r'(?:[^\n\S]*=[^\n\S]*(?:[^\s"\'`=<>]+|\'[^\n\']*\'|"[^\n"]*"))?'
 )
-link_label = r"(?P<label>\[(?!\s*\])(?:\\\\|\\[\[\]]|[^\[\]])+\])"
-link_dest = r"(?P<dest><(?:\\.|[^\n\\<>])*>|[^<\s]\S*)"
-link_title = (
-    r'(?P<title>"(?:\\\\|\\"|[^"])*"|\'(?:\\\\|\\\'|[^\'])*\''
-    r"|\((?:\\\\|\\\)|[^\(\)])*\))"
-)
 
-link_dest_1 = re.compile(r"<(?:\\.|[^\n\\<>])*>")
 whitespace = re.compile(r"\s+", flags=re.UNICODE)
-optional_label = re.compile(r"\[(?:\\\\|\\[\[\]]|[^\[\]])*\]")
 uri = r"[A-Za-z][A-Za-z\-.+]{1,31}:[^\s<>]*?"
 email = (
     r"[a-zA-Z0-9.!#$%&\'*+/=?^_`{|}~-]+@[a-zA-Z0-9]"

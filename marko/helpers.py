@@ -8,7 +8,9 @@ from importlib import import_module
 from typing import (
     TYPE_CHECKING,
     Callable,
+    Container,
     Generator,
+    Iterable,
     List,
     Match,
     Optional,
@@ -28,7 +30,7 @@ def camel_to_snake_case(name: str) -> str:
     return "_".join(map(str.lower, re.findall(pattern, name)))
 
 
-def is_paired(text: str, open: str = "(", close: str = ")") -> bool:
+def is_paired(text: Iterable[str], open: str = "(", close: str = ")") -> bool:
     """Check if the text only contains:
     1. blackslash escaped parentheses, or
     2. parentheses paired.
@@ -188,14 +190,44 @@ def normalize_label(label: str) -> str:
     return re.sub(r"\s+", " ", label).strip().casefold()
 
 
-def partition_by_spaces(text: str) -> Tuple[str, str, str]:
+def find_next(
+    text: str,
+    target: Container[str],
+    start: int = 0,
+    end: Optional[int] = None,
+    disallowed: Container[str] = (),
+) -> int:
+    """Find the next occurrence of target in text, and return the index
+    Characters are escaped by backslash.
+    Optional disallowed characters can be specified, if found, the search
+    will fail with -2 returned. Otherwise, -1 is returned if not found.
+    """
+    if end is None:
+        end = len(text)
+    i = start
+    escaped = False
+    while i < end:
+        c = text[i]
+        if escaped:
+            escaped = False
+        elif c in target:
+            return i
+        elif c in disallowed:
+            return -2
+        elif c == "\\":
+            escaped = True
+        i += 1
+    return -1
+
+
+def partition_by_spaces(text: str, spaces: str = " \t") -> Tuple[str, str, str]:
     """Split the given text by spaces or tabs, and return a tuple of
     (start, delimiter, remaining). If spaces are not found, the latter
     two elements will be empty.
     """
     start = end = -1
     for i, c in enumerate(text):
-        if c in " \t":
+        if c in spaces:
             if start >= 0:
                 continue
             start = i

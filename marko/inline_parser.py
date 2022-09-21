@@ -1,20 +1,28 @@
 """
 Parse inline elements
 """
+import collections
 import re
-import string
 from typing import TYPE_CHECKING, List, Match, Optional, Tuple, Type, Union
 
 from . import patterns
-from .helpers import is_paired, normalize_label
+from .helpers import is_paired, normalize_label, find_next
 
 if TYPE_CHECKING:
     from .block import Document
     from .inline import InlineElement
 
     ElementType = Type[InlineElement]
-    Group = Tuple[int, int, Optional[str]]
     _Match = Union[Match[str], "MatchObj"]
+
+Group = collections.namedtuple("Group", "start end text")
+_EMPTY_GROUP = Group(-1, -1, None)
+WHITESPACE = " \n\t"
+ASCII_CONTROL = "".join(chr(i) for i in range(0, 32)) + chr(127)
+
+
+class ParseError(ValueError):
+    """Raised when parsing fails."""
 
 
 def parse(
@@ -203,7 +211,7 @@ def look_for_image_or_link(
             break  # break to remove the delimiter and return None
         if not _is_legal_link_text(text[d.end : close]):
             break
-        link_text = (d.end, close, text[d.end : close])
+        link_text = Group(d.end, close, text[d.end : close])
         etype = "Image" if d.content == "![" else "Link"
         match = _expect_inline_link(text, close + 1) or _expect_reference_link(
             text, close + 1, link_text[2], root_node
@@ -231,68 +239,127 @@ def _is_legal_link_text(text: str) -> bool:
     return is_paired(text, "[", "]")
 
 
-def _expect_inline_link(
-    text: str, start: int
-) -> Optional[Tuple["Group", "Group", int]]:
-    """(link_dest "link_title")"""
-    if start >= len(text) - 1 or text[start] != "(":
+def _parse_link_separator(text: str, start: int) -> int:
+    i = start
+    has_newline = False
+    while i < len(text):
+        if text[i] == "\n":
+            if has_newline:
+                break
+            has_newline = True
+        elif text[i] not in WHITESPACE:
+            break
+        i += 1
+    return i
+
+
+def _parse_link_label(text: str, start: int) -> Optional[Group]:
+    if text[start : start + 1] != "[":
         return None
-    i = start + 1
-    m = patterns.whitespace.match(text, i)
-    if m:
-        i = m.end()
-    m = patterns.link_dest_1.match(text, i)
-    if m:
-        link_dest = m.start(), m.end(), m.group()
-        i = m.end()
+    i = find_next(text, "]", start + 1, disallowed="[")
+    if i < 0:
+        return None
+    label = text[start + 1 : i]
+    if not label.strip() or len(label) > 999:
+        return None
+    return Group(start, i + 1, text[start : i + 1])
+
+
+def _parse_link_dest_title(
+    link_text: str, start: int = 0, is_inline: bool = False
+) -> Tuple[Group, Group]:
+    if start >= len(link_text):
+        raise ParseError()
+    if link_text[start] == "<":
+        right_bracket = find_next(link_text, ">", start + 1, disallowed="<\n")
+        if right_bracket < 0:
+            raise ParseError()
+        i = right_bracket + 1
+        link_dest = Group(start, i, link_text[start:i])
     else:
-        if text[i] == "<":
-            return None
-        open_num = 0
         escaped = False
-        prev = i
-        while i < len(text):
-            c = text[i]
+        pairs = 0
+        for i, c in enumerate(link_text[start:], start):
             if escaped:
                 escaped = False
             elif c == "\\":
                 escaped = True
-            elif c == "(":
-                open_num += 1
-            elif c in string.whitespace:
+            elif c in WHITESPACE:
                 break
+            elif c in ASCII_CONTROL:
+                raise ParseError("Invalid character in link destination")
+            elif c == "(":
+                pairs += 1
             elif c == ")":
-                if open_num > 0:
-                    open_num -= 1
+                if pairs > 0:
+                    pairs -= 1
+                elif is_inline:
+                    link_dest = Group(start, i, link_text[start:i])
+                    return link_dest, _EMPTY_GROUP
                 else:
-                    break
-            i += 1
-        if open_num != 0:
-            return None
-        link_dest = prev, i, text[prev:i]
-    link_title = i, i, None
-    tail_re = re.compile(r"(?:\s+%s)?\s*\)" % patterns.link_title, flags=re.UNICODE)
-    m = tail_re.match(text, i)
-    if not m:
+                    raise ParseError("unmatched parenthesis")
+        else:
+            if is_inline:
+                raise ParseError("No right parenthesis is found")
+        link_dest = Group(start, i, link_text[start:i])
+        if not link_dest.text:
+            raise ParseError("Empty link destination")
+    prev = i
+    i = _parse_link_separator(link_text, i)
+    if i >= len(link_text) or link_text[i] == "\n" or link_text[i] == ")" and is_inline:
+        return link_dest, _EMPTY_GROUP
+    if link_text[i] == '"':
+        end = find_next(link_text, '"', i + 1)
+    elif link_text[i] == "'":
+        end = find_next(link_text, "'", i + 1)
+    elif link_text[i] == "(":
+        end = find_next(link_text, ")", i + 1, disallowed="(")
+    elif "\n" in link_text[prev:i]:
+        return link_dest, _EMPTY_GROUP
+    else:
+        raise ParseError()
+    if 0 < i < len(link_text) and link_text[i - 1] not in WHITESPACE:
+        raise ParseError()
+    if end < 0:
+        raise ParseError()
+    if "\n\n" in link_text[i:end]:
+        raise ParseError()
+    link_title = Group(i, end + 1, link_text[i : end + 1])
+    return link_dest, link_title
+
+
+def _expect_inline_link(text: str, start: int) -> Optional[Tuple[Group, Group, int]]:
+    """(link_dest "link_title")"""
+    if start >= len(text) - 1 or text[start] != "(":
         return None
-    if m.group("title"):
-        link_title = m.start("title"), m.end("title"), m.group("title")  # type: ignore
-    return (link_dest, link_title, m.end())
+    i = _parse_link_separator(text, start + 1)
+
+    try:
+        link_dest, link_title = _parse_link_dest_title(text, i, is_inline=True)
+    except ParseError:
+        return None
+    end = max(link_dest.end, link_title.end)
+    end = _parse_link_separator(text, end)
+    if end >= len(text) or text[end] != ")":
+        return None
+    return link_dest, link_title, end + 1
 
 
 def _expect_reference_link(
     text: str, start: int, link_text: str, root_node: "Document"
-) -> Optional[Tuple["Group", "Group", int]]:
-    match = patterns.optional_label.match(text, start)
-    link_label = link_text
-    if match and match.group()[1:-1]:
-        link_label = match.group()[1:-1]
-    result = _get_reference_link(link_label, root_node)
+) -> Optional[Tuple[Group, Group, int]]:
+    link_label = _parse_link_label(text, start)
+    label = link_text
+    if link_label is not None:
+        label = link_label.text[1:-1] or link_text
+    elif text[start : start + 2] == "[]":
+        link_label = Group(start, start + 2, "[]")
+    result = _get_reference_link(label, root_node)
     if not result:
         return None
-    link_dest = start, start, result[0]
-    link_title = start, start, result[1]
-    return (link_dest, link_title, match and match.end() or start)
+    link_dest = Group(start, start, result[0])
+    link_title = Group(start, start, result[1])
+    return (link_dest, link_title, link_label.end if link_label else start)
 
 
 def _get_reference_link(
@@ -322,7 +389,9 @@ def process_emphasis(
                 text,
                 d_opener.end - n,
                 d_closer.start + n,
-                (d_opener.end, d_closer.start, text[d_opener.end : d_closer.start]),
+                Group(
+                    d_opener.end, d_closer.start, text[d_opener.end : d_closer.start]
+                ),
             )
             matches.append(match)
             del delimiters[opener + 1 : cur]
@@ -458,7 +527,7 @@ class MatchObj:
     """A fake match object that memes re.match methods"""
 
     def __init__(
-        self, etype: str, text: str, start: int, end: int, *groups: "Group"
+        self, etype: str, text: str, start: int, end: int, *groups: Group
     ) -> None:
         self._text = text
         self._start = start
@@ -480,3 +549,6 @@ class MatchObj:
         if n == 0:
             return self._end
         return self._groups[n - 1][1]
+
+    def span(self, n: int = 0) -> Tuple[int, int]:
+        return (self.start(n), self.end(n))

@@ -6,9 +6,9 @@ from typing import Any, Dict
 from typing import List as _List
 from typing import Match, Optional, Tuple, Union, cast
 
-from . import inline, patterns
+from . import inline, inline_parser, patterns
 from .element import Element
-from .helpers import Source, is_paired, normalize_label, partition_by_spaces
+from .helpers import Source, normalize_label, partition_by_spaces, find_next
 from .parser import Parser
 
 __all__ = (
@@ -569,42 +569,55 @@ class LinkRefDef(BlockElement):
     [label]: destination "title"
     """
 
-    pattern = re.compile(
-        r" {,3}%s:(?P<s1>\s*)%s(?P<s2>\s*)(?:(?<=\s)%s)?[^\n\S]*$\n?"
-        % (patterns.link_label, patterns.link_dest, patterns.link_title),
-        flags=re.M,
+    pattern = re.compile(r" {,3}(\[[\s\S]*?)(?=\n\n|\Z)", flags=re.M)
+    _parse_info = (
+        inline_parser._EMPTY_GROUP,
+        inline_parser._EMPTY_GROUP,
+        inline_parser._EMPTY_GROUP,
+        -1,
     )
-    _parse_info = ("", "", "")
 
     @classmethod
     def match(cls, source: Source) -> bool:
         m = source.expect_re(cls.pattern)
         if not m:
             return False
-        rv = m.groupdict()
-        if rv["s1"].count("\n") > 1 or rv["s1"].count("\n") > 1:
+        text = source._buffer
+        link_label = inline_parser._parse_link_label(text, m.start(1))
+        if not link_label:  # no ending bracket
             return False
-        label = rv["label"]
-        if rv["dest"][0] == "<" and rv["dest"][-1] == ">":
-            dest = rv["dest"]
-        elif is_paired(rv["dest"], "(", ")"):
-            dest = rv["dest"]
+        if link_label.end >= len(text) or text[link_label.end] != ":":
+            # no colon after the ending bracket
+            return False
+        i = inline_parser._parse_link_separator(text, link_label.end + 1)
+        try:
+            link_dest, link_title = inline_parser._parse_link_dest_title(text, i)
+        except inline_parser.ParseError:
+            return False
+        i = max(link_dest.end, link_title.end)
+        end = find_next(text, "\n", i)
+        if end >= 0:
+            end += 1
         else:
-            return False
-        title = rv["title"]
-        if title and re.search(r"^$", title, re.M):
-            return False
-        cls._parse_info = label, dest, title
-        return m is not None
+            end = i
+        if text[i:end].strip():
+            if link_title.text and "\n" in text[link_dest.end : link_title.start]:
+                link_title = inline_parser._EMPTY_GROUP
+                end = find_next(text, "\n", link_dest.end) + 1
+            else:
+                # There is content after the link title
+                return False
+        cls._parse_info = (link_label, link_dest, link_title, end)
+        return True
 
     @classmethod
     def parse(cls, source: Source) -> "LinkRefDef":
-        label, dest, title = cls._parse_info
-        normalized_label = normalize_label(label[1:-1])
+        label, dest, title, pos = cls._parse_info
+        normalized_label = normalize_label(label.text[1:-1])
         assert isinstance(source.root, Document)
         if normalized_label not in source.root.link_ref_defs:
-            source.root.link_ref_defs[normalized_label] = (dest, title)
-        source.consume()
+            source.root.link_ref_defs[normalized_label] = (dest.text, title.text)
+        source.pos = pos
         return cls()
 
 
