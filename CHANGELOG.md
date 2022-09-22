@@ -1,3 +1,9 @@
+## v1.2.2(2022-09-22)
+
+- Fix a bug of markdown renderer, the ordered list index isn't increasing. [#112](https://github.com/frostming/marko/pull/112)
+- Fix a crash issue when parsing a list item with NBSP in preceding spaces. [#123](https://github.com/frostming/marko/pull/123)
+- Fix a hanging issue when parsing a text with nested brackets. [#124](https://github.com/frostming/marko/pull/124)
+
 ## v1.2.1(2022-05-12)
 
 - Fix a bug that tabs between the list bullet and item are not expanded properly.
