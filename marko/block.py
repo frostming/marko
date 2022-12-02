@@ -73,7 +73,7 @@ class BlockElement(Element):
                 if isinstance(child, BlockElement):
                     child.parse_inline()
 
-    def __lt__(self, o: "BlockElement") -> bool:
+    def __lt__(self, o: BlockElement) -> bool:
         return self.priority < o.priority
 
 
@@ -272,7 +272,7 @@ class ThematicBreak(BlockElement):
         return len(set(re.sub(r"\s+", "", m.group()))) == 1
 
     @classmethod
-    def parse(cls, source: Source) -> "ThematicBreak":
+    def parse(cls, source: Source) -> ThematicBreak:
         source.consume()
         return cls()
 
@@ -431,7 +431,7 @@ class Quote(BlockElement):
         return source.expect_re(r" {,3}>")
 
     @classmethod
-    def parse(cls, source: Source) -> "Quote":
+    def parse(cls, source: Source) -> Quote:
         state = cls()
         with source.under_state(state):
             state.children = parser.parse(source)  # type: ignore
@@ -463,7 +463,7 @@ class List(BlockElement):
         return m is not None
 
     @classmethod
-    def parse(cls, source: Source) -> "List":
+    def parse(cls, source: Source) -> List:
         state = cls()
         children = []
         tight = True
@@ -547,7 +547,7 @@ class ListItem(BlockElement):
         return True
 
     @classmethod
-    def parse(cls, source: Source) -> "ListItem":
+    def parse(cls, source: Source) -> ListItem:
         state = cls()
         state.children = []
         with source.under_state(state):
@@ -611,7 +611,7 @@ class LinkRefDef(BlockElement):
         return True
 
     @classmethod
-    def parse(cls, source: Source) -> "LinkRefDef":
+    def parse(cls, source: Source) -> LinkRefDef:
         label, dest, title, pos = cls._parse_info
         normalized_label = normalize_label(label.text[1:-1])
         assert isinstance(source.root, Document)

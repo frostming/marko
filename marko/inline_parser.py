@@ -28,8 +28,8 @@ class ParseError(ValueError):
 
 
 def parse(
-    text: str, elements: list["ElementType"], fallback: "ElementType"
-) -> list["InlineElement"]:
+    text: str, elements: list[ElementType], fallback: ElementType
+) -> list[InlineElement]:
     """Parse given text and produce a list of inline elements.
 
     :param text: the text to be parsed.
@@ -46,7 +46,7 @@ def parse(
     return make_elements(tokens, text, fallback=fallback)
 
 
-def _resolve_overlap(tokens: list["Token"]) -> list["Token"]:
+def _resolve_overlap(tokens: list[Token]) -> list[Token]:
     if not tokens:
         return tokens
     result = []
@@ -65,12 +65,12 @@ def _resolve_overlap(tokens: list["Token"]) -> list["Token"]:
 
 
 def make_elements(
-    tokens: list["Token"],
+    tokens: list[Token],
     text: str,
     start: int = 0,
     end: int | None = None,
-    fallback: "ElementType" = None,
-) -> list["InlineElement"]:
+    fallback: ElementType = None,
+) -> list[InlineElement]:
     """Make elements from a list of parsed tokens.
     It will turn all unmatched holes into fallback elements.
 
@@ -81,7 +81,7 @@ def make_elements(
     :param fallback: fallback element type.
     :returns: a list of inline elements.
     """
-    result: list["InlineElement"] = []
+    result: list[InlineElement] = []
     end = end or len(text)
     prev_end = start
     for token in tokens:
@@ -105,7 +105,7 @@ class Token:
     SHADE = 3
 
     def __init__(
-        self, etype: "ElementType", match: "_Match", text: str, fallback: "ElementType"
+        self, etype: ElementType, match: _Match, text: str, fallback: ElementType
     ) -> None:
         self.etype = etype
         self.match = match
@@ -117,7 +117,7 @@ class Token:
         self.fallback = fallback
         self.children: list[Token] = []
 
-    def relation(self, other: "Token") -> int:
+    def relation(self, other: Token) -> int:
         if self.end <= other.start:
             return Token.PRECEDE
         if self.end >= other.end:
@@ -131,12 +131,12 @@ class Token:
                 return Token.SHADE
         return Token.INTERSECT
 
-    def append_child(self, child: "Token") -> None:
+    def append_child(self, child: Token) -> None:
         if not self.etype.parse_children:
             return
         self.children.append(child)
 
-    def as_element(self) -> "InlineElement":
+    def as_element(self) -> InlineElement:
         e = self.etype(self.match)
         if e.parse_children:
             self.children = _resolve_overlap(self.children)
@@ -154,11 +154,11 @@ class Token:
             self.__class__.__name__, self.etype.__name__, self.start, self.end
         )
 
-    def __lt__(self, o: "Token") -> bool:
+    def __lt__(self, o: Token) -> bool:
         return self.start < o.start
 
 
-def find_links_or_emphs(text: str, root_node: "Document") -> list["MatchObj"]:
+def find_links_or_emphs(text: str, root_node: Document) -> list[MatchObj]:
     """Fink links/images or emphasis from text.
 
     :param text: the original text.
@@ -201,11 +201,11 @@ def find_links_or_emphs(text: str, root_node: "Document") -> list["MatchObj"]:
 
 def look_for_image_or_link(
     text: str,
-    delimiters: list["Delimiter"],
+    delimiters: list[Delimiter],
     close: int,
-    root_node: "Document",
-    matches: list["MatchObj"],
-) -> "MatchObj" | None:
+    root_node: Document,
+    matches: list[MatchObj],
+) -> MatchObj | None:
     for i, d in list(enumerate(delimiters))[::-1]:
         if d.content not in ("[", "!["):
             continue
@@ -348,7 +348,7 @@ def _expect_inline_link(text: str, start: int) -> tuple[Group, Group, int] | Non
 
 
 def _expect_reference_link(
-    text: str, start: int, link_text: str, root_node: "Document"
+    text: str, start: int, link_text: str, root_node: Document
 ) -> tuple[Group, Group, int] | None:
     link_label = _parse_link_label(text, start)
     label = link_text
@@ -364,18 +364,16 @@ def _expect_reference_link(
     return (link_dest, link_title, link_label.end if link_label else start)
 
 
-def _get_reference_link(
-    link_label: str, root_node: "Document"
-) -> tuple[str, str] | None:
+def _get_reference_link(link_label: str, root_node: Document) -> tuple[str, str] | None:
     normalized_label = normalize_label(link_label)
     return root_node.link_ref_defs.get(normalized_label, None)
 
 
 def process_emphasis(
     text: str,
-    delimiters: list["Delimiter"],
+    delimiters: list[Delimiter],
     stack_bottom: int | None,
-    matches: list["MatchObj"],
+    matches: list[MatchObj],
 ) -> None:
     star_bottom = underscore_bottom = stack_bottom
     cur = _next_closer(delimiters, stack_bottom)
@@ -417,7 +415,7 @@ def process_emphasis(
     del delimiters[lower:]
 
 
-def _next_closer(delimiters: list["Delimiter"], bound: int | None) -> int | None:
+def _next_closer(delimiters: list[Delimiter], bound: int | None) -> int | None:
     i = bound + 1 if bound is not None else 0
     while i < len(delimiters):
         d = delimiters[i]
@@ -428,7 +426,7 @@ def _next_closer(delimiters: list["Delimiter"], bound: int | None) -> int | None
 
 
 def _nearest_opener(
-    delimiters: list["Delimiter"], higher: int, lower: int | None
+    delimiters: list[Delimiter], higher: int, lower: int | None
 ) -> int | None:
     i = higher - 1
     lower = lower if lower is not None else -1
@@ -443,7 +441,7 @@ def _nearest_opener(
 class Delimiter:
     whitespace_re = re.compile(r"\s", flags=re.UNICODE)
 
-    def __init__(self, match: "_Match", text: str) -> None:
+    def __init__(self, match: _Match, text: str) -> None:
         self.start = match.start()
         self.end = match.end()
         self.content = match.group()
@@ -501,7 +499,7 @@ class Delimiter:
             and patterns.punctuation.match(self.text[self.start - 1]) is not None
         )
 
-    def closed_by(self, other: "Delimiter") -> bool:
+    def closed_by(self, other: Delimiter) -> bool:
         return not (
             self.content[0] != other.content[0]
             or (self.can_open and self.can_close or other.can_open and other.can_close)

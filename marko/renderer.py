@@ -41,7 +41,7 @@ class Renderer:
     )
 
     def __init__(self) -> None:
-        self.root_node: "Document" | None = None
+        self.root_node: Document | None = None
 
     def __enter__(self: _T) -> _T:
         """Provide a context so that root_node can be reset after render."""
@@ -52,7 +52,7 @@ class Renderer:
     def __exit__(self, *args: Any) -> None:
         html._charref = self._charref_bak  # type: ignore[attr-defined]
 
-    def render(self, element: "Element") -> Any:
+    def render(self, element: Element) -> Any:
         """Renders the given element to string.
 
         :param element: a element to be rendered.

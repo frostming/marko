@@ -45,9 +45,9 @@ class InlineElement(Element):
     override = False
 
     if TYPE_CHECKING:
-        children: "str | Sequence[Element]"
+        children: str | Sequence[Element]
 
-    def __init__(self, match: "_Match") -> None:
+    def __init__(self, match: _Match) -> None:
         """Parses the matched object into an element"""
         if not self.parse_children:
             self.children = match.group(self.parse_group)
@@ -80,7 +80,7 @@ class LineBreak(InlineElement):
     priority = 2
     pattern = r"( *|\\)\n(?!\Z)"
 
-    def __init__(self, match: "_Match") -> None:
+    def __init__(self, match: _Match) -> None:
         self.soft = not match.group(1).startswith(("  ", "\\"))
         self.children = "\n"
 
@@ -106,7 +106,7 @@ class LinkOrEmph(InlineElement):
 
     parse_children = True
 
-    def __new__(cls, match: "_Match") -> "LinkOrEmph":
+    def __new__(cls, match: _Match) -> LinkOrEmph:
         return parser.inline_elements[match.etype](match)  # type: ignore
 
     @classmethod
@@ -134,7 +134,7 @@ class Link(InlineElement):
     virtual = True
     parse_children = True
 
-    def __init__(self, match: "_Match") -> None:
+    def __init__(self, match: _Match) -> None:
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
@@ -151,7 +151,7 @@ class Image(InlineElement):
     virtual = True
     parse_children = True
 
-    def __init__(self, match: "_Match") -> None:
+    def __init__(self, match: _Match) -> None:
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             self.dest = match.group(2)[1:-1]
         else:
@@ -168,7 +168,7 @@ class CodeSpan(InlineElement):
     priority = 7
     pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
-    def __init__(self, match: "_Match") -> None:
+    def __init__(self, match: _Match) -> None:
         self.children = match.group(2).replace("\n", " ")
         if self.children.strip() and self.children[0] == self.children[-1] == " ":
             self.children = self.children[1:-1]
@@ -180,7 +180,7 @@ class AutoLink(InlineElement):
     priority = 7
     pattern = re.compile(rf"<({patterns.uri}|{patterns.email})>")
 
-    def __init__(self, match: "_Match") -> None:
+    def __init__(self, match: _Match) -> None:
         self.dest = match.group(1)
         if re.match(patterns.email, self.dest):
             self.dest = "mailto:" + self.dest
@@ -192,6 +192,8 @@ class RawText(InlineElement):
     """The raw text is the fallback for all holes that doesn't match any others."""
 
     virtual = True
+    if TYPE_CHECKING:
+        children: str
 
     def __init__(self, match: str, escape: bool = True) -> None:
         self.children = match

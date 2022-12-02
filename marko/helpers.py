@@ -60,33 +60,33 @@ class Source:
         self._buffer = _preprocess_text(text)
         self.pos = 0
         self._anchor = 0
-        self._states: list["BlockElement"] = []
+        self._states: list[BlockElement] = []
         self.match: Match[str] | None = None
 
     @property
-    def state(self) -> "BlockElement":
+    def state(self) -> BlockElement:
         """Returns the current element state."""
         if not self._states:
             raise RuntimeError("Need to push a state first.")
         return self._states[-1]
 
     @property
-    def root(self) -> "BlockElement":
+    def root(self) -> BlockElement:
         """Returns the root element, which is at the bottom of self._states."""
         if not self._states:
             raise RuntimeError("Need to push a state first.")
         return self._states[0]
 
-    def push_state(self, element: "BlockElement") -> None:
+    def push_state(self, element: BlockElement) -> None:
         """Push a new state to the state stack."""
         self._states.append(element)
 
-    def pop_state(self) -> "BlockElement":
+    def pop_state(self) -> BlockElement:
         """Pop the top most state."""
         return self._states.pop()
 
     @contextmanager
-    def under_state(self, element: "BlockElement") -> Generator["Source", None, None]:
+    def under_state(self, element: BlockElement) -> Generator[Source, None, None]:
         """A context manager to enable a new state temporarily."""
         self.push_state(element)
         yield self

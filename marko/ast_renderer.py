@@ -32,7 +32,7 @@ class ASTRenderer(Renderer):
     delegate = False
 
     @force_delegate
-    def render_raw_text(self, element: "inline.RawText") -> dict[str, Any]:
+    def render_raw_text(self, element: inline.RawText) -> dict[str, Any]:
         return {
             "element": "raw_text",
             "children": html.unescape(element.children)
@@ -42,11 +42,11 @@ class ASTRenderer(Renderer):
         }
 
     @overload
-    def render_children(self, element: list["Element"]) -> list[dict[str, Any]]:
+    def render_children(self, element: list[Element]) -> list[dict[str, Any]]:
         ...
 
     @overload
-    def render_children(self, element: "Element") -> dict[str, Any]:
+    def render_children(self, element: Element) -> dict[str, Any]:
         ...
 
     @overload
@@ -85,7 +85,7 @@ class XMLRenderer(Renderer):
 
     delegate = False
 
-    def __enter__(self) -> "XMLRenderer":
+    def __enter__(self) -> XMLRenderer:
         self.indent = 0
         return super().__enter__()
 
@@ -93,7 +93,7 @@ class XMLRenderer(Renderer):
         self.indent = 0
         return super().__exit__(*args)
 
-    def render_children(self, element: "Element") -> str:
+    def render_children(self, element: Element) -> str:
         lines = []
         if element is self.root_node:
             lines.append(" " * self.indent + '<?xml version="1.0" encoding="UTF-8"?>')

@@ -113,7 +113,7 @@ class Markdown:
     def __call__(self, text: str) -> str:
         return self.convert(text)
 
-    def parse(self, text: str) -> "Document":
+    def parse(self, text: str) -> Document:
         """Call ``self.parser.parse(text)``.
 
         Override this to preprocess text or handle parsed result.
@@ -121,7 +121,7 @@ class Markdown:
         self._setup_extensions()
         return cast("Document", self.parser.parse(text))
 
-    def render(self, parsed: "Document") -> str:
+    def render(self, parsed: Document) -> str:
         """Call ``self.renderer.render(text)``.
 
         Override this to handle parsed result.
@@ -144,7 +144,7 @@ def convert(text: str) -> str:
     return _markdown.convert(text)
 
 
-def parse(text: str) -> "Document":
+def parse(text: str) -> Document:
     """Parse the text to a structured data object.
 
     :param text: text to parse.
@@ -153,7 +153,7 @@ def parse(text: str) -> "Document":
     return _markdown.parse(text)
 
 
-def render(parsed: "Document") -> str:
+def render(parsed: Document) -> str:
     """Render the parsed object to text.
 
     :param parsed: the parsed object
