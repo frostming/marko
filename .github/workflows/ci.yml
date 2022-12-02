@@ -26,7 +26,7 @@ jobs:
         run: pdm install -G toc -G codehilite
       - name: Run Tests
         run: |
-          pdm run -v pytest tests
+          pdm run -v pytest --cov=marko/ --cov-report=xml tests
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
