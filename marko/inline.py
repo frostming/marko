@@ -80,6 +80,7 @@ class LineBreak(InlineElement):
 
     def __init__(self, match: "_Match") -> None:
         self.soft = not match.group(1).startswith(("  ", "\\"))
+        self.children = "\n"
 
 
 class InlineHTML(InlineElement):
@@ -189,9 +190,6 @@ class RawText(InlineElement):
     """The raw text is the fallback for all holes that doesn't match any others."""
 
     virtual = True
-
-    if TYPE_CHECKING:
-        children: str
 
     def __init__(self, match: str, escape: bool = True) -> None:
         self.children = match

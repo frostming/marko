@@ -21,6 +21,11 @@ class TestCommonMark(SpecTestSuite):
         html = "<ul>\n<li>A</li>\n</ul>"
         self.assert_case(md, html)
 
+    def test_line_break_in_link_text(self):
+        md = "![foo\nbar\nbaz](/image.png)"
+        html = '<p><img src="/image.png" alt="foo\nbar\nbaz" /></p>'
+        self.assert_case(md, html)
+
 
 TestCommonMark.load_spec("commonmark")
 

@@ -1,3 +1,7 @@
+## Unreleased
+
+- Fix a rendering bug when line breaks exist in a link text. [#126](https://github.com/frostming/marko/issue/126)
+
 ## v1.2.2(2022-09-22)
 
 - Fix a bug of markdown renderer, the ordered list index isn't increasing. [#112](https://github.com/frostming/marko/pull/112)
