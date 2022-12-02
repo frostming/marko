@@ -5,7 +5,6 @@ import marko
 from marko import block
 from marko.ast_renderer import ASTRenderer, XMLRenderer
 from marko.md_renderer import MarkdownRenderer
-
 from tests.normalize import normalize_html
 
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
+import codecs
 import os
 import re
-import codecs
 
 from tests.normalize import normalize_html
 
@@ -25,8 +25,8 @@ def parse_examples(text):
         if md and html:
             count += 1
             name = "%s_%03d" % (section, count)
-            md = md.replace(u"→", "\t")
-            html = html.replace(u"→", "\t")
+            md = md.replace("→", "\t")
+            html = html.replace("→", "\t")
             yield name, md, html
 
 

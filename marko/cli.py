@@ -1,11 +1,12 @@
 """
 Command line interfaces
 """
-import sys
-import importlib
-import marko
 import codecs
+import importlib
+import sys
 from argparse import ArgumentParser
+
+import marko
 
 
 def import_class(import_string):

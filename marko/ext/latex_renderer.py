@@ -1,8 +1,10 @@
 """
 LaTeX renderer
 """
+from __future__ import annotations
+
 import logging
-from typing import Iterable, Set
+from typing import Iterable
 
 from marko import Renderer
 
@@ -12,7 +14,7 @@ _logger = logging.getLogger(__name__)
 class LatexRenderer(Renderer):
     """Render the parsed Markdown to LaTeX format."""
 
-    _packages: Set[str]
+    _packages: set[str]
 
     def __init__(self):
         super().__init__()
@@ -67,7 +69,9 @@ class LatexRenderer(Renderer):
     def render_fenced_code(self, element):
         self._packages.add("listings")
         language = self._escape_latex(element.lang)
-        return self._environment("lstlisting", element.children[0].children, [f"language={language}"])
+        return self._environment(
+            "lstlisting", element.children[0].children, [f"language={language}"]
+        )
 
     def render_code_block(self, element):
         return self._environment("verbatim", element.children[0].children)
@@ -77,7 +81,14 @@ class LatexRenderer(Renderer):
 
     def render_heading(self, element):
         children = self.render_children(element)
-        headers = ["part", "section", "subsection", "subsubsection", "paragraph", "subparagraph"]
+        headers = [
+            "part",
+            "section",
+            "subsection",
+            "subsubsection",
+            "paragraph",
+            "subparagraph",
+        ]
         header = headers[element.level - 1] + "*"
         return f"\\{header}{{{children}}}\n"
 

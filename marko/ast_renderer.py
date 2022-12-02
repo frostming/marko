@@ -1,9 +1,11 @@
 """
 AST renderers for inspecting the markdown parsing result.
 """
+from __future__ import annotations
+
 import html
 import json
-from typing import TYPE_CHECKING, Any, Dict, List, overload
+from typing import TYPE_CHECKING, Any, overload
 
 from marko.html_renderer import HTMLRenderer
 
@@ -30,7 +32,7 @@ class ASTRenderer(Renderer):
     delegate = False
 
     @force_delegate
-    def render_raw_text(self, element: "inline.RawText") -> Dict[str, Any]:
+    def render_raw_text(self, element: "inline.RawText") -> dict[str, Any]:
         return {
             "element": "raw_text",
             "children": html.unescape(element.children)
@@ -40,11 +42,11 @@ class ASTRenderer(Renderer):
         }
 
     @overload
-    def render_children(self, element: List["Element"]) -> List[Dict[str, Any]]:
+    def render_children(self, element: list["Element"]) -> list[dict[str, Any]]:
         ...
 
     @overload
-    def render_children(self, element: "Element") -> Dict[str, Any]:
+    def render_children(self, element: "Element") -> dict[str, Any]:
         ...
 
     @overload

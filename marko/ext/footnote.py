@@ -14,7 +14,8 @@ Usage::
 
 """
 import re
-from marko import block, inline, helpers
+
+from marko import block, helpers, inline
 
 
 class Document(block.Document):

@@ -1,8 +1,10 @@
 """
 Inline(span) level elements
 """
+from __future__ import annotations
+
 import re
-from typing import TYPE_CHECKING, Iterator, Match, Pattern, Sequence, Union
+from typing import TYPE_CHECKING, Iterator, Match, Pattern, Sequence
 
 from . import inline_parser, patterns
 from .element import Element
@@ -31,7 +33,7 @@ class InlineElement(Element):
     #: Use to denote the precedence in parsing.
     priority = 5
     #: element regex pattern.
-    pattern: Union[Pattern[str], str] = ""
+    pattern: Pattern[str] | str = ""
     #: whether to parse children.
     parse_children = False
     #: which match group to parse.

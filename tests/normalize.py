@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from html.parser import HTMLParser
-from html.entities import name2codepoint
-from html import escape
-
-import urllib
-import sys
 import re
+import sys
+import urllib
+from html import escape
+from html.entities import name2codepoint
+from html.parser import HTMLParser
 
 
 class HTMLParseError(Exception):
@@ -75,7 +74,7 @@ class MyHTMLParser(HTMLParser):
         self.last = "starttag"
 
     def handle_startendtag(self, tag, attrs):
-        """Ignore closing tag for self-closing """
+        """Ignore closing tag for self-closing"""
         self.handle_starttag(tag, attrs)
         self.last_tag = tag
         self.last = "endtag"
