@@ -8,7 +8,7 @@ from urllib.parse import quote
 from .renderer import Renderer
 
 if TYPE_CHECKING:
-    from . import inline, block
+    from . import block, inline
 
 
 class HTMLRenderer(Renderer):

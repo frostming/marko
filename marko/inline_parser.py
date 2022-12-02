@@ -1,12 +1,14 @@
 """
 Parse inline elements
 """
+from __future__ import annotations
+
 import collections
 import re
-from typing import TYPE_CHECKING, List, Match, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING, Match, Type, Union
 
 from . import patterns
-from .helpers import is_paired, normalize_label, find_next
+from .helpers import find_next, is_paired, normalize_label
 
 if TYPE_CHECKING:
     from .block import Document
@@ -26,8 +28,8 @@ class ParseError(ValueError):
 
 
 def parse(
-    text: str, elements: List["ElementType"], fallback: "ElementType"
-) -> List["InlineElement"]:
+    text: str, elements: list["ElementType"], fallback: "ElementType"
+) -> list["InlineElement"]:
     """Parse given text and produce a list of inline elements.
 
     :param text: the text to be parsed.
@@ -35,7 +37,7 @@ def parse(
     :param fallback: fallback class when no other element type is matched.
     """
     # this is a raw list of elements that may contain overlaps.
-    tokens: List[Token] = []
+    tokens: list[Token] = []
     for etype in elements:
         for match in etype.find(text):
             tokens.append(Token(etype, match, text, fallback))
@@ -44,7 +46,7 @@ def parse(
     return make_elements(tokens, text, fallback=fallback)
 
 
-def _resolve_overlap(tokens: List["Token"]) -> List["Token"]:
+def _resolve_overlap(tokens: list["Token"]) -> list["Token"]:
     if not tokens:
         return tokens
     result = []
@@ -63,12 +65,12 @@ def _resolve_overlap(tokens: List["Token"]) -> List["Token"]:
 
 
 def make_elements(
-    tokens: List["Token"],
+    tokens: list["Token"],
     text: str,
     start: int = 0,
-    end: Optional[int] = None,
+    end: int | None = None,
     fallback: "ElementType" = None,
-) -> List["InlineElement"]:
+) -> list["InlineElement"]:
     """Make elements from a list of parsed tokens.
     It will turn all unmatched holes into fallback elements.
 
@@ -79,7 +81,7 @@ def make_elements(
     :param fallback: fallback element type.
     :returns: a list of inline elements.
     """
-    result: List["InlineElement"] = []
+    result: list["InlineElement"] = []
     end = end or len(text)
     prev_end = start
     for token in tokens:
@@ -113,7 +115,7 @@ class Token:
         self.inner_end = match.end(etype.parse_group)
         self.text = text
         self.fallback = fallback
-        self.children: List[Token] = []
+        self.children: list[Token] = []
 
     def relation(self, other: "Token") -> int:
         if self.end <= other.start:
@@ -156,7 +158,7 @@ class Token:
         return self.start < o.start
 
 
-def find_links_or_emphs(text: str, root_node: "Document") -> List["MatchObj"]:
+def find_links_or_emphs(text: str, root_node: "Document") -> list["MatchObj"]:
     """Fink links/images or emphasis from text.
 
     :param text: the original text.
@@ -165,9 +167,9 @@ def find_links_or_emphs(text: str, root_node: "Document") -> List["MatchObj"]:
     """
     delimiters_re = re.compile(r"(?:!?\[|\*+|_+)")
     i = 0
-    delimiters: List[Delimiter] = []
+    delimiters: list[Delimiter] = []
     escape = False
-    matches: List[MatchObj] = []
+    matches: list[MatchObj] = []
     code_pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
     while i < len(text):
@@ -199,11 +201,11 @@ def find_links_or_emphs(text: str, root_node: "Document") -> List["MatchObj"]:
 
 def look_for_image_or_link(
     text: str,
-    delimiters: List["Delimiter"],
+    delimiters: list["Delimiter"],
     close: int,
     root_node: "Document",
-    matches: List["MatchObj"],
-) -> Optional["MatchObj"]:
+    matches: list["MatchObj"],
+) -> "MatchObj" | None:
     for i, d in list(enumerate(delimiters))[::-1]:
         if d.content not in ("[", "!["):
             continue
@@ -253,7 +255,7 @@ def _parse_link_separator(text: str, start: int) -> int:
     return i
 
 
-def _parse_link_label(text: str, start: int) -> Optional[Group]:
+def _parse_link_label(text: str, start: int) -> Group | None:
     if text[start : start + 1] != "[":
         return None
     i = find_next(text, "]", start + 1, disallowed="[")
@@ -267,7 +269,7 @@ def _parse_link_label(text: str, start: int) -> Optional[Group]:
 
 def _parse_link_dest_title(
     link_text: str, start: int = 0, is_inline: bool = False
-) -> Tuple[Group, Group]:
+) -> tuple[Group, Group]:
     if start >= len(link_text):
         raise ParseError()
     if link_text[start] == "<":
@@ -328,7 +330,7 @@ def _parse_link_dest_title(
     return link_dest, link_title
 
 
-def _expect_inline_link(text: str, start: int) -> Optional[Tuple[Group, Group, int]]:
+def _expect_inline_link(text: str, start: int) -> tuple[Group, Group, int] | None:
     """(link_dest "link_title")"""
     if start >= len(text) - 1 or text[start] != "(":
         return None
@@ -347,7 +349,7 @@ def _expect_inline_link(text: str, start: int) -> Optional[Tuple[Group, Group, i
 
 def _expect_reference_link(
     text: str, start: int, link_text: str, root_node: "Document"
-) -> Optional[Tuple[Group, Group, int]]:
+) -> tuple[Group, Group, int] | None:
     link_label = _parse_link_label(text, start)
     label = link_text
     if link_label is not None:
@@ -364,16 +366,16 @@ def _expect_reference_link(
 
 def _get_reference_link(
     link_label: str, root_node: "Document"
-) -> Optional[Tuple[str, str]]:
+) -> tuple[str, str] | None:
     normalized_label = normalize_label(link_label)
     return root_node.link_ref_defs.get(normalized_label, None)
 
 
 def process_emphasis(
     text: str,
-    delimiters: List["Delimiter"],
-    stack_bottom: Optional[int],
-    matches: List["MatchObj"],
+    delimiters: list["Delimiter"],
+    stack_bottom: int | None,
+    matches: list["MatchObj"],
 ) -> None:
     star_bottom = underscore_bottom = stack_bottom
     cur = _next_closer(delimiters, stack_bottom)
@@ -415,7 +417,7 @@ def process_emphasis(
     del delimiters[lower:]
 
 
-def _next_closer(delimiters: List["Delimiter"], bound: Optional[int]) -> Optional[int]:
+def _next_closer(delimiters: list["Delimiter"], bound: int | None) -> int | None:
     i = bound + 1 if bound is not None else 0
     while i < len(delimiters):
         d = delimiters[i]
@@ -426,8 +428,8 @@ def _next_closer(delimiters: List["Delimiter"], bound: Optional[int]) -> Optiona
 
 
 def _nearest_opener(
-    delimiters: List["Delimiter"], higher: int, lower: Optional[int]
-) -> Optional[int]:
+    delimiters: list["Delimiter"], higher: int, lower: int | None
+) -> int | None:
     i = higher - 1
     lower = lower if lower is not None else -1
     while i > lower:
@@ -550,5 +552,5 @@ class MatchObj:
             return self._end
         return self._groups[n - 1][1]
 
-    def span(self, n: int = 0) -> Tuple[int, int]:
+    def span(self, n: int = 0) -> tuple[int, int]:
         return (self.start(n), self.end(n))

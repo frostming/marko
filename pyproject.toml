@@ -9,7 +9,7 @@ authors = [
     {name = "Frost Ming", email = "mianghong@gmail.com"},
 ]
 dynamic = ["version"]
-requires-python = ">=3.6"
+requires-python = ">=3.7"
 license = {text = "MIT"}
 dependencies = []
 description = "A markdown parser with high extensibility."
@@ -54,3 +54,6 @@ dev = [
     "pytest-cov",
     "mypy>=0.950",
 ]
+
+[tool.isort]
+profile = "black"

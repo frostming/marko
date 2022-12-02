@@ -19,8 +19,8 @@ Usage::
 import json
 
 from pygments import highlight
-from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.formatters import html
+from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.util import ClassNotFound
 
 

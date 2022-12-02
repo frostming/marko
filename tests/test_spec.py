@@ -1,6 +1,6 @@
-from tests import SpecTestSuite
 from marko import Markdown
 from marko.ext.gfm import gfm
+from tests import SpecTestSuite
 
 
 class TestCommonMark(SpecTestSuite):

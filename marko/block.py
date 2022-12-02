@@ -1,14 +1,14 @@
 """
 Block level elements
 """
+from __future__ import annotations
+
 import re
-from typing import Any, Dict
-from typing import List as _List
-from typing import Match, Optional, Tuple, Union, cast
+from typing import Any, Match, cast
 
 from . import inline, inline_parser, patterns
 from .element import Element
-from .helpers import Source, normalize_label, partition_by_spaces, find_next
+from .helpers import Source, find_next, normalize_label, partition_by_spaces
 from .parser import Parser
 
 __all__ = (
@@ -84,7 +84,7 @@ class Document(BlockElement):
     virtual = True
 
     def __init__(self, text: str) -> None:
-        self.link_ref_defs: Dict[str, Tuple[str, str]] = {}
+        self.link_ref_defs: dict[str, tuple[str, str]] = {}
         source = Source(text)
         inline._root_node = self  # type: ignore
         with source.under_state(self):
@@ -128,11 +128,11 @@ class Heading(BlockElement):
         self.children = match.group(2).strip()
 
     @classmethod
-    def match(cls, source: Source) -> Optional[Match]:
+    def match(cls, source: Source) -> Match | None:
         return source.expect_re(cls.pattern)
 
     @classmethod
-    def parse(cls, source: Source) -> Optional[Match]:
+    def parse(cls, source: Source) -> Match | None:
         m = source.match
         source.consume()
         return m
@@ -146,7 +146,7 @@ class SetextHeading(BlockElement):
     virtual = True
     inline_children = True
 
-    def __init__(self, lines: _List[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
         self.level = 1 if lines.pop().strip()[0] == "=" else 2
         self.children = "".join(line.lstrip() for line in lines).strip()
 
@@ -216,15 +216,15 @@ class FencedCode(BlockElement):
 
     priority = 7
     pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
-    _parse_info: Tuple[str, str, str, str] = ("", "", "", "")
+    _parse_info: tuple[str, str, str, str] = ("", "", "", "")
 
-    def __init__(self, match: Tuple[str, str, str]) -> None:
+    def __init__(self, match: tuple[str, str, str]) -> None:
         self.lang = inline.Literal.strip_backslash(match[0])
         self.extra = match[1]
         self.children = [inline.RawText(match[2], False)]
 
     @classmethod
-    def match(cls, source: Source) -> Optional[Match]:
+    def match(cls, source: Source) -> Match | None:
         m = source.expect_re(cls.pattern)
         if not m:
             return None
@@ -236,7 +236,7 @@ class FencedCode(BlockElement):
         return m
 
     @classmethod
-    def parse(cls, source: Source) -> Tuple[str, str, str]:
+    def parse(cls, source: Source) -> tuple[str, str, str]:
         source.next_line()
         source.consume()
         lines = []
@@ -287,7 +287,7 @@ class HTMLBlock(BlockElement):
         self.children = lines
 
     @classmethod
-    def match(cls, source: Source) -> Union[int, bool]:
+    def match(cls, source: Source) -> int | bool:
         if source.expect_re(r"(?i) {,3}<(script|pre|style|textarea)[>\s]"):
             assert source.match
             cls._end_cond = re.compile(rf"(?i)</{source.match.group(1)}>")
@@ -343,7 +343,7 @@ class Paragraph(BlockElement):
     pattern = re.compile(r"[^\n]+$\n?", flags=re.M)
     inline_children = True
 
-    def __init__(self, lines: _List[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
         str_lines = "".join(line.lstrip() for line in lines).rstrip("\n")
         self.children = str_lines
         self._tight = False
@@ -388,7 +388,7 @@ class Paragraph(BlockElement):
         return False
 
     @classmethod
-    def parse(cls, source: Source) -> _List[str]:
+    def parse(cls, source: Source) -> list[str]:
         lines = [source.next_line()]
         source.consume()
         end_parse = False
@@ -427,7 +427,7 @@ class Quote(BlockElement):
     _prefix = r" {,3}>[^\n\S]?"
 
     @classmethod
-    def match(cls, source: Source) -> Optional[Match]:
+    def match(cls, source: Source) -> Match | None:
         return source.expect_re(r" {,3}>")
 
     @classmethod
@@ -512,7 +512,7 @@ class ListItem(BlockElement):
         self._second_prefix = " " * (len(bullet) + indent + (mid or 1))
 
     @classmethod
-    def parse_leading(cls, line: str, prefix_pos: int) -> Tuple[int, str, int, str]:
+    def parse_leading(cls, line: str, prefix_pos: int) -> tuple[int, str, int, str]:
         stripped_line = line[prefix_pos:].expandtabs(4).lstrip()
         indent = len(line) - prefix_pos - len(stripped_line)
         bullet, spaces, tail = partition_by_spaces(stripped_line)

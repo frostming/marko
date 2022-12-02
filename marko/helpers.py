@@ -1,6 +1,8 @@
 """
 Helper functions and data structures
 """
+from __future__ import annotations
+
 import functools
 import re
 from contextlib import contextmanager
@@ -11,12 +13,8 @@ from typing import (
     Container,
     Generator,
     Iterable,
-    List,
     Match,
-    Optional,
     Pattern,
-    Tuple,
-    Union,
 )
 
 if TYPE_CHECKING:
@@ -62,8 +60,8 @@ class Source:
         self._buffer = _preprocess_text(text)
         self.pos = 0
         self._anchor = 0
-        self._states: List["BlockElement"] = []
-        self.match: Optional[Match[str]] = None
+        self._states: list["BlockElement"] = []
+        self.match: Match[str] | None = None
 
     @property
     def state(self) -> "BlockElement":
@@ -104,9 +102,7 @@ class Source:
         """The prefix of each line when parsing."""
         return "".join(s._prefix for s in self._states)
 
-    def _expect_re(
-        self, regexp: Union[Pattern[str], str], pos: int
-    ) -> Optional[Match[str]]:
+    def _expect_re(self, regexp: Pattern[str] | str, pos: int) -> Match[str] | None:
         if isinstance(regexp, str):
             regexp = re.compile(regexp)
         return regexp.match(self._buffer, pos)
@@ -131,7 +127,7 @@ class Source:
                 return i
         return -1  # pragma: no cover
 
-    def expect_re(self, regexp: Union[Pattern[str], str]) -> Optional[Match[str]]:
+    def expect_re(self, regexp: Pattern[str] | str) -> Match[str] | None:
         """Test against the given regular expression and returns the match object.
 
         :param regexp: the expression to be tested.
@@ -147,7 +143,7 @@ class Source:
         else:
             return None
 
-    def next_line(self, require_prefix: bool = True) -> Optional[str]:
+    def next_line(self, require_prefix: bool = True) -> str | None:
         """Return the next line in the source.
 
         :param require_prefix:  if False, the whole line will be returned.
@@ -194,7 +190,7 @@ def find_next(
     text: str,
     target: Container[str],
     start: int = 0,
-    end: Optional[int] = None,
+    end: int | None = None,
     disallowed: Container[str] = (),
 ) -> int:
     """Find the next occurrence of target in text, and return the index
@@ -220,7 +216,7 @@ def find_next(
     return -1
 
 
-def partition_by_spaces(text: str, spaces: str = " \t") -> Tuple[str, str, str]:
+def partition_by_spaces(text: str, spaces: str = " \t") -> tuple[str, str, str]:
     """Split the given text by spaces or tabs, and return a tuple of
     (start, delimiter, remaining). If spaces are not found, the latter
     two elements will be empty.
@@ -254,15 +250,12 @@ def load_extension_object(name: str) -> Callable:
     if module is None:
         try:
             module = import_module(name)
-        except ImportError:
-            raise ImportError(
-                f"Extension {name} cannot be found. Please check the name."
-            )
+        except ImportError as e:
+            raise ImportError(f"Extension {name} cannot be imported") from e
 
     try:
-        maker = getattr(module, "make_extension")
+        return module.make_extension
     except AttributeError:
         raise AttributeError(
             f"Module {name} does not have 'make_extension' attributte."
-        )
-    return maker
+        ) from None

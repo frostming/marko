@@ -15,7 +15,9 @@ Example usage::
 
 """
 import re
+
 from marko import Markdown
+
 from . import elements
 
 

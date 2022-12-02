@@ -47,7 +47,7 @@ def test_load_extension_object():
     ext = helpers.load_extension_object("marko.ext.pangu")()
     assert len(ext.renderer_mixins) == 1
 
-    with pytest.raises(ImportError, match="Extension foobar cannot be found"):
+    with pytest.raises(ImportError, match="Extension foobar cannot be imported"):
         helpers.load_extension_object("foobar")()
 
 

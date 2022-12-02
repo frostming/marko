@@ -1,8 +1,9 @@
 """
 Extra elements
 """
-import re
 import itertools
+import re
+
 from marko import block, inline
 
 

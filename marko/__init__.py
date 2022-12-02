@@ -9,7 +9,9 @@ r"""
  Licensed under MIT.
  Created by Frost Ming<mianghong@gmail.com>
 """
-from typing import TYPE_CHECKING, Any, List, Optional, Type, cast
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, cast
 
 from .helpers import load_extension_object
 from .html_renderer import HTMLRenderer
@@ -44,21 +46,21 @@ class Markdown:
 
     def __init__(
         self,
-        parser: Type[Parser] = Parser,
-        renderer: Type[Renderer] = HTMLRenderer,
-        extensions: Optional[Any] = None,
+        parser: type[Parser] = Parser,
+        renderer: type[Renderer] = HTMLRenderer,
+        extensions: Any | None = None,
     ) -> None:
         if not issubclass(parser, Parser):
             raise TypeError("parser must be a subclass of Parser.")
         self._base_parser = parser
-        self._parser_mixins: List[Any] = []
+        self._parser_mixins: list[Any] = []
 
         if not issubclass(renderer, Renderer):
             raise TypeError("renderer must be a subclass of Renderer.")
         self._base_renderer = renderer
-        self._renderer_mixins: List[Any] = []
+        self._renderer_mixins: list[Any] = []
 
-        self._extra_elements: List[ElementType] = []
+        self._extra_elements: list[ElementType] = []
         self._setup_done = False
         if extensions:
             self.use(*extensions)

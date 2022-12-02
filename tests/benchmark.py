@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sys
 import functools
+import sys
 from importlib import import_module
 from time import perf_counter
-
 
 TEST_FILE = "tests/samples/syntax.md"
 TIMES = 100
@@ -22,7 +21,7 @@ def benchmark(package_name):
                 return "not available."
 
             start = perf_counter()
-            for i in range(TIMES):
+            for _ in range(TIMES):
                 func(package)
             end = perf_counter()
 

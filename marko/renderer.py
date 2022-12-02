@@ -1,13 +1,15 @@
 """
 Base renderer class
 """
+from __future__ import annotations
+
 import html
 import re
-from typing import TYPE_CHECKING, Any, Callable, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 if TYPE_CHECKING:
-    from .element import Element
     from .block import Document
+    from .element import Element
 
 _T = TypeVar("_T", bound="Renderer")
 
@@ -39,7 +41,7 @@ class Renderer:
     )
 
     def __init__(self) -> None:
-        self.root_node: Optional["Document"] = None
+        self.root_node: "Document" | None = None
 
     def __enter__(self: _T) -> _T:
         """Provide a context so that root_node can be reset after render."""

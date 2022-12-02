@@ -1,8 +1,10 @@
 """
 Base parser
 """
+from __future__ import annotations
+
 import itertools
-from typing import TYPE_CHECKING, AnyStr, Dict, List, Type, Union
+from typing import TYPE_CHECKING, AnyStr, Type
 
 from .helpers import Source
 
@@ -20,8 +22,8 @@ class Parser:
     """
 
     def __init__(self) -> None:
-        self.block_elements: Dict[str, "BlockElementType"] = {}
-        self.inline_elements: Dict[str, "InlineElementType"] = {}
+        self.block_elements: dict[str, "BlockElementType"] = {}
+        self.inline_elements: dict[str, "InlineElementType"] = {}
 
         for el in itertools.chain(
             (getattr(block, name) for name in block.__all__),
@@ -37,7 +39,7 @@ class Parser:
         .. note:: If one needs to call it inside ``__init__()``, please call it after
              ``super().__init__()`` is called.
         """
-        dest: Dict[str, "ElementType"] = {}
+        dest: dict[str, "ElementType"] = {}
         if issubclass(element, inline.InlineElement):
             dest = self.inline_elements  # type: ignore
         elif issubclass(element, block.BlockElement):
@@ -50,8 +52,8 @@ class Parser:
         dest[element.get_type()] = element
 
     def parse(
-        self, source_or_text: Union[Source, AnyStr]
-    ) -> Union[List["block.BlockElement"], "block.BlockElement"]:
+        self, source_or_text: Source | AnyStr
+    ) -> list["block.BlockElement"] | "block.BlockElement":
         """Do the actual parsing and returns an AST or parsed element.
 
         :param source_or_text: the text or source object.
@@ -64,7 +66,7 @@ class Parser:
             inline.parser = self  # type: ignore
             return self.block_elements["Document"](source_or_text)  # type: ignore
         element_list = self._build_block_element_list()
-        ast: List[block.BlockElement] = []
+        ast: list[block.BlockElement] = []
         assert isinstance(source_or_text, Source)
         while not source_or_text.exhausted:
             for ele_type in element_list:
@@ -82,7 +84,7 @@ class Parser:
                 break
         return ast
 
-    def parse_inline(self, text: str) -> List["inline.InlineElement"]:
+    def parse_inline(self, text: str) -> list["inline.InlineElement"]:
         """Parses text into inline elements.
         RawText is not considered in parsing but created as a wrapper of holes
         that don't match any other elements.
@@ -95,7 +97,7 @@ class Parser:
             text, element_list, fallback=self.inline_elements["RawText"]
         )
 
-    def _build_block_element_list(self) -> List["BlockElementType"]:
+    def _build_block_element_list(self) -> list["BlockElementType"]:
         """Return a list of block elements, ordered from highest priority to lowest."""
         return sorted(
             (e for e in self.block_elements.values() if not e.virtual),
@@ -103,7 +105,7 @@ class Parser:
             reverse=True,
         )
 
-    def _build_inline_element_list(self) -> List["InlineElementType"]:
+    def _build_inline_element_list(self) -> list["InlineElementType"]:
         """Return a list of elements, each item is a list of elements
         with the same priority.
         """
