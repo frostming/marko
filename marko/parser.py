@@ -24,6 +24,9 @@ class Parser:
     def __init__(self) -> None:
         self.block_elements: dict[str, BlockElementType] = {}
         self.inline_elements: dict[str, InlineElementType] = {}
+        # Create references in block and inline modules to avoid cyclic import.
+        block.parser = self  # type: ignore
+        inline.parser = self  # type: ignore
 
         for el in itertools.chain(
             (getattr(block, name) for name in block.__all__),
@@ -62,8 +65,6 @@ class Parser:
             - source: parse the source and returns the parsed children as a list.
         """
         if isinstance(source_or_text, str):
-            block.parser = self  # type: ignore
-            inline.parser = self  # type: ignore
             return self.block_elements["Document"](source_or_text)  # type: ignore
         element_list = self._build_block_element_list()
         ast: list[block.BlockElement] = []

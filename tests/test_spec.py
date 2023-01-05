@@ -1,5 +1,4 @@
 from marko import Markdown
-from marko.ext.gfm import gfm
 from tests import SpecTestSuite
 
 
@@ -35,7 +34,7 @@ GFM_IGNORE = ["autolinks_015", "autolinks_018", "autolinks_019"]
 class TestGFM(SpecTestSuite):
     @classmethod
     def setup_class(cls):
-        cls.markdown = gfm
+        cls.markdown = Markdown(extensions=["gfm"])
 
     @classmethod
     def ignore_case(cls, n):

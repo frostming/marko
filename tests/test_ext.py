@@ -74,9 +74,7 @@ class TestPangu:
 
 class TestGFM:
     def setup_method(self):
-        from marko.ext.gfm import gfm
-
-        self.markdown = gfm
+        self.markdown = Markdown(extensions=["gfm"])
 
     def test_gfm_autolink(self):
         content = "地址：https://google.com"
