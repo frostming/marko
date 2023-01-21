@@ -83,7 +83,7 @@ summary = "Markdown URL utilities"
 
 [[package]]
 name = "mistletoe"
-version = "1.0.0"
+version = "1.0.1"
 requires_python = "~=3.5"
 summary = "A fast, extensible Markdown parser in pure Python."
 
@@ -293,9 +293,9 @@ content_hash = "sha256:997b779d9c4cb4927a09b8749facf186a5975e67f696ebf83966d48cf
     {url = "https://files.pythonhosted.org/packages/00/3f/571221facbf1c158a78dbad166b512fc718e76a1ed16382ee919816b0015/mdurl-0.1.1-py3-none-any.whl", hash = "sha256:6a8f6804087b7128040b2fb2ebe242bdc2affaeaa034d5fc9feeed30b443651b"},
     {url = "https://files.pythonhosted.org/packages/d1/ff/2f02e94382daee347ca6cfd33fde421e891398d83c51d05f25941f7f93e9/mdurl-0.1.1.tar.gz", hash = "sha256:f79c9709944df218a4cdb0fcc0b0c7ead2f44594e3e84dc566606f04ad749c20"},
 ]
-"mistletoe 1.0.0" = [
-    {url = "https://files.pythonhosted.org/packages/8d/45/22f6dfa9f841b637b9ac893030a292fe47d5a88de3af1d5c59884a5de2c8/mistletoe-1.0.0.tar.gz", hash = "sha256:fa0e9c57e2050cfd68ae304e4f9c5e1e693574cc5fd8323db33452949d682661"},
-    {url = "https://files.pythonhosted.org/packages/ea/81/14b1a5ec29a6016992a10e6569c61f10a3a06324102f9a05bab0770edc19/mistletoe-1.0.0-py3-none-any.whl", hash = "sha256:727cbd74006b3cea6685587c6d926256b9558a6d2b28b6f2ed1d1a9afd3add82"},
+"mistletoe 1.0.1" = [
+    {url = "https://files.pythonhosted.org/packages/3e/f8/bdddc5323dcd50dd9eb21fdf733312bca4c4adeae66d5c264d35c4ad937f/mistletoe-1.0.1.tar.gz", hash = "sha256:b1f89afb079a1b1a542e9ef2c08dd450a07a2bd935c03cab22c328ad7ca4d8e8"},
+    {url = "https://files.pythonhosted.org/packages/5f/2f/9bd9bb9649e708e60d5baa57b22dcce622b34e94b58590e624d68dfd898a/mistletoe-1.0.1-py3-none-any.whl", hash = "sha256:c1e3d8a5a7fcd6354650977bb228d28f184f09a475456b8a1e122170038e2707"},
 ]
 "mistune 2.0.4" = [
     {url = "https://files.pythonhosted.org/packages/3a/c7/b0a4413a4d9b7a4fda0d710fd90dba62375f0d0c4544e848dc7656757c0c/mistune-2.0.4-py2.py3-none-any.whl", hash = "sha256:182cc5ee6f8ed1b807de6b7bb50155df7b66495412836b9a74c8fbdfc75fe36d"},
