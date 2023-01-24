@@ -1,5 +1,6 @@
 #! -*- coding: utf-8 -*-
 
+
 from marko import Markdown
 
 
@@ -75,6 +76,38 @@ class TestPangu:
 class TestGFM:
     def setup_method(self):
         self.markdown = Markdown(extensions=["gfm"])
+
+    def test_strikethrough_link(self):
+        content = "~~[google](https://google.com)~~"
+        assert (
+            self.markdown(content).strip()
+            == '<p><del><a href="https://google.com">google</a></del></p>'
+        )
+
+    def test_strikethrough_inside_link(self):
+        content = "[~~google~~](https://google.com)"
+        assert (
+            self.markdown(content).strip()
+            == '<p><a href="https://google.com"><del>google</del></a></p>'
+        )
+
+    def test_strikethrough_spec_standard(self):
+        content = "~~Hi~~ Hello, world!"
+        expected = "<p><del>Hi</del> Hello, world!</p>"
+        assert self.markdown(content).strip() == expected
+
+    def test_strikethrough_spec_new_paragraph(self):
+        content = """This ~~has a
+
+new paragraph~~."""
+        expected = """<p>This ~~has a</p>
+<p>new paragraph~~.</p>"""
+        assert self.markdown(content).strip() == expected
+
+    def test_strikethrough_spec_wont_strike(self):
+        content = "This will ~~~not~~~ strike."
+        expected = "<p>This will ~~~not~~~ strike.</p>"
+        assert self.markdown(content).strip() == expected
 
     def test_gfm_autolink(self):
         content = "地址：https://google.com"
