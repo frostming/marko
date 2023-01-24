@@ -23,7 +23,7 @@ class Paragraph(block.Paragraph):
 class Strikethrough(inline.InlineElement):
 
     pattern = re.compile(r"~~([^~]+)~~")
-    priority = 4
+    priority = 5
     parse_children = True
 
 
