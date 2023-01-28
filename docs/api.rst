@@ -31,7 +31,19 @@ Renderer Class
 Elements
 --------
 
+Block Elements
+~~~~~~~~~~~~~~
+
+.. autoclass:: marko.block.BlockElement
+    :members:
+
 .. automodule:: marko.block
+    :members:
+
+Inline Elements
+~~~~~~~~~~~~~~~
+
+.. autoclass:: marko.block.InlineElement
     :members:
 
 .. automodule:: marko.inline
