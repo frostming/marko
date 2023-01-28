@@ -31,13 +31,11 @@ Renderer Class
 Base Elements
 -------------
 
-.. autoclass:: marko.block.BlockElement
+.. automodule:: marko.block
     :members:
-    :inherited-members:
 
-.. autoclass:: marko.inline.InlineElement
+.. automodule:: marko.inline.InlineElement
     :members:
-    :inherited-members:
 
 Helper Classes
 --------------
