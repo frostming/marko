@@ -1,5 +1,7 @@
 ## Unreleased
 
+## v1.3.0(2023-01-28)
+
 - Fix a bug that `Parser.parse_inline()` cannot be called without preceding call of `Parser.parse()`. [#131](https://github.com/frostming/marko/issue/131)
 - Fix a rendering bug when line breaks exist in a link text. [#126](https://github.com/frostming/marko/issue/126)
 - Drop support of Python 3.6.
