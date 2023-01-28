@@ -12,6 +12,7 @@ from .helpers import Source, find_next, normalize_label, partition_by_spaces
 from .parser import Parser
 
 __all__ = (
+    "BlockElement",
     "Document",
     "CodeBlock",
     "Heading",

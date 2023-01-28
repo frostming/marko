@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from .inline_parser import _Match
 
 __all__ = (
+    "InlineElement",
     "LineBreak",
     "Literal",
     "LinkOrEmph",
