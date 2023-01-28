@@ -7,7 +7,7 @@ from tests.normalize import normalize_html
 
 TEST_ROOT = os.path.dirname(__file__)
 EXAMPLE_PATTERN = re.compile(
-    r"^`{32} example\n([\s\S]*?)" r"^\.\n([\s\S]*?)" r"^`{32}$|^#{1,6} *(.*)$",
+    r"^`{32} example\b.*?\n([\s\S]*?)^\.\n([\s\S]*?)^`{32}$|^#{1,6} *(.*)$",
     flags=re.M,
 )
 
@@ -20,7 +20,7 @@ def parse_examples(text):
     for md, html, title in data:
         if title:
             count = 0
-            section = title.lower().replace(" ", "_")
+            section = title.lower().split("(")[0].replace(" ", "_")
 
         if md and html:
             count += 1

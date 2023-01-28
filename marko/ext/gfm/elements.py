@@ -4,7 +4,7 @@ Extra elements
 import itertools
 import re
 
-from marko import block, inline
+from marko import block, inline, patterns
 
 
 class Paragraph(block.Paragraph):
@@ -18,6 +18,18 @@ class Paragraph(block.Paragraph):
         if m:
             self.checked = m.group(1)[1:-1].lower() == "x"
             self.children = self.children[m.end(1) :]
+
+
+class InlineHTML(inline.InlineHTML):
+    pattern = re.compile(
+        r"(<%s(?:%s)* */?>"  # open tag
+        r"|</%s *>"  # closing tag
+        r"|<!--(?:>|->|[\s\S]*?-->)"  # HTML comment
+        r"|<\?[\s\S]*?\?>"  # processing instruction
+        r"|<![A-Z]+ +[\s\S]*?>"  # declaration
+        r"|<!\[CDATA\[[\s\S]*?\]\]>)"  # CDATA section
+        % (patterns.tag_name, patterns.attribute, patterns.tag_name)
+    )
 
 
 class Strikethrough(inline.InlineElement):
@@ -211,6 +223,6 @@ class TableCell(block.BlockElement):
     inline_children = True
 
     def __init__(self, text):
-        self.children = text.strip()
+        self.children = text.strip().replace("\\|", "|")
         self.header = False
         self.align = None

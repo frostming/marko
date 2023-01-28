@@ -82,6 +82,7 @@ class GFM:
     elements = [
         elements.Paragraph,
         elements.ListItem,
+        elements.InlineHTML,
         elements.Strikethrough,
         elements.Url,
         elements.Table,
