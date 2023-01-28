@@ -43,7 +43,7 @@ Block Elements
 Inline Elements
 ~~~~~~~~~~~~~~~
 
-.. autoclass:: marko.block.InlineElement
+.. autoclass:: marko.inline.InlineElement
     :members:
 
 .. automodule:: marko.inline
