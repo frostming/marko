@@ -34,9 +34,10 @@ class InlineHTML(inline.InlineHTML):
 
 class Strikethrough(inline.InlineElement):
 
-    pattern = re.compile(r"~~([^~]+)~~")
+    pattern = re.compile(r"(?<!~)(~|~~)([^~]+)\1(?!~)")
     priority = 5
     parse_children = True
+    parse_group = 2
 
 
 class _MatchObj:

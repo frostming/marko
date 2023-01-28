@@ -45,5 +45,37 @@ class TestGFM(SpecTestSuite):
         html = "<p>\\</p><table><thead><tr><th>\\</th></tr></thead><tbody><tr><td>\\</td></tr></tbody></table>"
         self.assert_case(md, html)
 
+    def test_strikethrough_link(self):
+        md = "~~[google](https://google.com)~~"
+        html = '<p><del><a href="https://google.com">google</a></del></p>'
+        self.assert_case(md, html)
+
+    def test_strikethrough_inside_link(self):
+        md = "[~~google~~](https://google.com)"
+        html = '<p><a href="https://google.com"><del>google</del></a></p>'
+        self.assert_case(md, html)
+
+    def test_strikethrough_single_tilde(self):
+        md = "hello ~google~"
+        html = "<p>hello <del>google</del></p>"
+        self.assert_case(md, html)
+
+    def test_strikethrough_spec_wont_strike(self):
+        content = "This will ~~~not~~~ strike."
+        expected = "<p>This will ~~~not~~~ strike.</p>"
+        assert self.markdown(content).strip() == expected
+
+    def test_gfm_autolink(self):
+        content = "地址：https://google.com"
+        assert (
+            self.markdown(content).strip()
+            == '<p>地址：<a href="https://google.com">https://google.com</a></p>'
+        )
+        content = "地址：www.baidu.com"
+        assert (
+            self.markdown(content).strip()
+            == '<p>地址：<a href="http://www.baidu.com">www.baidu.com</a></p>'
+        )
+
 
 TestGFM.load_spec("gfm")

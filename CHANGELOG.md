@@ -4,6 +4,7 @@
 - Fix a rendering bug when line breaks exist in a link text. [#126](https://github.com/frostming/marko/issue/126)
 - Drop support of Python 3.6.
 - Update the GFM spec to the latest master branch.
+- Fix a precedence issue of parsing strikethroughs in GFM.
 
 ## v1.2.2(2022-09-22)
 
