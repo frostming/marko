@@ -28,13 +28,13 @@ Renderer Class
 
 .. _elements:
 
-Base Elements
--------------
+Elements
+--------
 
 .. automodule:: marko.block
     :members:
 
-.. automodule:: marko.inline.InlineElement
+.. automodule:: marko.inline
     :members:
 
 Helper Classes
