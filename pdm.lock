@@ -89,7 +89,7 @@ summary = "A fast, extensible Markdown parser in pure Python."
 
 [[package]]
 name = "mistune"
-version = "2.0.4"
+version = "2.0.5"
 summary = "A sane Markdown parser with useful plugins and renderers"
 
 [[package]]
@@ -297,9 +297,9 @@ content_hash = "sha256:997b779d9c4cb4927a09b8749facf186a5975e67f696ebf83966d48cf
     {url = "https://files.pythonhosted.org/packages/3e/f8/bdddc5323dcd50dd9eb21fdf733312bca4c4adeae66d5c264d35c4ad937f/mistletoe-1.0.1.tar.gz", hash = "sha256:b1f89afb079a1b1a542e9ef2c08dd450a07a2bd935c03cab22c328ad7ca4d8e8"},
     {url = "https://files.pythonhosted.org/packages/5f/2f/9bd9bb9649e708e60d5baa57b22dcce622b34e94b58590e624d68dfd898a/mistletoe-1.0.1-py3-none-any.whl", hash = "sha256:c1e3d8a5a7fcd6354650977bb228d28f184f09a475456b8a1e122170038e2707"},
 ]
-"mistune 2.0.4" = [
-    {url = "https://files.pythonhosted.org/packages/3a/c7/b0a4413a4d9b7a4fda0d710fd90dba62375f0d0c4544e848dc7656757c0c/mistune-2.0.4-py2.py3-none-any.whl", hash = "sha256:182cc5ee6f8ed1b807de6b7bb50155df7b66495412836b9a74c8fbdfc75fe36d"},
-    {url = "https://files.pythonhosted.org/packages/cd/9b/0f98334812f548a5ee4399b76e33752a74fc7bb976f5efb34d962f03d585/mistune-2.0.4.tar.gz", hash = "sha256:9ee0a66053e2267aba772c71e06891fa8f1af6d4b01d5e84e267b4570d4d9808"},
+"mistune 2.0.5" = [
+    {url = "https://files.pythonhosted.org/packages/9f/e5/780d22d19543f339aad583304f58002975b586757aa590cbe7bea5cc6f13/mistune-2.0.5-py2.py3-none-any.whl", hash = "sha256:bad7f5d431886fcbaf5f758118ecff70d31f75231b34024a1341120340a65ce8"},
+    {url = "https://files.pythonhosted.org/packages/fb/6b/d8013058fcdb0088b4130164fc961e15c50d30302f60a349c16bdfda9770/mistune-2.0.5.tar.gz", hash = "sha256:0246113cb2492db875c6be56974a7c893333bf26cd92891c85f63151cee09d34"},
 ]
 "mypy 1.0.0" = [
     {url = "https://files.pythonhosted.org/packages/0e/84/073a709d3f20e831e75199a30a20885f04d1a8a0d7b956a26056a5454fc3/mypy-1.0.0-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5cd187d92b6939617f1168a4fe68f68add749902c010e66fe574c165c742ed88"},
