@@ -4,7 +4,7 @@ Base parser
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, AnyStr, Type
+from typing import TYPE_CHECKING, Type
 
 from .helpers import Source
 
@@ -55,7 +55,7 @@ class Parser:
         dest[element.get_type()] = element
 
     def parse(
-        self, source_or_text: Source | AnyStr
+        self, source_or_text: Source | str
     ) -> list[block.BlockElement] | block.BlockElement:
         """Do the actual parsing and returns an AST or parsed element.
 

@@ -45,7 +45,6 @@ class TestBasic:
 
 class TestExtension:
     def test_extension_use(self):
-
         markdown = marko.Markdown(extensions=["footnote", "toc"])
 
         assert len(markdown._extra_elements) == 3
@@ -53,7 +52,6 @@ class TestExtension:
         assert hasattr(markdown._renderer_mixins[1], "render_footnote_def")
 
     def test_extension_setup(self):
-
         markdown = marko.Markdown()
         markdown.use("footnote")
 

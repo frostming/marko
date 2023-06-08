@@ -11,15 +11,14 @@ r"""
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Iterable, cast
 
-from .helpers import load_extension_object
+from .helpers import load_extension
 from .html_renderer import HTMLRenderer
 from .parser import Parser
 from .renderer import Renderer
 
 if TYPE_CHECKING:
-
     from .block import Document
     from .parser import ElementType
 
@@ -48,24 +47,24 @@ class Markdown:
         self,
         parser: type[Parser] = Parser,
         renderer: type[Renderer] = HTMLRenderer,
-        extensions: Any | None = None,
+        extensions: Iterable[str | object] | None = None,
     ) -> None:
         if not issubclass(parser, Parser):
             raise TypeError("parser must be a subclass of Parser.")
         self._base_parser = parser
-        self._parser_mixins: list[Any] = []
+        self._parser_mixins: list[type] = []
 
         if not issubclass(renderer, Renderer):
             raise TypeError("renderer must be a subclass of Renderer.")
         self._base_renderer = renderer
-        self._renderer_mixins: list[Any] = []
+        self._renderer_mixins: list[type] = []
 
         self._extra_elements: list[ElementType] = []
         self._setup_done = False
         if extensions:
             self.use(*extensions)
 
-    def use(self, *extensions: Any) -> None:
+    def use(self, *extensions: str | object) -> None:
         r"""Register extensions to Markdown object.
         An extension should be either an object providing ``elements``, `parser_mixins``
         , ``renderer_mixins`` or all attributes, or a string representing the
@@ -80,15 +79,19 @@ class Markdown:
             raise SetupDone()
         for extension in extensions:
             if isinstance(extension, str):
-                extension = load_extension_object(extension)()
+                extension = load_extension(extension)
 
             self._parser_mixins = (
-                getattr(extension, "parser_mixins", []) + self._parser_mixins
+                cast("list[type]", getattr(extension, "parser_mixins", []))
+                + self._parser_mixins
             )
             self._renderer_mixins = (
-                getattr(extension, "renderer_mixins", []) + self._renderer_mixins
+                cast("list[type]", getattr(extension, "renderer_mixins", []))
+                + self._renderer_mixins
             )
-            self._extra_elements.extend(getattr(extension, "elements", []))
+            self._extra_elements.extend(
+                cast("list[ElementType]", getattr(extension, "elements", []))
+            )
 
     def _setup_extensions(self) -> None:
         """Install all extensions and set things up."""

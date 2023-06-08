@@ -86,7 +86,6 @@ class LineBreak(InlineElement):
 
 
 class InlineHTML(InlineElement):
-
     priority = 7
     pattern = re.compile(
         r"(<%s(?:%s)* */?>"  # open tag

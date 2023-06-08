@@ -8,7 +8,6 @@ from marko import block, inline, patterns
 
 
 class Paragraph(block.Paragraph):
-
     _task_list_item_pattern = re.compile(r"(\[[\sxX]\])\s+\S")
     override = True
 
@@ -33,7 +32,6 @@ class InlineHTML(inline.InlineHTML):
 
 
 class Strikethrough(inline.InlineElement):
-
     pattern = re.compile(r"(?<!~)(~|~~)([^~]+)\1(?!~)")
     priority = 5
     parse_children = True
@@ -68,7 +66,6 @@ class _MatchObj:
 
 
 class Url(inline.AutoLink):
-
     www_pattern = re.compile(
         r"(?:^|(?<=[\s*_~(\uff00-\uffef]))(www\.([\w.\-]*?\.[\w.\-]+)[^<\s]*)"
     )
@@ -108,7 +105,6 @@ class Url(inline.AutoLink):
 
 
 class ListItem(block.ListItem):
-
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
     override = True
 

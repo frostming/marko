@@ -4,7 +4,7 @@ Block level elements
 from __future__ import annotations
 
 import re
-from typing import Any, Match, cast
+from typing import Any, Match, Pattern, cast
 
 from . import inline, inline_parser, patterns
 from .element import Element
@@ -43,7 +43,7 @@ class BlockElement(Element):
     _prefix = ""
 
     @classmethod
-    def match(self, source: Source) -> Any:
+    def match(cls, source: Source) -> Any:
         """Test if the source matches the element at current position.
         The source should not be consumed in the method unless you have to.
 
@@ -52,7 +52,7 @@ class BlockElement(Element):
         raise NotImplementedError()
 
     @classmethod
-    def parse(self, source: Source) -> Any:
+    def parse(cls, source: Source) -> Any:
         """Parses the source. This is a proper place to consume the source body and
         return an element or information to build one. The information tuple will be
         passed to ``__init__`` method afterwards. Inline parsing, if any, should also
@@ -123,16 +123,16 @@ class Heading(BlockElement):
     )
     inline_children = True
 
-    def __init__(self, match: Match) -> None:
+    def __init__(self, match: Match[str]) -> None:
         self.level = len(match.group(1))
         self.children = match.group(2).strip()
 
     @classmethod
-    def match(cls, source: Source) -> Match | None:
+    def match(cls, source: Source) -> Match[str] | None:
         return source.expect_re(cls.pattern)
 
     @classmethod
-    def parse(cls, source: Source) -> Match | None:
+    def parse(cls, source: Source) -> Match[str] | None:
         m = source.match
         source.consume()
         return m
@@ -224,7 +224,7 @@ class FencedCode(BlockElement):
         self.children = [inline.RawText(match[2], False)]
 
     @classmethod
-    def match(cls, source: Source) -> Match | None:
+    def match(cls, source: Source) -> Match[str] | None:
         m = source.expect_re(cls.pattern)
         if not m:
             return None
@@ -281,7 +281,7 @@ class HTMLBlock(BlockElement):
     """HTML blocks, parsed as it is"""
 
     priority = 5
-    _end_cond = None  # Optional[Match]
+    _end_cond: Pattern[str] | None = None
 
     def __init__(self, lines: str) -> None:
         self.children = lines
@@ -427,7 +427,7 @@ class Quote(BlockElement):
     _prefix = r" {,3}>[^\n\S]?"
 
     @classmethod
-    def match(cls, source: Source) -> Match | None:
+    def match(cls, source: Source) -> Match[str] | None:
         return source.expect_re(r" {,3}>")
 
     @classmethod

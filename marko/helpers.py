@@ -7,18 +7,9 @@ import functools
 import re
 from contextlib import contextmanager
 from importlib import import_module
-from typing import (
-    TYPE_CHECKING,
-    Callable,
-    Container,
-    Generator,
-    Iterable,
-    Match,
-    Pattern,
-)
+from typing import TYPE_CHECKING, Container, Generator, Iterable, Match, Pattern
 
 if TYPE_CHECKING:
-
     from .block import BlockElement
 
 
@@ -237,7 +228,7 @@ def partition_by_spaces(text: str, spaces: str = " \t") -> tuple[str, str, str]:
     return text[:start], text[start:end], text[end:]
 
 
-def load_extension_object(name: str) -> Callable:
+def load_extension(name: str) -> object:
     """Load extension object from a string.
     First try `marko.ext.<name>` if possible
     """
@@ -254,7 +245,7 @@ def load_extension_object(name: str) -> Callable:
             raise ImportError(f"Extension {name} cannot be imported") from e
 
     try:
-        return module.make_extension
+        return module.make_extension()
     except AttributeError:
         raise AttributeError(
             f"Module {name} does not have 'make_extension' attributte."

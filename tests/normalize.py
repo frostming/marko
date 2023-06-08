@@ -61,7 +61,7 @@ class MyHTMLParser(HTMLParser):
         # attrs = filter(lambda attr: attr[0] in significant_attrs, attrs)
         if attrs:
             attrs.sort()
-            for (k, v) in attrs:
+            for k, v in attrs:
                 self.output += " " + k
                 if v in ["href", "src"]:
                     self.output += (

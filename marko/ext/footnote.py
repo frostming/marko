@@ -25,7 +25,6 @@ class Document(block.Document):
 
 
 class FootnoteDef(block.BlockElement):
-
     pattern = re.compile(r" {,3}\[\^([^\]]+)\]:[^\n\S]*(?=\S| {4})")
     priority = 6
 
@@ -48,7 +47,6 @@ class FootnoteDef(block.BlockElement):
 
 
 class FootnoteRef(inline.InlineElement):
-
     pattern = re.compile(r"\[\^([^\]]+)\]")
     priority = 6
 

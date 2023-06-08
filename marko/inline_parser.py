@@ -69,7 +69,7 @@ def make_elements(
     text: str,
     start: int = 0,
     end: int | None = None,
-    fallback: ElementType = None,
+    fallback: ElementType | None = None,
 ) -> list[InlineElement]:
     """Make elements from a list of parsed tokens.
     It will turn all unmatched holes into fallback elements.

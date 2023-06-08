@@ -41,14 +41,14 @@ def test_source_no_state():
 
 
 def test_load_extension_object():
-    ext = helpers.load_extension_object("pangu")()
+    ext = helpers.load_extension("pangu")
     assert len(ext.renderer_mixins) == 1
 
-    ext = helpers.load_extension_object("marko.ext.pangu")()
+    ext = helpers.load_extension("marko.ext.pangu")
     assert len(ext.renderer_mixins) == 1
 
     with pytest.raises(ImportError, match="Extension foobar cannot be imported"):
-        helpers.load_extension_object("foobar")()
+        helpers.load_extension("foobar")
 
 
 def test_load_illegal_extension_object():
@@ -56,7 +56,7 @@ def test_load_illegal_extension_object():
         AttributeError,
         match="Module marko.block does not have 'make_extension' attributte",
     ):
-        helpers.load_extension_object("marko.block")()
+        helpers.load_extension("marko.block")
 
 
 @pytest.mark.parametrize(
