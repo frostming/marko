@@ -14,7 +14,7 @@ Usage::
     from marko import Markdown
 
     markdown = Markdown(extensions=['codehilite'])
-    markdown.convert(```python my_script.py\nprint('hello world')\n```)
+    markdown.convert('```python filename="my_script.py"\nprint('hello world')\n```')
 """
 import json
 
@@ -27,7 +27,16 @@ from pygments.util import ClassNotFound
 def _parse_extras(line):
     if not line:
         return {}
-    return {k: json.loads(v) for part in line.split(",") for k, v in [part.split("=")]}
+    extras = {}
+    for token in line.split(","):
+        k, has_eq, v = token.partition("=")
+        if has_eq:
+            try:
+                parsed_v = json.loads(v)
+                extras[k] = parsed_v
+            except json.JSONDecodeError:
+                continue
+    return extras
 
 
 class CodeHiliteRendererMixin:
