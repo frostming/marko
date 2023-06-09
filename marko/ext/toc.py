@@ -8,9 +8,9 @@ This requires to install `toc` extras::
     pip install marko[toc]
 
 Arguments:
-* openning: the openning tag, defaults to <ul>
-* closing: the closing tag, defaults to </ul>
-* item_format: the toc item format, defaults to '<li><a href="#{slug}">{text}</a></li>'
+    * openning: the openning tag, defaults to <ul>
+    * closing: the closing tag, defaults to </ul>
+    * item_format: the toc item format, defaults to '<li><a href="#{slug}">{text}</a></li>'
 
 Usage::
 

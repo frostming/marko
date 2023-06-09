@@ -37,10 +37,13 @@ class Markdown:
         * parser: an instance of :class:`marko.parser.Parser`
         * renderer: an instance of :class:`marko.renderer.Renderer`
 
-    :param parser: a subclass :class:`marko.parser.Parser`.
-    :param renderer: a subclass :class:`marko.renderer.Renderer`.
+    :param parser: a subclass of :class:`marko.parser.Parser`.
+    :param renderer: a subclass of :class:`marko.renderer.Renderer`.
     :param extensions: a list of extensions to register on the object.
         See document of :meth:`Markdown.use()`.
+
+    .. note::
+        This class is not thread-safe. Create a new instance for each thread.
     """
 
     def __init__(
@@ -70,7 +73,7 @@ class Markdown:
         , ``renderer_mixins`` or all attributes, or a string representing the
         corresponding extension in ``marko.ext`` module.
 
-        :param \*extensions: extension object or string.
+        :param \*extensions: string or :class:`marko.helpers.MarkoExtension` object.
 
         .. note:: Marko uses a mixin based extension system, the order of extensions
             matters: An extension preceding in order will have higher priorty.
