@@ -129,6 +129,7 @@ class Markdown:
 
         Override this to handle parsed result.
         """
+        self._setup_extensions()
         self.renderer.root_node = parsed
         with self.renderer as r:
             return r.render(parsed)
