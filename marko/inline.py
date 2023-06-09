@@ -4,18 +4,18 @@ Inline(span) level elements
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Iterator, Match, Pattern, Sequence
+from typing import TYPE_CHECKING, Iterator, Pattern, Sequence
 
-from . import inline_parser, patterns
+from . import patterns
 from .element import Element
 
 if TYPE_CHECKING:
     from .inline_parser import _Match
+    from .source import Source
 
 __all__ = (
     "LineBreak",
     "Literal",
-    "LinkOrEmph",
     "InlineHTML",
     "CodeSpan",
     "Emphasis",
@@ -53,7 +53,7 @@ class InlineElement(Element):
             self.children = match.group(self.parse_group)
 
     @classmethod
-    def find(cls, text: str) -> Iterator[Match]:
+    def find(cls, text: str, *, source: Source) -> Iterator[_Match]:
         """This method should return an iterable containing matches of this element."""
         if isinstance(cls.pattern, str):
             cls.pattern = re.compile(cls.pattern)
@@ -68,7 +68,7 @@ class Literal(InlineElement):
 
     @classmethod
     def strip_backslash(cls, text: str) -> str:
-        return cls.pattern.sub(r"\1", text)
+        return cls.pattern.sub(r"\1", text)  # type: ignore[unio]
 
 
 class LineBreak(InlineElement):
@@ -96,21 +96,6 @@ class InlineHTML(InlineElement):
         r"|<!\[CDATA\[[\s\S]*?\]\]>)"  # CDATA section
         % (patterns.tag_name, patterns.attribute, patterns.tag_name)
     )
-
-
-class LinkOrEmph(InlineElement):
-    """This is a special element, whose parsing is done specially.
-    And it produces Link or Emphasis elements.
-    """
-
-    parse_children = True
-
-    def __new__(cls, match: _Match) -> LinkOrEmph:
-        return parser.inline_elements[match.etype](match)  # type: ignore
-
-    @classmethod
-    def find(cls, text: str) -> Iterator[Match]:
-        return inline_parser.find_links_or_emphs(text, _root_node)  # type: ignore
 
 
 class StrongEmphasis(InlineElement):
@@ -197,8 +182,3 @@ class RawText(InlineElement):
     def __init__(self, match: str, escape: bool = True) -> None:
         self.children = match
         self.escape = escape
-
-
-# backrefs to avoid cylic  import
-parser = None
-_root_node = None

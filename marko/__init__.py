@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, cast
 
-from .helpers import load_extension
+from .helpers import MarkoExtension, load_extension
 from .html_renderer import HTMLRenderer
 from .parser import Parser
 from .renderer import Renderer
@@ -47,7 +47,7 @@ class Markdown:
         self,
         parser: type[Parser] = Parser,
         renderer: type[Renderer] = HTMLRenderer,
-        extensions: Iterable[str | object] | None = None,
+        extensions: Iterable[str | MarkoExtension] | None = None,
     ) -> None:
         if not issubclass(parser, Parser):
             raise TypeError("parser must be a subclass of Parser.")
@@ -64,7 +64,7 @@ class Markdown:
         if extensions:
             self.use(*extensions)
 
-    def use(self, *extensions: str | object) -> None:
+    def use(self, *extensions: str | MarkoExtension) -> None:
         r"""Register extensions to Markdown object.
         An extension should be either an object providing ``elements``, `parser_mixins``
         , ``renderer_mixins`` or all attributes, or a string representing the
@@ -81,32 +81,30 @@ class Markdown:
             if isinstance(extension, str):
                 extension = load_extension(extension)
 
-            self._parser_mixins = (
-                cast("list[type]", getattr(extension, "parser_mixins", []))
-                + self._parser_mixins
-            )
-            self._renderer_mixins = (
-                cast("list[type]", getattr(extension, "renderer_mixins", []))
-                + self._renderer_mixins
-            )
-            self._extra_elements.extend(
-                cast("list[ElementType]", getattr(extension, "elements", []))
-            )
+            self._parser_mixins = extension.parser_mixins + self._parser_mixins
+            self._renderer_mixins = extension.renderer_mixins + self._renderer_mixins
+            self._extra_elements.extend(extension.elements)
 
     def _setup_extensions(self) -> None:
         """Install all extensions and set things up."""
         if self._setup_done:
             return
-        self.parser: Parser = type(
-            "MarkdownParser", tuple(self._parser_mixins) + (self._base_parser,), {}
-        )()
+        self.parser = cast(
+            Parser,
+            type(
+                "MarkdownParser", tuple(self._parser_mixins) + (self._base_parser,), {}
+            )(),
+        )
         for e in self._extra_elements:
             self.parser.add_element(e)
-        self.renderer: Renderer = type(
-            "MarkdownRenderer",
-            tuple(self._renderer_mixins) + (self._base_renderer,),
-            {},
-        )()
+        self.renderer = cast(
+            Renderer,
+            type(
+                "MarkdownRenderer",
+                tuple(self._renderer_mixins) + (self._base_renderer,),
+                {},
+            )(),
+        )
         self._setup_done = True
 
     def convert(self, text: str) -> str:
@@ -122,7 +120,7 @@ class Markdown:
         Override this to preprocess text or handle parsed result.
         """
         self._setup_extensions()
-        return cast("Document", self.parser.parse(text))
+        return self.parser.parse(text)
 
     def render(self, parsed: Document) -> str:
         """Call ``self.renderer.render(text)``.
@@ -164,3 +162,16 @@ def render(parsed: Document) -> str:
     :returns: the rendered result.
     """
     return _markdown.render(parsed)
+
+
+__all__ = [
+    "MarkoExtension",
+    "Markdown",
+    "convert",
+    "parse",
+    "render",
+    "load_extension",
+    "Parser",
+    "Renderer",
+    "HTMLRenderer",
+]

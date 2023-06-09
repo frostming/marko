@@ -66,10 +66,9 @@ class TestExtension:
             def render_paragraph(self, element):
                 return "foo bar"
 
-        class MyExtension:
-            renderer_mixins = [MyRendererMixin]
+        my_extension = marko.MarkoExtension(renderer_mixins=[MyRendererMixin])
 
-        markdown = marko.Markdown(extensions=["gfm", MyExtension])
+        markdown = marko.Markdown(extensions=["gfm", my_extension])
         out = markdown.convert("hello world\n")
         assert out == "foo bar"
 
@@ -77,10 +76,9 @@ class TestExtension:
         class MyHeading(block.Heading):
             override = True
 
-        class MyExtension:
-            elements = [MyHeading]
+        my_extension = marko.MarkoExtension(elements=[MyHeading])
 
-        markdown = marko.Markdown(extensions=[MyExtension])
+        markdown = marko.Markdown(extensions=[my_extension])
         markdown._setup_extensions()
         assert markdown.parser.block_elements["Heading"] is MyHeading
         assert markdown.parser.block_elements["Heading"].get_type() == "Heading"
@@ -89,19 +87,17 @@ class TestExtension:
         class MyHeading(block.BlockElement):
             override = True
 
-        class MyExtension:
-            elements = [MyHeading]
+        my_extension = marko.MarkoExtension(elements=[MyHeading])
 
-        markdown = marko.Markdown(extensions=[MyExtension])
+        markdown = marko.Markdown(extensions=[my_extension])
         markdown._setup_extensions()
         assert markdown.parser.block_elements["MyHeading"] is MyHeading
         assert markdown.parser.block_elements["MyHeading"].get_type() == "MyHeading"
 
     def test_extension_with_illegal_element(self):
-        class MyExtension:
-            elements = [object]
+        my_extension = marko.MarkoExtension(elements=[object])  # type: ignore
 
-        markdown = marko.Markdown(extensions=[MyExtension])
+        markdown = marko.Markdown(extensions=[my_extension])
         with pytest.raises(TypeError, match="The element should be a subclass of"):
             markdown.convert("hello world\n")
 
@@ -110,10 +106,9 @@ class TestExtension:
             def render_paragraph(self, element):
                 return "ohohohohohoh"
 
-        class Extension:
-            renderer_mixins = [RendererMixin]
+        my_extension = marko.MarkoExtension(renderer_mixins=[RendererMixin])
 
-        markdown = marko.Markdown(renderer=ASTRenderer, extensions=[Extension])
+        markdown = marko.Markdown(renderer=ASTRenderer, extensions=[my_extension])
         res = markdown.convert("Hello world")
         paragraph = res["children"][0]
         assert isinstance(paragraph, dict)

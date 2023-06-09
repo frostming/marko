@@ -103,20 +103,21 @@ class XMLRenderer(Renderer):
         attrs = {
             k: v
             for k, v in element.__dict__.items()
-            if not k.startswith("_") and k != "children"
+            if not k.startswith("_") and k not in ("body", "children")
         }
         attr_str = "".join(f' {k}="{v}"' for k, v in attrs.items())
         element_name = camel_to_snake_case(element.__class__.__name__)
         lines.append(" " * self.indent + f"<{element_name}{attr_str}>")
-        if getattr(element, "children", None):
+        children = getattr(element, "body", None) or getattr(element, "children", None)
+        if children:
             self.indent += 2
-            if isinstance(element.children, str):  # type: ignore
+            if isinstance(children, str):  # type: ignore
                 lines.append(
                     " " * self.indent
-                    + HTMLRenderer.escape_html(json.dumps(element.children)[1:-1])  # type: ignore
+                    + HTMLRenderer.escape_html(json.dumps(children)[1:-1])  # type: ignore
                 )
             else:
-                lines.extend(self.render(child) for child in element.children)  # type: ignore
+                lines.extend(self.render(child) for child in children)  # type: ignore
             self.indent -= 2
             lines.append(" " * self.indent + f"</{element_name}>")
         else:

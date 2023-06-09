@@ -23,6 +23,8 @@ from pygments.formatters import html
 from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.util import ClassNotFound
 
+from marko.helpers import MarkoExtension
+
 
 def _parse_extras(line):
     if not line:
@@ -44,8 +46,7 @@ class CodeHiliteRendererMixin:
 
     def render_fenced_code(self, element):
         code = element.children[0].children
-        options = CodeHiliteRendererMixin.options.copy()
-        options.update(_parse_extras(getattr(element, "extra", None)))
+        options = {**self.options, **_parse_extras(getattr(element, "extra", None))}
         if element.lang:
             try:
                 lexer = get_lexer_by_name(element.lang, stripall=True)
@@ -57,11 +58,8 @@ class CodeHiliteRendererMixin:
         return highlight(code, lexer, formatter)
 
 
-class CodeHilite:
-    def __init__(self, **options):
-        CodeHiliteRendererMixin.options = options
-        self.renderer_mixins = [CodeHiliteRendererMixin]
-
-
 def make_extension(**options):
-    return CodeHilite(**options)
+    mixin_cls = type(
+        "CodeHiliteRendererMixin", (CodeHiliteRendererMixin,), {"options": options}
+    )
+    return MarkoExtension(renderer_mixins=[mixin_cls])

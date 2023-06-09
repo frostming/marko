@@ -3,21 +3,27 @@ Parse inline elements
 """
 from __future__ import annotations
 
-import collections
 import re
-from typing import TYPE_CHECKING, Match, Type, Union
+from typing import TYPE_CHECKING, Match, NamedTuple, Union
 
 from . import patterns
 from .helpers import find_next, is_paired, normalize_label
+from .inline import InlineElement
 
 if TYPE_CHECKING:
-    from .block import Document
-    from .inline import InlineElement
+    from .source import Source
 
-    ElementType = Type[InlineElement]
     _Match = Union[Match[str], "MatchObj"]
 
-Group = collections.namedtuple("Group", "start end text")
+    ElementType = type[InlineElement]
+
+
+class Group(NamedTuple):
+    start: int
+    end: int
+    text: str | None
+
+
 _EMPTY_GROUP = Group(-1, -1, None)
 WHITESPACE = " \n\t"
 ASCII_CONTROL = "".join(chr(i) for i in range(0, 32)) + chr(127)
@@ -28,7 +34,7 @@ class ParseError(ValueError):
 
 
 def parse(
-    text: str, elements: list[ElementType], fallback: ElementType
+    text: str, elements: list[ElementType], fallback: ElementType, source: Source
 ) -> list[InlineElement]:
     """Parse given text and produce a list of inline elements.
 
@@ -36,10 +42,21 @@ def parse(
     :param elements: the element types to be included in parsing
     :param fallback: fallback class when no other element type is matched.
     """
-    # this is a raw list of elements that may contain overlaps.
+
+    class LinkOrEmph(InlineElement):
+        parse_children = True
+
+        def __new__(cls, match: _Match) -> InlineElement:  # type: ignore
+            assert isinstance(match, MatchObj)
+            return source.parser.inline_elements[match.etype](match)
+
+    # A raw list of elements that may contain overlaps.
     tokens: list[Token] = []
+    for m in find_links_or_emphs(text, source.root.link_ref_defs):
+        tokens.append(Token(LinkOrEmph, m, text, fallback))
+
     for etype in elements:
-        for match in etype.find(text):
+        for match in etype.find(text, source=source):
             tokens.append(Token(etype, match, text, fallback))
     tokens.sort()
     tokens = _resolve_overlap(tokens)
@@ -158,11 +175,13 @@ class Token:
         return self.start < o.start
 
 
-def find_links_or_emphs(text: str, root_node: Document) -> list[MatchObj]:
+def find_links_or_emphs(
+    text: str, link_ref_defs: dict[str, tuple[str, str]]
+) -> list[MatchObj]:
     """Fink links/images or emphasis from text.
 
     :param text: the original text.
-    :param root_node: a reference to the root node of the AST.
+    :param link_ref_defs: a mapping of link ref definitions.
     :returns: an iterable of match object.
     """
     delimiters_re = re.compile(r"(?:!?\[|\*+|_+)")
@@ -182,7 +201,7 @@ def find_links_or_emphs(text: str, root_node: Document) -> list[MatchObj]:
         elif code_pattern.match(text, i):
             i = code_pattern.match(text, i).end()  # type: ignore
         elif text[i] == "]":
-            node = look_for_image_or_link(text, delimiters, i, root_node, matches)
+            node = look_for_image_or_link(text, delimiters, i, link_ref_defs, matches)
             if node:
                 i = node.end()
                 matches.append(node)
@@ -203,7 +222,7 @@ def look_for_image_or_link(
     text: str,
     delimiters: list[Delimiter],
     close: int,
-    root_node: Document,
+    link_ref_defs: dict[str, tuple[str, str]],
     matches: list[MatchObj],
 ) -> MatchObj | None:
     for i, d in list(enumerate(delimiters))[::-1]:
@@ -214,9 +233,10 @@ def look_for_image_or_link(
         if not _is_legal_link_text(text[d.end : close]):
             break
         link_text = Group(d.end, close, text[d.end : close])
+        assert link_text.text is not None
         etype = "Image" if d.content == "![" else "Link"
         match = _expect_inline_link(text, close + 1) or _expect_reference_link(
-            text, close + 1, link_text[2], root_node
+            text, close + 1, link_text.text, link_ref_defs
         )
         if not match:  # not a link
             break
@@ -281,6 +301,7 @@ def _parse_link_dest_title(
     else:
         escaped = False
         pairs = 0
+        i = 0
         for i, c in enumerate(link_text[start:], start):
             if escaped:
                 escaped = False
@@ -348,15 +369,16 @@ def _expect_inline_link(text: str, start: int) -> tuple[Group, Group, int] | Non
 
 
 def _expect_reference_link(
-    text: str, start: int, link_text: str, root_node: Document
+    text: str, start: int, link_text: str, link_ref_defs: dict[str, tuple[str, str]]
 ) -> tuple[Group, Group, int] | None:
     link_label = _parse_link_label(text, start)
     label = link_text
     if link_label is not None:
+        assert link_label.text is not None
         label = link_label.text[1:-1] or link_text
     elif text[start : start + 2] == "[]":
         link_label = Group(start, start + 2, "[]")
-    result = _get_reference_link(label, root_node)
+    result = _get_reference_link(label, link_ref_defs)
     if not result:
         return None
     link_dest = Group(start, start, result[0])
@@ -364,9 +386,11 @@ def _expect_reference_link(
     return (link_dest, link_title, link_label.end if link_label else start)
 
 
-def _get_reference_link(link_label: str, root_node: Document) -> tuple[str, str] | None:
+def _get_reference_link(
+    link_label: str, link_ref_defs: dict[str, tuple[str, str]]
+) -> tuple[str, str] | None:
     normalized_label = normalize_label(link_label)
-    return root_node.link_ref_defs.get(normalized_label, None)
+    return link_ref_defs.get(normalized_label)
 
 
 def process_emphasis(

@@ -13,10 +13,10 @@ class Paragraph(block.Paragraph):
 
     def __init__(self, lines):
         super().__init__(lines)
-        m = self._task_list_item_pattern.match(self.children)
+        m = self._task_list_item_pattern.match(self.inline_body)
         if m:
             self.checked = m.group(1)[1:-1].lower() == "x"
-            self.children = self.children[m.end(1) :]
+            self.inline_body = self.inline_body[m.end(1) :]
 
 
 class InlineHTML(inline.InlineHTML):
@@ -82,7 +82,7 @@ class Url(inline.AutoLink):
             self.dest = "http://" + self.dest
 
     @classmethod
-    def find(cls, text):
+    def find(cls, text, *, source):
         for match in itertools.chain(
             cls.www_pattern.finditer(text), cls.bare_pattern.finditer(text)
         ):
@@ -156,7 +156,7 @@ class Table(block.BlockElement):
                 elif stripped_d[-1] == ":":
                     th.align = "right"
             while not source.exhausted:
-                for e in block.parser._build_block_element_list():
+                for e in source.parser._build_block_element_list():
                     if issubclass(e, (Table, block.Paragraph)):
                         continue
                     if e.match(source):
@@ -217,9 +217,8 @@ class TableCell(block.BlockElement):
     """A table cell element."""
 
     virtual = True
-    inline_children = True
 
     def __init__(self, text):
-        self.children = text.strip().replace("\\|", "|")
+        self.inline_body = text.strip().replace("\\|", "|")
         self.header = False
         self.align = None
