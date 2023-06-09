@@ -29,7 +29,7 @@ class Source:
         self._anchor = 0
         self._states: list[BlockElement] = []
         self.match: Match[str] | None = None
-        # Store temporary data during parsing.
+        #: Store temporary data during parsing.
         self.context = types.SimpleNamespace()
 
     @property
@@ -121,6 +121,7 @@ class Source:
 
     def next_line(self, require_prefix: bool = True) -> str | None:
         """Return the next line in the source.
+
         :param require_prefix:  if False, the whole line will be returned.
             otherwise, return the line with prefix stripped or None if the prefix
             is not matched.

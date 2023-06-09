@@ -128,6 +128,7 @@ class Heading(BlockElement):
 
 class SetextHeading(BlockElement):
     """Setext heading: (Hello\n===\n)
+
     It can only be created by Paragraph.parse.
     """
 

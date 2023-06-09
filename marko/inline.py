@@ -73,6 +73,7 @@ class Literal(InlineElement):
 
 class LineBreak(InlineElement):
     """Line breaks:
+
     Soft: '\n'
     Hard: '  \n'
     """

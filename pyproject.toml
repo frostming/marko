@@ -1,6 +1,6 @@
 [build-system]
-requires = ["pdm-pep517"]
-build-backend = "pdm.pep517.api"
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [project]
 # PEP 621 project metadata
@@ -39,7 +39,13 @@ codehilite = ["pygments"]
 marko = "marko.cli:main"
 
 [tool.pdm]
-version = {from = "marko/__init__.py"}
+plugins = [
+    "pdm-autoexport",
+]
+
+[tool.pdm.version]
+source = "file"
+path = "marko/__init__.py"
 
 [tool.pdm.dev-dependencies]
 benchmark = [
@@ -54,6 +60,16 @@ dev = [
     "pytest-cov",
     "mypy>=0.950",
 ]
+doc = [
+    "marko[toc]",
+    "sphinx>=5.3.0",
+    "shibuya>=2023.6.8",
+]
+
+[[tool.pdm.autoexport]]
+filename = "docs/reqs.txt"
+groups = ["doc"]
+without-hashes = true
 
 [tool.isort]
 profile = "black"

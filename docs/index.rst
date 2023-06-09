@@ -15,21 +15,23 @@ Marko: A markdown parser with high extensibility.
 .. image:: https://img.shields.io/badge/CommonMark-0.30-blue.svg
    :target: https://spec.commonmark.org/0.30/
 
-Marko is a markdown parser written in pure Python that complies `CommonMark's spec v0.30 <https://spec.commonmark.org/0.30/>`_.
-It is designed to be highly extensible, see :doc:`Extend Marko <extend>` for details.
+Marko is a pure Python markdown parser that adheres to the specifications of `CommonMark's spec v0.30 <https://spec.commonmark.org/0.30/>`_.
+It has been designed with high extensibility in mind, as detailed in the :doc:`Extend Marko <extend>` section.
 
 Marko requires Python 3.7 or higher.
 
 Why Marko?
 ----------
 
-Among all implementations of Python's markdown parser, it is a common issue that user can't easily extend it to add his own features.
-Furthermore, `Python-Markdown`_ and `mistune`_ don't comply CommonMark's spec. It is a good reason for me to develop a new markdown parser.
+Of all the Python markdown parsers available, a common issue is the difficulty for users to add their own features.
+Additionally, both `Python-Markdown`_ and `mistune`_ do not comply with CommonMark specifications.
+This has prompted me to develop a new markdown parser.
 
-Respecting that Marko complies CommonMark's spec at the same time, which is a super complicated spec, Marko's performance will be affected.
-However, using a parser which doesn't comply the CommonMark spec may give you unexpected rendered results from time to time.
-A benchmark result shows that Marko is 3 times slower than `Python-Markdown`_, but a bit faster than `Commonmark-py`_,
-much slower than `mistune`_. If performance is a bigger concern to you than spec compliance, you'd better choose another parser.
+Marko's compliance with the complex CommonMark specification can impact its performance.
+However, using a parser that does not adhere to this spec may result in unexpected rendering outcomes.
+According to benchmark results, Marko is three times slower than Python-Markdown but slightly faster than Commonmark-py
+and significantly slower than mistune. If prioritizing performance over spec compliance is crucial for you,
+it would be best to opt for another parser.
 
 .. _Python-Markdown: https://github.com/waylan/Python-Markdown
 .. _mistune: https://github.com/lepture/mistune

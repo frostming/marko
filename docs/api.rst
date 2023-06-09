@@ -1,5 +1,5 @@
-API References
-==============
+API Reference
+=============
 
 .. module:: marko
 
@@ -52,5 +52,8 @@ Inline Elements
 Helper Classes
 --------------
 
-.. autoclass:: marko.helpers.Source
+.. autoclass:: marko.source.Source
+    :members:
+
+.. autoclass:: marko.helpers.MarkoExtension
     :members:
