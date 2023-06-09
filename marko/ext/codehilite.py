@@ -29,8 +29,8 @@ def _parse_extras(line):
         return {}
     extras = {}
     for token in line.split(","):
-        if "=" in token:
-            k, v = token.split("=")
+        k, has_eq, v = token.partition("=")
+        if has_eq:
             try:
                 parsed_v = json.loads(v)
                 extras[k] = parsed_v
