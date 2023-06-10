@@ -1,5 +1,17 @@
 ## Unreleased
 
+### Changed
+
+- Avoid saving to global variables during parsing. There can be multiple parsers running in parallel.
+- Now the `children` attribute for block elements should be a list of child elements.
+- Move the HTML content of `HTMLBlock` from `children` to `body` attribute.
+- Fixed some built-in extensions that modify class attributes.
+- Add a helper class to create extensions, instead of using arbitrary objects to hold partial properties.
+
+### Fixed
+
+- Call `setup_extensions()` when running `render()` method alone.
+
 ## v1.3.1(2023-06-09)
 
 ### Fixed
