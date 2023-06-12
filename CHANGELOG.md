@@ -1,5 +1,7 @@
 ## Unreleased
 
+## v2.0.0(2023-06-12)
+
 ### Changed
 
 - Avoid saving to global variables during parsing. There can be multiple parsers running in parallel.
