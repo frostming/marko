@@ -6,12 +6,13 @@ from __future__ import annotations
 import logging
 from typing import Iterable
 
-from marko import Renderer
+from marko.helpers import MarkoExtension
+from marko.renderer import Renderer
 
 _logger = logging.getLogger(__name__)
 
 
-class LatexRenderer(Renderer):
+class LatexRendererMixin:
     """Render the parsed Markdown to LaTeX format."""
 
     _packages: set[str]
@@ -160,3 +161,11 @@ class LatexRenderer(Renderer):
     def _environment(env_name: str, content: str, options: Iterable[str] = ()) -> str:
         options_str = f"[{','.join(options)}]" if options else ""
         return f"\\begin{{{env_name}}}{options_str}\n{content}\\end{{{env_name}}}\n"
+
+
+class LatexRenderer(LatexRendererMixin, Renderer):
+    """Render the parsed Markdown to LaTeX format."""
+
+
+def make_extension():
+    return MarkoExtension(renderer_mixins=[LatexRendererMixin])

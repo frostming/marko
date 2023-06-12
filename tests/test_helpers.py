@@ -1,5 +1,6 @@
 import pytest
 
+import marko.source
 from marko import helpers
 
 
@@ -31,7 +32,7 @@ def test_is_not_paired(raw_string):
 
 
 def test_source_no_state():
-    source = helpers.Source("hello world")
+    source = marko.source.Source("hello world")
 
     with pytest.raises(RuntimeError, match="Need to push a state first"):
         source.root

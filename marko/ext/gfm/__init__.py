@@ -17,6 +17,7 @@ Example usage::
 import re
 
 from marko import Markdown
+from marko.helpers import MarkoExtension
 
 from . import elements
 
@@ -50,7 +51,7 @@ class GFMRendererMixin:
         return self.tagfilter.sub(r"&lt;\1", element.children)
 
     def render_html_block(self, element):
-        return self.tagfilter_no_open.sub(r"\1&lt;\2", element.children)
+        return self.tagfilter_no_open.sub(r"\1&lt;\2", element.body)
 
     def render_table(self, element):
         header, body = element.children[0], element.children[1:]
@@ -78,8 +79,8 @@ class GFMRendererMixin:
         return self.render_link(element)
 
 
-class GFM:
-    elements = [
+GFM = MarkoExtension(
+    elements=[
         elements.Paragraph,
         elements.ListItem,
         elements.InlineHTML,
@@ -88,13 +89,13 @@ class GFM:
         elements.Table,
         elements.TableRow,
         elements.TableCell,
-    ]
-    renderer_mixins = [GFMRendererMixin]
+    ],
+    renderer_mixins=[GFMRendererMixin],
+)
 
 
-gfm = Markdown()
-gfm.use(GFM)
+gfm = Markdown(extensions=[GFM])
 
 
 def make_extension():
-    return GFM()
+    return GFM

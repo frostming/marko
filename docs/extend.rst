@@ -80,30 +80,19 @@ They are useful to see how parsing works when you are developing your own parsin
 Create an extension object
 --------------------------
 
-We need an additional extension object to sum these mixins up. It is typically a simple class,
-though other Python objects may also work::
+We need an additional extension object to sum these mixins up. An extension object can
+be made with the help of :class:`marko.helpers.MarkoExtension`::
 
-The extension object protocol is something like::
+    from marko.helpers import MarkoExtension
 
-    type Extension
-        one-of: elements, renderer_mixins, parser_mixins
-
-And our ``GitHubWiki`` extension should be::
-
-    class GitHubWiki:
-        elements = [GitHubWiki]
-        renderer_mixins = [WikiRendererMixin]
+    GitHubWiki = MarkoExtension(
+        elements=[GitHubWiki],
+        renderer_mixins=[WikiRendererMixin]
+    )
 
 An optional ``parser_mixins`` can be also given if you want to customize the parser.
 The extension exposes a single object so that it can be distributed as a standalone package. We will come to how to use it in the later sections.
 
-Sometimes the extension can leave some arguments for users to customize. In this case, you can create an "extension factory" ::
-
-    class GitHubWiki:
-        def __init__(self, arg):
-            WikiRendererMixin.arg = arg
-            self.elements = [GitHubWiki]
-            self.renderer_mixins = [WikiRendererMixin]
 
 Register the extension
 ----------------------

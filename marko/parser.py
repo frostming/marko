@@ -4,9 +4,9 @@ Base parser
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Type
+from typing import TYPE_CHECKING, Type, cast
 
-from .helpers import Source
+from .source import Source
 
 
 class Parser:
@@ -24,9 +24,6 @@ class Parser:
     def __init__(self) -> None:
         self.block_elements: dict[str, BlockElementType] = {}
         self.inline_elements: dict[str, InlineElementType] = {}
-        # Create references in block and inline modules to avoid cyclic import.
-        block.parser = self  # type: ignore
-        inline.parser = self  # type: ignore
 
         for el in itertools.chain(
             (getattr(block, name) for name in block.__all__),
@@ -54,9 +51,7 @@ class Parser:
             )
         dest[element.get_type()] = element
 
-    def parse(
-        self, source_or_text: Source | str
-    ) -> list[block.BlockElement] | block.BlockElement:
+    def parse(self, text: str) -> block.Document:
         """Do the actual parsing and returns an AST or parsed element.
 
         :param source_or_text: the text or source object.
@@ -64,15 +59,21 @@ class Parser:
             - text: returns the parsed Document element.
             - source: parse the source and returns the parsed children as a list.
         """
-        if isinstance(source_or_text, str):
-            return self.block_elements["Document"](source_or_text)  # type: ignore
+        source = Source(text)
+        source.parser = self
+        doc = cast(block.Document, self.block_elements["Document"]())
+        with source.under_state(doc):
+            doc.children = self.parse_source(source)
+            self.parse_inline(doc, source)
+        return doc
+
+    def parse_source(self, source: Source) -> list[block.BlockElement]:
         element_list = self._build_block_element_list()
         ast: list[block.BlockElement] = []
-        assert isinstance(source_or_text, Source)
-        while not source_or_text.exhausted:
+        while not source.exhausted:
             for ele_type in element_list:
-                if ele_type.match(source_or_text):
-                    result = ele_type.parse(source_or_text)
+                if ele_type.match(source):
+                    result = ele_type.parse(source)
                     if not hasattr(result, "priority"):
                         # In some cases ``parse()`` won't return the element, but
                         # instead some information to create one, which will be passed
@@ -85,7 +86,20 @@ class Parser:
                 break
         return ast
 
-    def parse_inline(self, text: str) -> list[inline.InlineElement]:
+    def parse_inline(self, element: block.BlockElement, source: Source) -> None:
+        """Inline parsing is postponed so that all link references
+        are seen before that.
+        """
+        if element.inline_body:
+            element.children = self._parse_inline(element.inline_body, source)
+            # clear the inline body to avoid parsing it again.
+            element.inline_body = ""
+        else:
+            for child in element.children:
+                if isinstance(child, block.BlockElement):
+                    self.parse_inline(child, source)
+
+    def _parse_inline(self, text: str, source: Source) -> list[inline.InlineElement]:
         """Parses text into inline elements.
         RawText is not considered in parsing but created as a wrapper of holes
         that don't match any other elements.
@@ -95,7 +109,7 @@ class Parser:
         """
         element_list = self._build_inline_element_list()
         return inline_parser.parse(
-            text, element_list, fallback=self.inline_elements["RawText"]
+            text, element_list, fallback=self.inline_elements["RawText"], source=source
         )
 
     def _build_block_element_list(self) -> list[BlockElementType]:

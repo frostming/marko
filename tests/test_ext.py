@@ -41,7 +41,7 @@ class TestToc:
         assert '<li><a href="#foobar">Foobar</a></li>' not in toc
 
     def test_render_toc_replace_tags(self):
-        from marko.ext.toc import Toc
+        from marko.ext.toc import make_extension as Toc
 
         markdown = Markdown(extensions=[Toc("<div>", "</div>")])
         content = "#### Foobar\n"
@@ -86,9 +86,9 @@ class TestCodeHilite:
         assert '<div class="highlight">' in self.markdown(content)
 
     def test_codehilite_options(self):
-        from marko.ext.codehilite import CodeHilite
+        from marko.ext.codehilite import make_extension
 
-        markdown = Markdown(extensions=[CodeHilite(linenos="table")])
+        markdown = Markdown(extensions=[make_extension(linenos="table")])
         content = '```python\nprint("hello")\n```'
         assert '<table class="highlighttable">' in markdown(content)
 

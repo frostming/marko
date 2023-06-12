@@ -13,15 +13,17 @@ Usage::
     print(markdown(text))
 
 """
+from __future__ import annotations
+
 import re
 
 from marko import block, helpers, inline
 
 
 class Document(block.Document):
-    def __init__(self, text):
+    def __init__(self):
+        super().__init__()
         self.footnotes = {}
-        super().__init__(text)
 
 
 class FootnoteDef(block.BlockElement):
@@ -41,7 +43,7 @@ class FootnoteDef(block.BlockElement):
     def parse(cls, source):
         state = cls(source.match)
         with source.under_state(state):
-            state.children = block.parser.parse(source)
+            state.children = source.parser.parse_source(source)
         source.root.footnotes[state.label] = state
         return state
 
@@ -54,10 +56,10 @@ class FootnoteRef(inline.InlineElement):
         self.label = helpers.normalize_label(match.group(1))
 
     @classmethod
-    def find(cls, text):
-        for match in super().find(text):
+    def find(cls, text, *, source):
+        for match in super().find(text, source=source):
             label = helpers.normalize_label(match.group(1))
-            if label in inline._root_node.footnotes:
+            if label in source.root.footnotes:
                 yield match
 
 
@@ -102,10 +104,8 @@ class FootnoteRendererMixin:
         return text + footnotes
 
 
-class Footnote:
-    elements = [Document, FootnoteDef, FootnoteRef]
-    renderer_mixins = [FootnoteRendererMixin]
-
-
 def make_extension():
-    return Footnote()
+    return helpers.MarkoExtension(
+        elements=[Document, FootnoteDef, FootnoteRef],
+        renderer_mixins=[FootnoteRendererMixin],
+    )

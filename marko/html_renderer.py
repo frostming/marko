@@ -58,7 +58,7 @@ class HTMLRenderer(Renderer):
         return self.render_fenced_code(cast("block.FencedCode", element))
 
     def render_html_block(self, element: block.HTMLBlock) -> str:
-        return element.children  # type: ignore
+        return element.body
 
     def render_thematic_break(self, element: block.ThematicBreak) -> str:
         return "<hr />\n"
@@ -84,7 +84,7 @@ class HTMLRenderer(Renderer):
         return f"<strong>{self.render_children(element)}</strong>"
 
     def render_inline_html(self, element: inline.InlineHTML) -> str:
-        return self.render_html_block(cast("block.HTMLBlock", element))
+        return cast(str, element.children)
 
     def render_plain_text(self, element: Any) -> str:
         if isinstance(element.children, str):
