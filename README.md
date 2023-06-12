@@ -50,13 +50,13 @@ It is super easy to use an extension:
 
 ```python
 from marko import Markdown
-from marko.ext.footnote import Footnote
+from marko.ext.footnote import make_extension
 # Add footnote extension
-markdown = Markdown(extensions=[Footnote])
+markdown = Markdown(extensions=[make_extension()])
 # Or you can just:
 markdown = Markdown(extensions=['footnote'])
 # Alternatively you can register an extension later
-markdown.use(Footnote)
+markdown.use(make_extension())
 ```
 
 An example of using an extension with the command-line version of Marko:
