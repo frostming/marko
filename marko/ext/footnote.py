@@ -28,9 +28,9 @@ class Document(block.Document):
 
 class FootnoteDef(block.BlockElement):
     pattern = re.compile(r" {,3}\[\^([^\]]+)\]:[^\n\S]*(?=\S| {4})")
-    priority = 6
 
     def __init__(self, match):
+        super().__init__(priority=6)
         self.label = helpers.normalize_label(match.group(1))
         self._prefix = re.escape(match.group())
         self._second_prefix = r" {1,4}"
