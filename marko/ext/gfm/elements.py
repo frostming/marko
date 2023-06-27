@@ -106,14 +106,14 @@ class Url(inline.AutoLink):
 
 class ListItem(block.ListItem):
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
-    override = True
+    def __init__(self) -> None:
+        super().__init__(override=True)
 
 
 class Table(block.BlockElement):
     """A table element."""
 
     _num_of_cols = None
-    _prefix = ""
 
     @classmethod
     def match(cls, source):
@@ -174,12 +174,11 @@ class TableRow(block.BlockElement):
 
     splitter = re.compile(r"\s*(?<!\\)\|\s*")
     delimiter = re.compile(r":?-+:?")
-    virtual = True
     _cells = None
     _is_delimiter = False
 
-    def __init__(self, cells):
-        self.children = cells
+    def __init__(self, cells) -> None:
+        super().__init__(virtual=True, children=cells)
 
     @classmethod
     def match(cls, source):
@@ -216,9 +215,8 @@ class TableRow(block.BlockElement):
 class TableCell(block.BlockElement):
     """A table cell element."""
 
-    virtual = True
-
     def __init__(self, text):
+        super().__init__(virtual=True)
         self.inline_body = text.strip().replace("\\|", "|")
         self.header = False
         self.align = None
