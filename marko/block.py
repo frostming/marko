@@ -514,8 +514,8 @@ class ListItem(BlockElement):
         bullet: str
         mid: int
 
-    def __init__(self, info: ListItem.ParseInfo) -> None:
-        super().__init__(virtual=True)
+    def __init__(self, info: ListItem.ParseInfo, **kwargs) -> None:
+        super().__init__(virtual=True, **kwargs)
         indent, bullet, mid = info
         self._prefix = " " * indent + re.escape(bullet) + " " * mid
         self._second_prefix = " " * (len(bullet) + indent + (mid or 1))
