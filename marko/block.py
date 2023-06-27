@@ -33,18 +33,19 @@ __all__ = (
 class BlockElement(Element):
     """Any block element should inherit this class"""
 
-    #: An attribute to hold the children
-    children: Sequence[Element] = []
-    #: Use to denote the precedence in parsing
-    priority = 5
-    #: if True, it won't be included in parsing process but produced by other elements
-    #: other elements instead.
-    virtual = False
-    #: If not empty, the body needs to be parsed as inline elements
-    inline_body: str = ""
-    #: If true, will replace the element which it derives from.
-    override = False
-    _prefix = ""
+    def __init__(self, children=None, priority=5, virtual=False, inline_body="", override=False, prefix=""):
+        #: An attribute to hold the children
+        self.children: Sequence[Element] = [] or children
+        #: Use to denote the precedence in parsing
+        self.priority = priority
+        #: if True, it won't be included in parsing process but produced by other elements
+        #: other elements instead.
+        self.virtual = virtual
+        #: If not empty, the body needs to be parsed as inline elements
+        self.inline_body: str = inline_body
+        #: If true, will replace the element which it derives from.
+        self.override = override
+        self._prefix = prefix
 
     @classmethod
     def match(cls, source: Source) -> Any:
@@ -73,20 +74,16 @@ class BlockElement(Element):
 class Document(BlockElement):
     """Document node element."""
 
-    _prefix = ""
-    virtual = True
-
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(virtual=True)
         self.link_ref_defs: dict[str, tuple[str, str]] = {}
 
 
 class BlankLine(BlockElement):
     """Blank lines"""
 
-    priority = 5
-
     def __init__(self, start: int) -> None:
+        super().__init__(priority=5)
         self._anchor = start
 
     @classmethod
@@ -105,13 +102,13 @@ class BlankLine(BlockElement):
 class Heading(BlockElement):
     """Heading element: (### Hello\n)"""
 
-    priority = 6
     pattern = re.compile(
         r" {0,3}(#{1,6})((?=\s)[^\n]*?|[^\n\S]*)(?:(?<=\s)(?<!\\)#+)?[^\n\S]*$\n?",
         flags=re.M,
     )
 
     def __init__(self, match: Match[str]) -> None:
+        super().__init__(priority=6)
         self.level = len(match.group(1))
         self.inline_body = match.group(2).strip()
 
@@ -132,9 +129,8 @@ class SetextHeading(BlockElement):
     It can only be created by Paragraph.parse.
     """
 
-    virtual = True
-
     def __init__(self, lines: list[str]) -> None:
+        super().__init__(virtual=True)
         self.level = 1 if lines.pop().strip()[0] == "=" else 2
         self.inline_body = "".join(line.lstrip() for line in lines).strip()
 
@@ -142,10 +138,8 @@ class SetextHeading(BlockElement):
 class CodeBlock(BlockElement):
     """Indented code block: (    this is a code block\n)"""
 
-    priority = 4
-
     def __init__(self, lines: str) -> None:
-        self.children = [inline.RawText(lines, False)]
+        super().__init__(priority=4, children=[inline.RawText(lines, False)])
         self.lang = ""
         self.extra = ""
 
@@ -204,7 +198,6 @@ class CodeBlock(BlockElement):
 class FencedCode(BlockElement):
     """Fenced code block: (```python\nhello\n```\n)"""
 
-    priority = 7
     pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
 
     class ParseInfo(NamedTuple):
@@ -214,9 +207,9 @@ class FencedCode(BlockElement):
         extra: str
 
     def __init__(self, match: tuple[str, str, str]) -> None:
+        super().__init__(priority=7, children=[inline.RawText(match[2], False)])
         self.lang = inline.Literal.strip_backslash(match[0])
         self.extra = match[1]
-        self.children = [inline.RawText(match[2], False)]
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -257,8 +250,10 @@ class FencedCode(BlockElement):
 class ThematicBreak(BlockElement):
     """Horizontal rules: (----\n)"""
 
-    priority = 8
     pattern = re.compile(r" {,3}([-_*][^\n\S]*){3,}$\n?", flags=re.M)
+
+    def __init__(self) -> None:
+        super().__init__(priority=8)
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -276,9 +271,8 @@ class ThematicBreak(BlockElement):
 class HTMLBlock(BlockElement):
     """HTML blocks, parsed as it is"""
 
-    priority = 5
-
     def __init__(self, lines: str) -> None:
+        super().__init__(priority=5)
         self.body = lines
 
     @classmethod
@@ -335,10 +329,10 @@ class HTMLBlock(BlockElement):
 class Paragraph(BlockElement):
     """A paragraph element"""
 
-    priority = 1
     pattern = re.compile(r"[^\n]+$\n?", flags=re.M)
 
     def __init__(self, lines: list[str]) -> None:
+        super().__init__(priority=1)
         str_lines = "".join(line.lstrip() for line in lines).rstrip("\n")
         self.inline_body = str_lines
         self._tight = False
@@ -426,8 +420,10 @@ class Paragraph(BlockElement):
 class Quote(BlockElement):
     """block quote element: (> hello world)"""
 
-    priority = 6
     _prefix = r" {,3}>[^\n\S]?"
+
+    def __init__(self) -> None:
+        super().__init__(priority=6)
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -444,8 +440,6 @@ class Quote(BlockElement):
 class List(BlockElement):
     """List block element"""
 
-    priority = 6
-    _prefix = ""
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
 
     class ParseInfo(NamedTuple):
@@ -454,6 +448,7 @@ class List(BlockElement):
         start: int
 
     def __init__(self, info: List.ParseInfo) -> None:
+        super().__init__(priority=6)
         self.bullet, self.ordered, self.start = info
         self.tight = True
 
@@ -511,7 +506,6 @@ class List(BlockElement):
 class ListItem(BlockElement):
     """List item element. It can only be created by List.parse"""
 
-    virtual = True
     _tight = False
     pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
 
@@ -521,6 +515,7 @@ class ListItem(BlockElement):
         mid: int
 
     def __init__(self, info: ListItem.ParseInfo) -> None:
+        super().__init__(virtual=True)
         indent, bullet, mid = info
         self._prefix = " " * indent + re.escape(bullet) + " " * mid
         self._second_prefix = " " * (len(bullet) + indent + (mid or 1))
