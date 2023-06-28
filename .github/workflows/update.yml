@@ -14,4 +14,4 @@ jobs:
       - name: Update dependencies
         uses: pdm-project/update-deps-action@main
         with:
-          install-plugins: true
+          install-plugins: 'true'
