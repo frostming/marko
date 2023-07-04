@@ -248,7 +248,7 @@ dependencies = [
 
 [[package]]
 name = "shibuya"
-version = "2023.6.27"
+version = "2023.6.30"
 requires_python = ">=3.7"
 summary = "A clean, responsive, and customizable Sphinx documentation theme with light/dark mode."
 dependencies = [
@@ -677,9 +677,9 @@ content_hash = "sha256:d0ab93b433c852f9bc6ad14877c37e260ffe2a735cc8790951cf2c8a4
     {url = "https://files.pythonhosted.org/packages/70/8e/0e2d847013cb52cd35b38c009bb167a1a26b2ce6cd6965bf26b47bc0bf44/requests-2.31.0-py3-none-any.whl", hash = "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"},
     {url = "https://files.pythonhosted.org/packages/9d/be/10918a2eac4ae9f02f6cfe6414b7a155ccd8f7f9d4380d62fd5b955065c3/requests-2.31.0.tar.gz", hash = "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"},
 ]
-"shibuya 2023.6.27" = [
-    {url = "https://files.pythonhosted.org/packages/31/5c/ba24403cedaaedaa97aad9ed98a70b392dd3075a7e37baefd5111c5d048e/shibuya-2023.6.27-py3-none-any.whl", hash = "sha256:a44f51d81e7cd9c083ba3c9eddc03a5e8300ef1d49e01e49e5ceb13f458eaa7f"},
-    {url = "https://files.pythonhosted.org/packages/a5/5c/c943ab448406bff68a31832ec12d1bb8a6e67310f39d8315bbe02e8afb26/shibuya-2023.6.27.tar.gz", hash = "sha256:1f7e75dabf2e02af07344af2110c061cbe85150de26b06d2c44d5f9260f40b6b"},
+"shibuya 2023.6.30" = [
+    {url = "https://files.pythonhosted.org/packages/1a/67/8bf4014020d285c62811a4d36f07abe711155f672b8188bb6c17140896ee/shibuya-2023.6.30-py3-none-any.whl", hash = "sha256:c112605374c3fad933f683b9cbc9daa425418cfe24d0b0702592eef2d84d4efe"},
+    {url = "https://files.pythonhosted.org/packages/d6/1c/d3d53b55bc2f5336eb4af39bbbaf4891a33ff9d461ee2e1a97cbd63bd1ea/shibuya-2023.6.30.tar.gz", hash = "sha256:9569dfcceefbaa6651e1147f67f41d4e2bc0ba0077251a2b16b3a1ed660b4849"},
 ]
 "snowballstemmer 2.2.0" = [
     {url = "https://files.pythonhosted.org/packages/44/7b/af302bebf22c749c56c9c3e8ae13190b5b5db37a33d9068652e8f73b7089/snowballstemmer-2.2.0.tar.gz", hash = "sha256:09b16deb8547d3412ad7b590689584cd0fe25ec8db3be37788be3810cbf19cb1"},
