@@ -2,7 +2,7 @@
 Tests for the Gemtext renderer.
 """
 from marko import Markdown
-from marko.gemtext_renderer import GemtextRenderer
+from marko.ext.gemtext_renderer import GemtextRenderer
 
 
 def test_gemtext_renderer() -> None:

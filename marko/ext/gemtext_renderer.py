@@ -99,7 +99,7 @@ class GemtextRenderer(Renderer):
 
     def render_plain_text(self, element: Any) -> str:
         if isinstance(element.children, str):
-            return self.escape_html(element.children)
+            return element.children
         return self.render_children(element)
 
     def render_image(self, element: inline.Image) -> str:
