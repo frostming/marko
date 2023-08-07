@@ -527,12 +527,12 @@ files = [
 
 [[package]]
 name = "pygments"
-version = "2.15.1"
+version = "2.16.1"
 requires_python = ">=3.7"
 summary = "Pygments is a syntax highlighting package written in Python."
 files = [
-    {file = "Pygments-2.15.1-py3-none-any.whl", hash = "sha256:db2db3deb4b4179f399a09054b023b6a586b76499d36965813c71aa8ed7b5fd1"},
-    {file = "Pygments-2.15.1.tar.gz", hash = "sha256:8ace4d3c1dd481894b2005f560ead0f9f19ee64fe983366be1a21e171d12775c"},
+    {file = "Pygments-2.16.1-py3-none-any.whl", hash = "sha256:13fc09fa63bc8d8671a6d247e1eb303c4b343eaee81d861f3404db2935653692"},
+    {file = "Pygments-2.16.1.tar.gz", hash = "sha256:1daff0494820c69bc8941e407aa20f577374ee88364ee10a98fdbe0aece96e29"},
 ]
 
 [[package]]
@@ -618,15 +618,15 @@ files = [
 
 [[package]]
 name = "shibuya"
-version = "2023.7.16"
+version = "2023.7.28"
 requires_python = ">=3.7"
 summary = "A clean, responsive, and customizable Sphinx documentation theme with light/dark mode."
 dependencies = [
     "Sphinx",
 ]
 files = [
-    {file = "shibuya-2023.7.16-py3-none-any.whl", hash = "sha256:c020620e72fa33676a50443d884da378bc12deb16e87f604c9a5be735b05badf"},
-    {file = "shibuya-2023.7.16.tar.gz", hash = "sha256:7db8a34a34211589a2a8c84da07a4fd0433de270d27685e078d6bae46c68b6ba"},
+    {file = "shibuya-2023.7.28-py3-none-any.whl", hash = "sha256:e2bdecb5b89760f0164a8d3340bbdda7cad0dc6f4b0881b3c41367d32a4c5a4e"},
+    {file = "shibuya-2023.7.28.tar.gz", hash = "sha256:721d94acd82d02259446beed81da350eba3ca02aff05f530a5d29d79142fb236"},
 ]
 
 [[package]]
