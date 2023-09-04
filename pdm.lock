@@ -431,12 +431,12 @@ files = [
 
 [[package]]
 name = "mistletoe"
-version = "1.1.0"
+version = "1.2.1"
 requires_python = "~=3.5"
 summary = "A fast, extensible Markdown parser in pure Python."
 files = [
-    {file = "mistletoe-1.1.0-py3-none-any.whl", hash = "sha256:6a72aebf783bf546cb7c7a85835d1492e3a0be01584aafe021f46118c27f882d"},
-    {file = "mistletoe-1.1.0.tar.gz", hash = "sha256:c17464a4a20d030524123a9c9ebd6a70e41c5ad96b6e6b54ac48cf07ca3add72"},
+    {file = "mistletoe-1.2.1-py3-none-any.whl", hash = "sha256:620563ac06380ce0629b4a2afa2f2ab797ffac3efdcccaf2362a7266600e6dcc"},
+    {file = "mistletoe-1.2.1.tar.gz", hash = "sha256:7d0c1ab3747047d169f9fc4b925d1cba3f5c13eaf0b90c365b72e47e59d00a02"},
 ]
 
 [[package]]
@@ -547,7 +547,7 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "7.4.0"
+version = "7.4.1"
 requires_python = ">=3.7"
 summary = "pytest: simple powerful testing with Python"
 dependencies = [
@@ -560,8 +560,8 @@ dependencies = [
     "tomli>=1.0.0; python_version < \"3.11\"",
 ]
 files = [
-    {file = "pytest-7.4.0-py3-none-any.whl", hash = "sha256:78bf16451a2eb8c7a2ea98e32dc119fd2aa758f1d5d66dbf0a59d69a3969df32"},
-    {file = "pytest-7.4.0.tar.gz", hash = "sha256:b4bf8c45bd59934ed84001ad51e11b4ee40d40a1229d2c79f9c592b0a3f6bd8a"},
+    {file = "pytest-7.4.1-py3-none-any.whl", hash = "sha256:460c9a59b14e27c602eb5ece2e47bec99dc5fc5f6513cf924a7d03a578991b1f"},
+    {file = "pytest-7.4.1.tar.gz", hash = "sha256:2f2301e797521b23e4d2585a0a3d7b5e50fdddaaf7e7d6773ea26ddb17c213ab"},
 ]
 
 [[package]]
@@ -618,15 +618,15 @@ files = [
 
 [[package]]
 name = "shibuya"
-version = "2023.7.28"
+version = "2023.9.3"
 requires_python = ">=3.7"
 summary = "A clean, responsive, and customizable Sphinx documentation theme with light/dark mode."
 dependencies = [
     "Sphinx",
 ]
 files = [
-    {file = "shibuya-2023.7.28-py3-none-any.whl", hash = "sha256:e2bdecb5b89760f0164a8d3340bbdda7cad0dc6f4b0881b3c41367d32a4c5a4e"},
-    {file = "shibuya-2023.7.28.tar.gz", hash = "sha256:721d94acd82d02259446beed81da350eba3ca02aff05f530a5d29d79142fb236"},
+    {file = "shibuya-2023.9.3-py3-none-any.whl", hash = "sha256:9e518389e1bf590bfceb588392450c09b80dac29f4f49f171a2bd7284f993429"},
+    {file = "shibuya-2023.9.3.tar.gz", hash = "sha256:9dc2edb13db07d37ad4a774be94aaee68a4a530ce46141daa5f40afcc228b90e"},
 ]
 
 [[package]]
