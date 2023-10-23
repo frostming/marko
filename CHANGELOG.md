@@ -1,5 +1,13 @@
 ## Unreleased
 
+### Fixed
+
+- Preserve link references when rendering document as Markdown.
+
+### Documentation
+
+- Fix the sidebar warning in shibuya theme.
+
 ## v2.0.0(2023-06-12)
 
 ### Changed

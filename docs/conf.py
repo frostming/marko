@@ -105,7 +105,6 @@ html_sidebars = {
     "*": [
         "sidebarintro.html",
         "localtoc.html",
-        "relations.html",
         "sourcelink.html",
     ]
 }
