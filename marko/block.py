@@ -591,6 +591,11 @@ class LinkRefDef(BlockElement):
         link_title: inline_parser.Group
         end: int
 
+    def __init__(self, label: str, text: str, title: str | None = None) -> None:
+        self.label = label
+        self.dest = text
+        self.title = title
+
     @classmethod
     def match(cls, source: Source) -> bool:
         m = source.expect_re(cls.pattern)
@@ -634,4 +639,4 @@ class LinkRefDef(BlockElement):
         if normalized_label not in link_ref_defs:
             link_ref_defs[normalized_label] = (dest.text, title.text)
         source.pos = pos
-        return cls()
+        return cls(normalized_label, dest.text, title.text)

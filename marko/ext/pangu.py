@@ -18,6 +18,7 @@ Example::
 """
 import re
 
+from marko import HTMLRenderer
 from marko.helpers import MarkoExtension
 
 CJK_RE = (
@@ -35,6 +36,8 @@ PANGU_RE = re.compile(
 class PanguRendererMixin:
     def render_raw_text(self, element):
         rv = super().render_raw_text(element)
+        if not isinstance(self, HTMLRenderer):
+            return rv
         return PANGU_RE.sub('<span class="pangu"></span>', rv)
 
 

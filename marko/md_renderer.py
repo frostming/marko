@@ -21,6 +21,11 @@ class MarkdownRenderer(Renderer):
     and those from common extensions.
     """
 
+    def __init__(self) -> None:
+        super().__init__()
+        self._prefix = ""
+        self._second_prefix = ""
+
     def __enter__(self) -> MarkdownRenderer:
         self._prefix = ""
         self._second_prefix = ""
@@ -62,7 +67,7 @@ class MarkdownRenderer(Renderer):
 
     def render_quote(self, element: block.Quote) -> str:
         with self.container("> ", "> "):
-            result = self.render_children(element)
+            result = self.render_children(element).rstrip("\n")
         self._prefix = self._second_prefix
         return result + "\n"
 
@@ -116,7 +121,10 @@ class MarkdownRenderer(Renderer):
         return result
 
     def render_link_ref_def(self, element: block.LinkRefDef) -> str:
-        return ""
+        link_text = element.dest
+        if element.title:
+            link_text += f" {element.title}"
+        return f"[{element.label}]: {link_text}\n"
 
     def render_emphasis(self, element: inline.Emphasis) -> str:
         return f"*{self.render_children(element)}*"
@@ -128,10 +136,25 @@ class MarkdownRenderer(Renderer):
         return cast(str, element.children)
 
     def render_link(self, element: inline.Link) -> str:
-        title = (
-            ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
+        link_text = self.render_children(element)
+        link_title = (
+            '"{}"'.format(element.title.replace('"', '\\"')) if element.title else None
         )
-        return f"[{self.render_children(element)}]({element.dest}{title})"
+        assert self.root_node
+        label = next(
+            (
+                k
+                for k, v in self.root_node.link_ref_defs.items()
+                if v == (element.dest, link_title)
+            ),
+            None,
+        )
+        if label is not None:
+            if label == link_text:
+                return f"[{label}]"
+            return f"[{link_text}][{label}]"
+        title = f" {link_title}" if link_title is not None else ""
+        return f"[{link_text}]({element.dest}{title})"
 
     def render_auto_link(self, element: inline.AutoLink) -> str:
         return f"<{element.dest}>"
