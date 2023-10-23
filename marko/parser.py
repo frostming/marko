@@ -54,10 +54,8 @@ class Parser:
     def parse(self, text: str) -> block.Document:
         """Do the actual parsing and returns an AST or parsed element.
 
-        :param source_or_text: the text or source object.
-            Based on the type, it will do following:
-            - text: returns the parsed Document element.
-            - source: parse the source and returns the parsed children as a list.
+        :param text: the text to parse.
+        :returns: the parsed root element
         """
         source = Source(text)
         source.parser = self
@@ -68,6 +66,7 @@ class Parser:
         return doc
 
     def parse_source(self, source: Source) -> list[block.BlockElement]:
+        """Parse the source into a list of block elements."""
         element_list = self._build_block_element_list()
         ast: list[block.BlockElement] = []
         while not source.exhausted:

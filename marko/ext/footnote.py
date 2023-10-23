@@ -17,7 +17,9 @@ from __future__ import annotations
 
 import re
 
-from marko import block, helpers, inline
+from marko import HTMLRenderer, block, helpers, inline
+from marko.ast_renderer import ASTRenderer, XMLRenderer
+from marko.md_renderer import MarkdownRenderer
 
 
 class Document(block.Document):
@@ -72,15 +74,29 @@ class FootnoteRendererMixin:
         if element.label not in self.footnotes:
             self.footnotes.append(element.label)
         idx = self.footnotes.index(element.label) + 1
-        return (
-            '<sup class="footnote-ref" id="fnref-{lab}">'
-            '<a href="#fn-{lab}">{id}</a></sup>'.format(
-                lab=self.escape_url(element.label), id=idx
+        if isinstance(self, (ASTRenderer, XMLRenderer)):
+            return self.render_children(element)
+        elif isinstance(self, HTMLRenderer):
+            return (
+                '<sup class="footnote-ref" id="fnref-{lab}">'
+                '<a href="#fn-{lab}">{id}</a></sup>'.format(
+                    lab=self.escape_url(element.label), id=idx
+                )
             )
-        )
+        elif isinstance(self, MarkdownRenderer):
+            return f"[^{element.label}]"
+        else:
+            raise NotImplementedError("Unsupported renderer")
 
     def render_footnote_def(self, element):
-        return ""
+        if isinstance(self, (ASTRenderer, XMLRenderer)):
+            return self.render_children(element)
+        elif isinstance(self, HTMLRenderer):
+            return ""
+        elif isinstance(self, MarkdownRenderer):
+            return f"[^{element.label}]: {self.render_children(element)}"
+        else:
+            raise NotImplementedError("Unsupported renderer")
 
     def _render_footnote_def(self, element):
         children = self.render_children(element).rstrip()
@@ -96,7 +112,7 @@ class FootnoteRendererMixin:
     def render_document(self, element):
         text = self.render_children(element)
         items = [self.root_node.footnotes[label] for label in self.footnotes]
-        if not items:
+        if not items or not isinstance(self, HTMLRenderer):
             return text
         children = "".join(self._render_footnote_def(item) for item in items)
         footnotes = f'<div class="footnotes">\n<ol>\n{children}</ol>\n</div>\n'

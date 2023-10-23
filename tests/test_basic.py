@@ -1,4 +1,6 @@
 #! -*- coding: utf-8 -*-
+import textwrap
+
 import pytest
 
 import marko
@@ -41,6 +43,20 @@ class TestBasic:
         assert normalize_html(marko.convert(rerendered)) == normalize_html(
             marko.convert(text)
         )
+
+    def test_markdown_renderer_preserve_link_refs(self):
+        text = textwrap.dedent(
+            """\
+            This is a [link ref][1], [1] and a [link](abc "title").
+            This is a footnote [^1].
+
+            [1]: def
+            [^1]: ghi
+            """
+        )
+        markdown = marko.Markdown(renderer=MarkdownRenderer, extensions=["footnote"])
+        rerendered = markdown.convert(text)
+        assert rerendered == text
 
 
 class TestExtension:
