@@ -26,6 +26,8 @@ jobs:
 
       - name: Install dependencies
         run: pdm install -G toc -G codehilite
+      - run: unset LD_PRELOAD
+        if : matrix.os == 'ubuntu-latest'
       - name: Run Tests
         run: pdm run -v pytest --cov=marko/ --cov-report=xml tests
       - name: Upload coverage to Codecov
