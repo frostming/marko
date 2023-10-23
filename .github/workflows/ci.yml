@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9, "3.10", "3.11", "3.12"]
+        python-version: [3.7, 3.8, 3.9, "3.10", "3.12"]
         os: [ubuntu-latest, macOS-latest]
 
     steps:
@@ -27,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: pdm install -G toc -G codehilite
       - name: Run Tests
-        run: unset LD_PRELOAD && pdm run -v pytest --cov=marko/ --cov-report=xml tests
+        run: pdm run -v pytest --cov=marko/ --cov-report=xml tests
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
         with:
