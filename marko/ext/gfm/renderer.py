@@ -31,10 +31,12 @@ class GFMRendererMixin:
 
     @render_paragraph.dispatch(MarkdownRenderer)
     def render_paragraph(self, element):
-        para = super().render_paragraph(element)
+        para = self.render_children(element)
         if hasattr(element, "checked"):
-            return f"[{'x' if element.checked else ' '}] {para}"
-        return para
+            para = f"[{'x' if element.checked else ' '}]{para}"
+        line = self._prefix + para + "\n"
+        self._prefix = self._second_prefix
+        return line
 
     @render_dispatch(HTMLRenderer)
     def render_strikethrough(self, element):
