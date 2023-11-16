@@ -1,3 +1,10 @@
+## v2.0.2(2023-11-16)
+
+### Fixed
+
+- Rewrite the parsing logic of GFM tables.
+- Fixed the dispatching among different renderers for render methods in extensions. Now the GFM renderer supports `MarkdownRenderer`.
+
 ## v2.0.1(2023-10-23)
 
 ### Fixed
