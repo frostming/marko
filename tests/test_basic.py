@@ -132,3 +132,26 @@ class TestExtension:
 
         raw_text = paragraph["children"][0]
         assert raw_text["children"] == "Hello world"
+
+    def test_gfm_markdown_renderer(self):
+        text = textwrap.dedent(
+            """\
+            ## TODO
+
+            - [x] Shopping[^1]
+            - [ ] ~~Study~~
+
+            ## Table
+
+            | Item | Price |
+            | ---- | ----- |
+            | Apple | $1 |
+            | Orange | $2 |
+
+            [^1]: go to https://example.com
+            """
+        )
+
+        md = marko.Markdown(extensions=["gfm", "footnote"], renderer=MarkdownRenderer)
+        res = md.convert(text)
+        assert res == text

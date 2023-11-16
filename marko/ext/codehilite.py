@@ -24,9 +24,7 @@ from pygments.lexers import get_lexer_by_name, guess_lexer
 from pygments.util import ClassNotFound
 
 from marko import HTMLRenderer
-from marko.ast_renderer import ASTRenderer, XMLRenderer
-from marko.helpers import MarkoExtension
-from marko.md_renderer import MarkdownRenderer
+from marko.helpers import MarkoExtension, render_dispatch
 
 
 def _parse_extras(line):
@@ -47,25 +45,19 @@ def _parse_extras(line):
 class CodeHiliteRendererMixin:
     options = {}  # type: dict
 
+    @render_dispatch(HTMLRenderer)
     def render_fenced_code(self, element):
-        if isinstance(self, (ASTRenderer, XMLRenderer)):
-            return self.render_children(element)
-        elif isinstance(self, MarkdownRenderer):
-            return super().render_fenced_code(element)
-        elif isinstance(self, HTMLRenderer):
-            code = element.children[0].children
-            options = {**self.options, **_parse_extras(getattr(element, "extra", None))}
-            if element.lang:
-                try:
-                    lexer = get_lexer_by_name(element.lang, stripall=True)
-                except ClassNotFound:
-                    lexer = guess_lexer(code)
-            else:
+        code = element.children[0].children
+        options = {**self.options, **_parse_extras(getattr(element, "extra", None))}
+        if element.lang:
+            try:
+                lexer = get_lexer_by_name(element.lang, stripall=True)
+            except ClassNotFound:
                 lexer = guess_lexer(code)
-            formatter = html.HtmlFormatter(**options)
-            return highlight(code, lexer, formatter)
         else:
-            raise NotImplementedError("Unsupported renderer")
+            lexer = guess_lexer(code)
+        formatter = html.HtmlFormatter(**options)
+        return highlight(code, lexer, formatter)
 
 
 def make_extension(**options):

@@ -54,7 +54,7 @@ class SpecTestSuite:
 
     def assert_case(self, text, html):
         result = self.markdown(text)
-        assert normalize_html(result) == normalize_html(html), normalize_html(result)
+        assert normalize_html(result) == normalize_html(html), repr(result)
 
     # Extra cases that are not included
     def test_mixed_tab_space_in_list_item(self):

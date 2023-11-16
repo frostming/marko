@@ -5,11 +5,20 @@ from __future__ import annotations
 
 import dataclasses
 import re
+from functools import partial
 from importlib import import_module
-from typing import TYPE_CHECKING, Any, Container, Iterable
+from typing import TYPE_CHECKING, overload
+
+from marko.renderer import Renderer
 
 if TYPE_CHECKING:
+    from typing import Any, Callable, Container, Iterable, TypeVar
+
     from .element import Element
+
+    RendererFunc = Callable[[Any, Element], Any]
+    TRenderer = TypeVar("TRenderer", bound=RendererFunc)
+    D = TypeVar("D", bound="_RendererDispatcher")
 
 
 def camel_to_snake_case(name: str) -> str:
@@ -124,3 +133,62 @@ def load_extension(name: str, **kwargs: Any) -> MarkoExtension:
         raise AttributeError(
             f"Module {name} does not have 'make_extension' attributte."
         ) from None
+
+
+class _RendererDispatcher:
+    name: str
+
+    def __init__(
+        self, types: type[Renderer] | tuple[type[Renderer], ...], func: RendererFunc
+    ) -> None:
+        from marko.ast_renderer import ASTRenderer, XMLRenderer
+
+        self._mapping = {types: func}
+        self._mapping.setdefault((ASTRenderer, XMLRenderer), self.render_ast)
+
+    def dispatch(
+        self: D, types: type[Renderer] | tuple[type[Renderer], ...]
+    ) -> Callable[[RendererFunc], D]:
+        def decorator(func: RendererFunc) -> D:
+            self._mapping[types] = func
+            return self
+
+        return decorator
+
+    def __set_name__(self, owner: type, name: str) -> None:
+        self.name = name
+
+    @staticmethod
+    def render_ast(self, element: Element) -> Any:
+        return self.render_children(element)
+
+    def super_render(self, r: Any, element: Element) -> Any:
+        try:
+            return getattr(super(type(r), r), self.name)(element)
+        except AttributeError:
+            raise NotImplementedError(f"Unsupported renderer {type(r)}") from None
+
+    @overload
+    def __get__(self: D, obj: None, owner: type) -> D:
+        ...
+
+    @overload
+    def __get__(self: D, obj: Renderer, owner: type) -> RendererFunc:
+        ...
+
+    def __get__(self: D, obj: Renderer | None, owner: type) -> RendererFunc | D:
+        if obj is None:
+            return self
+        for types, func in self._mapping.items():
+            if isinstance(obj, types):
+                return partial(func, obj)
+        return partial(self.super_render, obj)
+
+
+def render_dispatch(
+    types: type[Renderer] | tuple[type[Renderer], ...]
+) -> Callable[[RendererFunc], _RendererDispatcher]:
+    def decorator(func: RendererFunc) -> _RendererDispatcher:
+        return _RendererDispatcher(types, func)
+
+    return decorator
