@@ -139,7 +139,7 @@ class TestExtension:
             ## TODO
 
             - [x] Shopping[^1]
-            - [ ] Study
+            - [ ] ~~Study~~
 
             ## Table
 
