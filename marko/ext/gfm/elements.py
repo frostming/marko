@@ -1,10 +1,14 @@
 """
 Extra elements
 """
+from __future__ import annotations
+
 import itertools
 import re
+from typing import Any, cast
 
 from marko import block, inline, patterns
+from marko.source import Source
 
 
 class Paragraph(block.Paragraph):
@@ -104,49 +108,53 @@ class Url(inline.AutoLink):
             yield match
 
 
-class ListItem(block.ListItem):
-    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
-    override = True
-
-
 class Table(block.BlockElement):
     """A table element."""
 
-    _num_of_cols = None
     _prefix = ""
+
+    def __init__(self, children: list[TableRow], delimiters: list[str]) -> None:
+        self.children = children
+        self.delimiters = delimiters
+
+    @property
+    def head(self) -> TableRow:
+        return cast(TableRow, self.children[0])
+
+    @property
+    def num_of_cols(self) -> int:
+        return len(self.head.children)
 
     @classmethod
     def match(cls, source):
         source.anchor()
-        if TableRow.match(source) and not TableRow._is_delimiter:
-            if not TableRow.splitter.search(source.next_line()):
-                return False
-            source.pos = source.match.end()
-            num_of_cols = len(TableRow._cells)
-            if (
-                TableRow.match(source)
-                and TableRow._is_delimiter
-                and num_of_cols == len(TableRow._cells)
-            ):
-                cls._num_of_cols = num_of_cols
-                source.reset()
-                return True
-        source.reset()
-        return False
+        if not TableRow.match(source) or source.context.is_delimiter:
+            return False
+        if TableRow.splitter.search(source.next_line()) is None:
+            return False
+        # consume the first row, we don't use source.consume() here
+        # because that may unexpectedly update the line prefix.
+        source.pos = source.match.end()
+        head = TableRow([TableCell(cell) for cell in source.context.cells])
+        if (
+            not TableRow.match(source)
+            or not source.context.is_delimiter
+            or len(source.context.cells) != len(head.children)
+        ):
+            source.reset()  # invalid table, revert the source position
+            return False
+        source.context.table_info = {
+            "children": [head],
+            "delimiters": source.context.cells,
+        }
+        source.consume()  # consume the second row
+        return True
 
     @classmethod
     def parse(cls, source):
-        rv = cls()
-        rv._num_of_cols = cls._num_of_cols
-        rv.children = []
+        rv = cls(**source.context.table_info)
         with source.under_state(rv):
-            TableRow.match(source)
-            header = TableRow(TableRow.parse(source))
-            rv.children.append(header)
-            TableRow.match(source)
-            delimiters = TableRow._cells
-            source.consume()
-            for d, th in zip(delimiters, header.children):
+            for d, th in zip(rv.delimiters, rv.head.children):
                 stripped_d = d.strip()
                 th.header = True
                 if stripped_d[0] == ":" and stripped_d[-1] == ":":
@@ -163,7 +171,7 @@ class Table(block.BlockElement):
                         break
                 else:
                     if TableRow.match(source):
-                        rv.children.append(TableRow(TableRow.parse(source)))
+                        rv.children.append(TableRow.parse(source))
                         continue
                 break
         return rv
@@ -175,14 +183,12 @@ class TableRow(block.BlockElement):
     splitter = re.compile(r"\s*(?<!\\)\|\s*")
     delimiter = re.compile(r":?-+:?")
     virtual = True
-    _cells = None
-    _is_delimiter = False
 
-    def __init__(self, cells):
+    def __init__(self, cells: list[TableCell]) -> None:
         self.children = cells
 
     @classmethod
-    def match(cls, source):
+    def match(cls, source: Source) -> Any:
         line = source.next_line()
         if not line or not re.match(r" {,3}\S", line):
             return False
@@ -193,24 +199,23 @@ class TableRow(block.BlockElement):
             parts.pop()
         if len(parts) < 1:
             return False
-        cls._cells = parts
-        cls._is_delimiter = all(cls.delimiter.match(cell) for cell in parts)
+        source.context.cells = parts
+        source.context.is_delimiter = all(cls.delimiter.match(cell) for cell in parts)
         return True
 
     @classmethod
-    def parse(cls, source):
+    def parse(cls, source: Source) -> TableRow:
         source.consume()
-        parent = source.state
-        cells = cls._cells[:]
-        if len(cells) < parent._num_of_cols:
-            cells.extend("" for _ in range(parent._num_of_cols - len(cells)))
-        elif len(cells) > parent._num_of_cols:
-            cells = cells[: parent._num_of_cols]
-        cells = [TableCell(cell) for cell in cells]
-        if parent.children:
-            for head, cell in zip(parent.children[0].children, cells):
-                cell.align = head.align
-        return cells
+        parent = cast(Table, source.state)
+        cells: list[str] = source.context.cells[:]
+        if len(cells) < parent.num_of_cols:
+            cells.extend("" for _ in range(parent.num_of_cols - len(cells)))
+        elif len(cells) > parent.num_of_cols:
+            cells = cells[: parent.num_of_cols]
+        cell_elements = [TableCell(cell) for cell in cells]
+        for head, cell in zip(parent.head.children, cell_elements):
+            cell.align = cast(TableCell, head).align
+        return cls(cell_elements)
 
 
 class TableCell(block.BlockElement):
@@ -218,7 +223,7 @@ class TableCell(block.BlockElement):
 
     virtual = True
 
-    def __init__(self, text):
+    def __init__(self, text: str) -> None:
         self.inline_body = text.strip().replace("\\|", "|")
         self.header = False
-        self.align = None
+        self.align: str | None = None

@@ -94,16 +94,14 @@ class Markdown:
             return
         self.parser = cast(
             Parser,
-            type(
-                "MarkdownParser", tuple(self._parser_mixins) + (self._base_parser,), {}
-            )(),
+            type("_Parser", tuple(self._parser_mixins) + (self._base_parser,), {})(),
         )
         for e in self._extra_elements:
             self.parser.add_element(e)
         self.renderer = cast(
             Renderer,
             type(
-                "MarkdownRenderer",
+                "_Renderer",
                 tuple(self._renderer_mixins) + (self._base_renderer,),
                 {},
             )(),

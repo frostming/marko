@@ -26,7 +26,8 @@ import re
 
 from slugify import slugify
 
-from marko.helpers import MarkoExtension  # type: ignore
+from marko.helpers import MarkoExtension, render_dispatch  # type: ignore
+from marko.html_renderer import HTMLRenderer
 
 
 class TocRendererMixin:
@@ -66,6 +67,7 @@ class TocRendererMixin:
 
         return "".join(rv)
 
+    @render_dispatch(HTMLRenderer)
     def render_heading(self, element):
         children = self.render_children(element)
         slug = slugify(re.sub(r"<.+?>", "", children))

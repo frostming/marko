@@ -1,3 +1,4 @@
+# mypy: disable-error-code="no-redef"
 """
 Footnotes extension
 ~~~~~~~~~~~~~~~~~~~
@@ -18,7 +19,6 @@ from __future__ import annotations
 import re
 
 from marko import HTMLRenderer, block, helpers, inline
-from marko.ast_renderer import ASTRenderer, XMLRenderer
 from marko.md_renderer import MarkdownRenderer
 
 
@@ -70,33 +70,29 @@ class FootnoteRendererMixin:
         super().__init__()
         self.footnotes = []
 
+    @helpers.render_dispatch(HTMLRenderer)
     def render_footnote_ref(self, element):
         if element.label not in self.footnotes:
             self.footnotes.append(element.label)
         idx = self.footnotes.index(element.label) + 1
-        if isinstance(self, (ASTRenderer, XMLRenderer)):
-            return self.render_children(element)
-        elif isinstance(self, HTMLRenderer):
-            return (
-                '<sup class="footnote-ref" id="fnref-{lab}">'
-                '<a href="#fn-{lab}">{id}</a></sup>'.format(
-                    lab=self.escape_url(element.label), id=idx
-                )
+        return (
+            '<sup class="footnote-ref" id="fnref-{lab}">'
+            '<a href="#fn-{lab}">{id}</a></sup>'.format(
+                lab=self.escape_url(element.label), id=idx
             )
-        elif isinstance(self, MarkdownRenderer):
-            return f"[^{element.label}]"
-        else:
-            raise NotImplementedError("Unsupported renderer")
+        )
 
+    @render_footnote_ref.dispatch(MarkdownRenderer)
+    def render_footnote_ref(self, element):
+        return f"[^{element.label}]"
+
+    @helpers.render_dispatch(HTMLRenderer)
     def render_footnote_def(self, element):
-        if isinstance(self, (ASTRenderer, XMLRenderer)):
-            return self.render_children(element)
-        elif isinstance(self, HTMLRenderer):
-            return ""
-        elif isinstance(self, MarkdownRenderer):
-            return f"[^{element.label}]: {self.render_children(element)}"
-        else:
-            raise NotImplementedError("Unsupported renderer")
+        return ""
+
+    @render_footnote_def.dispatch(MarkdownRenderer)
+    def render_footnote_def(self, element):
+        return f"[^{element.label}]: {self.render_children(element)}"
 
     def _render_footnote_def(self, element):
         children = self.render_children(element).rstrip()
@@ -109,6 +105,7 @@ class FootnoteRendererMixin:
             self.escape_url(element.label), children
         )
 
+    @helpers.render_dispatch((HTMLRenderer, MarkdownRenderer))
     def render_document(self, element):
         text = self.render_children(element)
         items = [self.root_node.footnotes[label] for label in self.footnotes]
