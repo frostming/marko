@@ -35,6 +35,7 @@ Documentation = "https://marko-py.readthedocs.io"
 [project.optional-dependencies]
 toc = ["python-slugify"]
 codehilite = ["pygments"]
+repr = ["objprint"]
 
 [project.scripts]
 marko = "marko.cli:main"

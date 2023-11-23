@@ -2,10 +2,10 @@
 # It is not intended for manual editing.
 
 [metadata]
-groups = ["default", "benchmark", "codehilite", "dev", "doc", "toc"]
+groups = ["default", "benchmark", "codehilite", "dev", "doc", "toc", "repr"]
 strategy = ["cross_platform"]
 lock_version = "4.4"
-content_hash = "sha256:d0ab93b433c852f9bc6ad14877c37e260ffe2a735cc8790951cf2c8a4260d712"
+content_hash = "sha256:3dc6244761616c0a38f3c3c5356adb07b85cb016d0fd12fced271510a359cd2e"
 
 [[package]]
 name = "alabaster"
@@ -496,6 +496,16 @@ summary = "Type system extensions for programs checked with the mypy type checke
 files = [
     {file = "mypy_extensions-1.0.0-py3-none-any.whl", hash = "sha256:4392f6c0eb8a5668a69e23d168ffa70f0be9ccfd32b5cc2d26a34ae5b844552d"},
     {file = "mypy_extensions-1.0.0.tar.gz", hash = "sha256:75dbf8955dc00442a438fc4d0666508a9a97b6bd41aa2f0ffe9d2f2725af0782"},
+]
+
+[[package]]
+name = "objprint"
+version = "0.2.3"
+requires_python = ">=3.6"
+summary = "A library that can print Python objects in human readable format"
+files = [
+    {file = "objprint-0.2.3-py3-none-any.whl", hash = "sha256:1721e6f97bae5c5b86c2716a0d45a9dd2c9a4cd9f52cfc8a0dfbe801805554cb"},
+    {file = "objprint-0.2.3.tar.gz", hash = "sha256:73d0ad5a7c3151fce634c8892e5c2a050ccae3b1a353bf1316f08b7854da863b"},
 ]
 
 [[package]]

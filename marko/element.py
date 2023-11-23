@@ -1,3 +1,5 @@
+from typing import Any
+
 from .helpers import camel_to_snake_case
 
 
@@ -8,6 +10,7 @@ class Element:
     """
 
     override: bool
+    children: Any
 
     @classmethod
     def get_type(cls, snake_case: bool = False) -> str:
@@ -23,3 +26,13 @@ class Element:
         else:
             name = cls.__name__
         return camel_to_snake_case(name) if snake_case else name
+
+    def __repr__(self) -> str:
+        try:
+            from objprint import objstr
+        except ImportError:
+            from pprint import pformat
+
+            return f"<{self.__class__.__name__} children={pformat(self.children)}>"
+        else:
+            return objstr(self, honor_existing=False, include=["children"])
