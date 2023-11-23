@@ -1,3 +1,7 @@
+## Unreleased
+
+- Add pretty representation for the AST for debugging purpose. An extra group `repr` is added for more readable output.
+
 ## v2.0.2(2023-11-16)
 
 ### Fixed
