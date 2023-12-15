@@ -4,7 +4,7 @@
 [metadata]
 groups = ["default", "benchmark", "codehilite", "dev", "doc", "toc", "repr"]
 strategy = ["cross_platform"]
-lock_version = "4.4"
+lock_version = "4.4.1"
 content_hash = "sha256:3dc6244761616c0a38f3c3c5356adb07b85cb016d0fd12fced271510a359cd2e"
 
 [[package]]
