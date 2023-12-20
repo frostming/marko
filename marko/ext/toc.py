@@ -8,7 +8,7 @@ This requires to install `toc` extras::
     pip install marko[toc]
 
 Arguments:
-    * openning: the openning tag, defaults to <ul>
+    * opening: the opening tag, defaults to <ul>
     * closing: the closing tag, defaults to </ul>
     * item_format: the toc item format, defaults to '<li><a href="#{slug}">{text}</a></li>'
 
@@ -31,7 +31,7 @@ from marko.html_renderer import HTMLRenderer
 
 
 class TocRendererMixin:
-    openning = "<ul>"
+    opening = "<ul>"
     closing = "</ul>"
     item_format = '<li><a href="#{slug}">{text}</a></li>'
 
@@ -52,10 +52,10 @@ class TocRendererMixin:
             if first_level is None:
                 first_level = level
                 last_level = level
-                rv.append(self.openning + "\n")
+                rv.append(self.opening + "\n")
 
             if last_level == level - 1:
-                rv.append(self.openning + "\n")
+                rv.append(self.opening + "\n")
                 last_level = level
             while last_level > level:
                 rv.append(self.closing + "\n")
@@ -75,10 +75,10 @@ class TocRendererMixin:
         return '<h{0} id="{1}">{2}</h{0}>\n'.format(element.level, slug, children)
 
 
-def make_extension(openning=None, closing=None, item_format=None):
+def make_extension(opening=None, closing=None, item_format=None):
     options = {}
-    if openning:
-        options["openning"] = openning
+    if opening:
+        options["opening"] = opening
     if closing:
         options["closing"] = closing
     if item_format:
