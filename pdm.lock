@@ -556,7 +556,7 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "7.4.3"
+version = "7.4.4"
 requires_python = ">=3.7"
 summary = "pytest: simple powerful testing with Python"
 dependencies = [
@@ -569,8 +569,8 @@ dependencies = [
     "tomli>=1.0.0; python_version < \"3.11\"",
 ]
 files = [
-    {file = "pytest-7.4.3-py3-none-any.whl", hash = "sha256:0d009c083ea859a71b76adf7c1d502e4bc170b80a8ef002da5806527b9591fac"},
-    {file = "pytest-7.4.3.tar.gz", hash = "sha256:d989d136982de4e3b29dabcc838ad581c64e8ed52c11fbe86ddebd9da0818cd5"},
+    {file = "pytest-7.4.4-py3-none-any.whl", hash = "sha256:b090cdf5ed60bf4c45261be03239c2c1c22df034fbffe691abe93cd80cea01d8"},
+    {file = "pytest-7.4.4.tar.gz", hash = "sha256:2cf0005922c6ace4a3e2ec8b4080eb0d9753fdc93107415332f50ce9e7994280"},
 ]
 
 [[package]]
@@ -627,15 +627,15 @@ files = [
 
 [[package]]
 name = "shibuya"
-version = "2023.10.26"
+version = "2024.1.1"
 requires_python = ">=3.7"
 summary = "A clean, responsive, and customizable Sphinx documentation theme with light/dark mode."
 dependencies = [
     "Sphinx",
 ]
 files = [
-    {file = "shibuya-2023.10.26-py3-none-any.whl", hash = "sha256:e8a8647005a410d929fe4fdd3af2b88c156efbca8582ce3803ebd7771d08cebb"},
-    {file = "shibuya-2023.10.26.tar.gz", hash = "sha256:878f866a8720776c878ff1d9e17f7731cf8923859ff6fec77999b469477764a1"},
+    {file = "shibuya-2024.1.1-py3-none-any.whl", hash = "sha256:6ff69cc3c43f3cb571472a5a8f3f438aa32a77b0736d1a084cb2aa04a1e53bfe"},
+    {file = "shibuya-2024.1.1.tar.gz", hash = "sha256:d1c1a029271b60c33665a22f7f56a447b497f96e99994bfcd1bf3b98a41c9d35"},
 ]
 
 [[package]]
