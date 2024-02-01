@@ -430,12 +430,12 @@ files = [
 
 [[package]]
 name = "mistletoe"
-version = "1.2.1"
+version = "1.3.0"
 requires_python = "~=3.5"
 summary = "A fast, extensible Markdown parser in pure Python."
 files = [
-    {file = "mistletoe-1.2.1-py3-none-any.whl", hash = "sha256:620563ac06380ce0629b4a2afa2f2ab797ffac3efdcccaf2362a7266600e6dcc"},
-    {file = "mistletoe-1.2.1.tar.gz", hash = "sha256:7d0c1ab3747047d169f9fc4b925d1cba3f5c13eaf0b90c365b72e47e59d00a02"},
+    {file = "mistletoe-1.3.0-py3-none-any.whl", hash = "sha256:a0710d0cdb7d2458cef91cf6b9b897db442927f8778dae890cbbfb1853a51700"},
+    {file = "mistletoe-1.3.0.tar.gz", hash = "sha256:bd0e788add9b4478d19ec792f6d5fb908a20e70abfe61193f29178c55d3adbe9"},
 ]
 
 [[package]]
@@ -589,15 +589,15 @@ files = [
 
 [[package]]
 name = "python-slugify"
-version = "8.0.1"
+version = "8.0.3"
 requires_python = ">=3.7"
 summary = "A Python slugify application that also handles Unicode"
 dependencies = [
     "text-unidecode>=1.3",
 ]
 files = [
-    {file = "python-slugify-8.0.1.tar.gz", hash = "sha256:ce0d46ddb668b3be82f4ed5e503dbc33dd815d83e2eb6824211310d3fb172a27"},
-    {file = "python_slugify-8.0.1-py2.py3-none-any.whl", hash = "sha256:70ca6ea68fe63ecc8fa4fcf00ae651fc8a5d02d93dcd12ae6d4fc7ca46c4d395"},
+    {file = "python-slugify-8.0.3.tar.gz", hash = "sha256:e04cba5f1c562502a1175c84a8bc23890c54cdaf23fccaaf0bf78511508cabed"},
+    {file = "python_slugify-8.0.3-py2.py3-none-any.whl", hash = "sha256:c71189c161e8c671f1b141034d9a56308a8a5978cd13d40446c879569212fdd1"},
 ]
 
 [[package]]
