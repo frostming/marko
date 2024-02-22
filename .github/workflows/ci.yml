@@ -19,21 +19,16 @@ jobs:
         with:
           submodules: true
       - name: Set up PDM
-        uses: pdm-project/setup-pdm@v3
+        uses: pdm-project/setup-pdm@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: true
 
       - name: Install dependencies
         run: pdm install -G toc -G codehilite
-      - name: Run Tests 3.11
-        if: ${{ matrix.python-version == '3.11' }}
-        run: pdm run -v pytest tests
-      - name: Run Tests < 3.11
-        if: ${{ matrix.python-version != '3.11' }}
+      - name: Run Tests
         run: pdm run -v pytest --cov=marko/ --cov-report=xml tests
       - name: Upload coverage to Codecov
-        if: ${{ matrix.python-version != '3.11' }}
         uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

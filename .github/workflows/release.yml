@@ -18,8 +18,7 @@ jobs:
           python-version: '3.11'
       - name: Build artifacts
         run: |
-          pip install build
-          python -m build
+          pipx run build
       - name: Test Build
         run: |
           python3 -m venv fresh_env
