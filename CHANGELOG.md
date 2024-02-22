@@ -1,6 +1,7 @@
 ## Unreleased
 
 - Add pretty representation for the AST for debugging purpose. An extra group `repr` is added for more readable output.
+- Make a dummy `Document` element if the element to render is not a `Document` instance.
 
 ## v2.0.2(2023-11-16)
 

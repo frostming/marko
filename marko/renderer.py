@@ -51,6 +51,7 @@ class Renderer:
 
     def __exit__(self, *args: Any) -> None:
         html._charref = _charref_bak  # type: ignore[attr-defined]
+        self.root_node = None
 
     def render(self, element: Element) -> Any:
         """Renders the given element to string.
@@ -60,7 +61,12 @@ class Renderer:
         """
         # Store the root node since it may be required by the render functions
         if not self.root_node:  # pragma: no cover
-            self.root_node = element  # type: ignore
+            if isinstance(element, Document):
+                self.root_node = element
+            else:
+                # Make a dummy root node from it
+                self.root_node = Document()
+                self.root_node.children = [element]
         if hasattr(element, "get_type"):
             func_name = "render_" + element.get_type(snake_case=True)
             render_func = getattr(self, func_name, None)
