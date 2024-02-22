@@ -22,7 +22,7 @@ if TYPE_CHECKING:
     from .block import Document
     from .parser import ElementType
 
-__version__ = "2.0.2"
+__version__ = "2.0.3"
 
 
 class SetupDone(Exception):

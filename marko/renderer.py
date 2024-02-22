@@ -59,6 +59,8 @@ class Renderer:
         :param element: a element to be rendered.
         :returns: the output string or any values.
         """
+        from .block import Document
+
         # Store the root node since it may be required by the render functions
         if not self.root_node:  # pragma: no cover
             if isinstance(element, Document):
