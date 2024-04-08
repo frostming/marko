@@ -11,6 +11,7 @@ r"""
 """
 from __future__ import annotations
 
+from pathlib import Path
 from typing import TYPE_CHECKING, Iterable, cast
 
 from .helpers import MarkoExtension, load_extension
@@ -122,6 +123,17 @@ class Markdown:
         """
         self._setup_extensions()
         return self.parser.parse(text)
+
+    def parse_file(self, path: str | Path) -> Document:
+        """Call ``self.parser.parse_file(path)``.
+
+        Override this to preprocess path or file content or handle parsed result.
+        """
+        if isinstance(path, str):
+            path = Path(path)
+        if not path.is_file():
+            raise IOError(f"{path}: not a file")
+        return self.parse(path.read_text())
 
     def render(self, parsed: Document) -> str:
         """Call ``self.renderer.render(text)``.
