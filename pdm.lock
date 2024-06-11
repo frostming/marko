@@ -627,15 +627,15 @@ files = [
 
 [[package]]
 name = "shibuya"
-version = "2024.5.14"
+version = "2024.6.1"
 requires_python = ">=3.7"
 summary = "A clean, responsive, and customizable Sphinx documentation theme with light/dark mode."
 dependencies = [
     "Sphinx",
 ]
 files = [
-    {file = "shibuya-2024.5.14-py3-none-any.whl", hash = "sha256:9000218ddae3e79df7d9df3655fa913519198dba38015fac84707cde09bf7951"},
-    {file = "shibuya-2024.5.14.tar.gz", hash = "sha256:614c0c03c9a153c9c930c27972e4ea187abfe63695e5aa08b3484ca26d7f3594"},
+    {file = "shibuya-2024.6.1-py3-none-any.whl", hash = "sha256:25aa62476ed6235111c4ed8ed75b8d87c281f81060ecf733894ee7a83c870074"},
+    {file = "shibuya-2024.6.1.tar.gz", hash = "sha256:9807f47349237b617ac29c809cfda7fa287ac01a03ecd9ade0faf7ec35ee4403"},
 ]
 
 [[package]]
