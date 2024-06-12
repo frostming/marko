@@ -40,7 +40,7 @@ class GFMRendererMixin:
 
     @render_dispatch(HTMLRenderer)
     def render_strikethrough(self, element):
-        return "<del>{}</del>".format(self.render_children(element))
+        return f"<del>{self.render_children(element)}</del>"
 
     @render_strikethrough.dispatch(MarkdownRenderer)
     def render_strikethrough(self, element):
@@ -57,7 +57,7 @@ class GFMRendererMixin:
     @render_dispatch(HTMLRenderer)
     def render_table(self, element):
         head, *body = element.children
-        theader = "<thead>\n{}</thead>".format(self.render(head))
+        theader = f"<thead>\n{self.render(head)}</thead>"
         tbody = ""
         if body:
             tbody = "\n<tbody>\n{}</tbody>".format(
@@ -77,7 +77,7 @@ class GFMRendererMixin:
 
     @render_dispatch(HTMLRenderer)
     def render_table_row(self, element):
-        return "<tr>\n{}</tr>\n".format(self.render_children(element))
+        return f"<tr>\n{self.render_children(element)}</tr>\n"
 
     @render_table_row.dispatch(MarkdownRenderer)
     def render_table_row(self, element):

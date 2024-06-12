@@ -1,6 +1,7 @@
 """
 Some regex patterns
 """
+
 import re
 
 tags = [

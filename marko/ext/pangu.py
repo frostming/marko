@@ -16,6 +16,7 @@ Example::
     markdown = Markdown(extensions=['pangu'])
     print(markdown(text))
 """
+
 import re
 
 from marko import HTMLRenderer

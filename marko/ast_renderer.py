@@ -1,6 +1,7 @@
 """
 AST renderers for inspecting the markdown parsing result.
 """
+
 from __future__ import annotations
 
 import html
@@ -35,23 +36,20 @@ class ASTRenderer(Renderer):
     def render_raw_text(self, element: inline.RawText) -> dict[str, Any]:
         return {
             "element": "raw_text",
-            "children": html.unescape(element.children)
-            if element.escape
-            else element.children,
+            "children": (
+                html.unescape(element.children) if element.escape else element.children
+            ),
             "escape": element.escape,
         }
 
     @overload
-    def render_children(self, element: list[Element]) -> list[dict[str, Any]]:
-        ...
+    def render_children(self, element: list[Element]) -> list[dict[str, Any]]: ...
 
     @overload
-    def render_children(self, element: Element) -> dict[str, Any]:
-        ...
+    def render_children(self, element: Element) -> dict[str, Any]: ...
 
     @overload
-    def render_children(self, element: str) -> str:
-        ...
+    def render_children(self, element: str) -> str: ...
 
     def render_children(self, element):
         if isinstance(element, list):

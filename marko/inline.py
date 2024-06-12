@@ -1,6 +1,7 @@
 """
 Inline(span) level elements
 """
+
 from __future__ import annotations
 
 import re

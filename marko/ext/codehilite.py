@@ -16,6 +16,7 @@ Usage::
     markdown = Markdown(extensions=['codehilite'])
     markdown.convert('```python filename="my_script.py"\nprint('hello world')\n```')
 """
+
 import json
 
 from pygments import highlight
