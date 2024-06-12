@@ -22,6 +22,7 @@ Usage::
     print(markdown.renderer.render_toc())
 
 """
+
 import re
 
 from slugify import slugify

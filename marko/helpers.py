@@ -1,6 +1,7 @@
 """
 Helper functions and data structures
 """
+
 from __future__ import annotations
 
 import dataclasses
@@ -169,12 +170,10 @@ class _RendererDispatcher:
             raise NotImplementedError(f"Unsupported renderer {type(r)}") from None
 
     @overload
-    def __get__(self: D, obj: None, owner: type) -> D:
-        ...
+    def __get__(self: D, obj: None, owner: type) -> D: ...
 
     @overload
-    def __get__(self: D, obj: Renderer, owner: type) -> RendererFunc:
-        ...
+    def __get__(self: D, obj: Renderer, owner: type) -> RendererFunc: ...
 
     def __get__(self: D, obj: Renderer | None, owner: type) -> RendererFunc | D:
         if obj is None:

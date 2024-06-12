@@ -9,6 +9,7 @@ r"""
  Licensed under MIT.
  Created by Frost Ming<mianghong@gmail.com>
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Iterable, cast

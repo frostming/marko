@@ -77,7 +77,7 @@ class Source:
         return regexp.match(self._buffer, pos)
 
     @staticmethod
-    @functools.lru_cache()
+    @functools.lru_cache
     def match_prefix(prefix: str, line: str) -> int:
         """Check if the line starts with given prefix and
         return the position of the end of prefix.
@@ -112,12 +112,10 @@ class Source:
             return None
 
     @overload
-    def next_line(self, require_prefix: Literal[False] = ...) -> str:
-        ...
+    def next_line(self, require_prefix: Literal[False] = ...) -> str: ...
 
     @overload
-    def next_line(self, require_prefix: Literal[True] = ...) -> str | None:
-        ...
+    def next_line(self, require_prefix: Literal[True] = ...) -> str | None: ...
 
     def next_line(self, require_prefix: bool = True) -> str | None:
         """Return the next line in the source.

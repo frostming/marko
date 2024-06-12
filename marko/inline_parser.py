@@ -1,6 +1,7 @@
 """
 Parse inline elements
 """
+
 from __future__ import annotations
 
 import re
