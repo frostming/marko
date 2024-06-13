@@ -1,3 +1,9 @@
+## v2.1.0(2024-06-13)
+
+### Changed
+
+- Drop support of Python 3.7.
+
 ## v2.0.3(2024-02-22)
 
 - Add pretty representation for the AST for debugging purpose. An extra group `repr` is added for more readable output.
