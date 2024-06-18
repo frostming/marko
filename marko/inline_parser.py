@@ -302,8 +302,9 @@ def _parse_link_dest_title(
     else:
         escaped = False
         pairs = 0
-        i = 0
-        for i, c in enumerate(link_text[start:], start):
+        i = start
+        while i < len(link_text):
+            c = link_text[i]
             if escaped:
                 escaped = False
             elif c == "\\":
@@ -322,6 +323,7 @@ def _parse_link_dest_title(
                     return link_dest, _EMPTY_GROUP
                 else:
                     raise ParseError("unmatched parenthesis")
+            i += 1
         else:
             if is_inline:
                 raise ParseError("No right parenthesis is found")
