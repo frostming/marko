@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed
+
+- Reference link will not render if the reference definition doesn't end with newline.
+
 ## v2.1.0(2024-06-13)
 
 ### Changed
