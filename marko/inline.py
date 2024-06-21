@@ -92,7 +92,7 @@ class InlineHTML(InlineElement):
     pattern = re.compile(
         r"(<%s(?:%s)* */?>"  # open tag
         r"|</%s *>"  # closing tag
-        r"|<!--(?!>|->|[\s\S]*?--[\s\S]*?-->)[\s\S]*?(?<!-)-->"  # HTML comment
+        r"|<!--(?:>|->|[\s\S]*?-->)"  # HTML comment
         r"|<\?[\s\S]*?\?>"  # processing instruction
         r"|<![A-Z]+ +[\s\S]*?>"  # declaration
         r"|<!\[CDATA\[[\s\S]*?\]\]>)"  # CDATA section

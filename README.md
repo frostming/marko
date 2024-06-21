@@ -5,13 +5,13 @@
 [![PyPI](https://img.shields.io/pypi/v/marko.svg?logo=python&logoColor=white)](https://pypi.org/project/marko/)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/marko.svg?logo=python&logoColor=white)](https://pypi.org/project/marko/)
 [![Documentation Status](https://img.shields.io/readthedocs/marko-py.svg?logo=readthedocs)](https://marko-py.readthedocs.io/en/latest/?badge=latest)
-[![CommonMark Spec](https://img.shields.io/badge/CommonMark-0.30-blue.svg)][spec]
+[![CommonMark Spec](https://img.shields.io/badge/CommonMark-0.31.2-blue.svg)][spec]
 
 ![Build Status](https://github.com/frostming/marko/workflows/Tests/badge.svg)
 [![codecov](https://codecov.io/gh/frostming/marko/branch/master/graph/badge.svg)](https://codecov.io/gh/frostming/marko)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/b785f5b3fa7c4d93a02372d31b3f73b1)](https://www.codacy.com/app/frostming/marko?utm_source=github.com&utm_medium=referral&utm_content=frostming/marko&utm_campaign=Badge_Grade)
 
-Marko is a pure Python markdown parser that adheres to the specifications of [CommonMark's spec v0.30][spec]. It has been designed with high extensibility in mind, as detailed in the [Extensions](#extensions) section.
+Marko is a pure Python markdown parser that adheres to the specifications of [CommonMark's spec v0.31.2][spec]. It has been designed with high extensibility in mind, as detailed in the [Extensions](#extensions) section.
 
 Marko requires Python 3.8 or higher.
 
@@ -21,7 +21,7 @@ Of all the Python markdown parsers available, a common issue is the difficulty f
 
 Marko's compliance with the complex CommonMark specification can impact its performance. However, using a parser that does not adhere to this spec may result in unexpected rendering outcomes. According to benchmark results, Marko is three times slower than Python-Markdown but slightly faster than Commonmark-py and significantly slower than mistune. If prioritizing performance over spec compliance is crucial for you, it would be best to opt for another parser.
 
-[spec]: https://spec.commonmark.org/0.30/
+[spec]: https://spec.commonmark.org/0.31.2/
 [pymd]: https://github.com/waylan/Python-Markdown
 [mistune]: https://github.com/lepture/mistune
 [cmpy]: https://github.com/rtfd/CommonMark-py

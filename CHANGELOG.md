@@ -1,3 +1,10 @@
+## v2.1.2(2024-06-21)
+
+### Changed
+
+- Update the GFM spec to the latest master branch.
+- Update the CommonMark spec to 0.31.2.
+
 ## v2.1.1(2024-06-19)
 
 ### Fixed
