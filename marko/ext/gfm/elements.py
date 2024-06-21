@@ -8,7 +8,7 @@ import itertools
 import re
 from typing import Any, cast
 
-from marko import block, inline, patterns
+from marko import block, inline
 from marko.source import Source
 
 
@@ -22,18 +22,6 @@ class Paragraph(block.Paragraph):
         if m:
             self.checked = m.group(1)[1:-1].lower() == "x"
             self.inline_body = self.inline_body[m.end(1) :]
-
-
-class InlineHTML(inline.InlineHTML):
-    pattern = re.compile(
-        r"(<%s(?:%s)* */?>"  # open tag
-        r"|</%s *>"  # closing tag
-        r"|<!--(?:>|->|[\s\S]*?-->)"  # HTML comment
-        r"|<\?[\s\S]*?\?>"  # processing instruction
-        r"|<![A-Z]+ +[\s\S]*?>"  # declaration
-        r"|<!\[CDATA\[[\s\S]*?\]\]>)"  # CDATA section
-        % (patterns.tag_name, patterns.attribute, patterns.tag_name)
-    )
 
 
 class Strikethrough(inline.InlineElement):

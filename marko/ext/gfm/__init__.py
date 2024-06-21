@@ -23,7 +23,6 @@ from . import elements, renderer
 GFM = MarkoExtension(
     elements=[
         elements.Paragraph,
-        elements.InlineHTML,
         elements.Strikethrough,
         elements.Url,
         elements.Table,

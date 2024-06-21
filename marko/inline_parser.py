@@ -515,16 +515,12 @@ class Delimiter:
         )
 
     def followed_by_punc(self) -> bool:
-        return (
-            self.end < len(self.text)
-            and patterns.punctuation.match(self.text, self.end) is not None
+        return self.end < len(self.text) and patterns.is_punctuation(
+            self.text[self.end]
         )
 
     def preceded_by_punc(self) -> bool:
-        return (
-            self.start > 0
-            and patterns.punctuation.match(self.text[self.start - 1]) is not None
-        )
+        return self.start > 0 and patterns.is_punctuation(self.text[self.start - 1])
 
     def closed_by(self, other: Delimiter) -> bool:
         return not (
