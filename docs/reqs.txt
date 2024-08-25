@@ -18,7 +18,7 @@ pyparsing==3.0.7
 python-slugify==8.0.4
 pytz==2023.3; python_version < "3.9"
 requests==2.31.0
-shibuya==2024.7.13
+shibuya==2024.8.21
 snowballstemmer==2.2.0
 sphinx==7.1.2
 sphinxcontrib-applehelp==1.0.2
