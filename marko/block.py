@@ -79,6 +79,7 @@ class Document(BlockElement):
 
     def __init__(self) -> None:
         super().__init__()
+        self.children = []
         self.link_ref_defs: dict[str, tuple[str, str]] = {}
 
 
