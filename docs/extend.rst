@@ -28,7 +28,7 @@ You don't need to provide the parsed content since it is handled by parser autom
 
     class GitHubWiki(inline.InlineElement):
 
-        pattern = r'\[\[ *(.+?) *| *(.+?) *\]\]'
+        pattern = r'\[\[ *(.+?) *\| *(.+?) *\]\]'
         parse_children = True
 
         def __init__(self, match):
@@ -57,15 +57,17 @@ Add a new render function
 -------------------------
 
 Marko uses mixins to add functionalities to renderer or parser. Parser controls the parsing logic which you don't need
-to change at the most of time, while renderer mixins controll how to represent the elements by the element name, in snake-cased form.
+to change at the most of time, while renderer mixins controll how to represent the elements by the element name.
 In our case::
 
     class WikiRendererMixin(object):
 
-        def render_github_wiki(self, element):
+        def render_git_hub_wiki(self, element):
             return '<a href="{}">{}</a>'.format(
                 self.escape_url(element.target), self.render_children(element)
             )
+
+Note the method name is composed of ``render_`` prefix and the element name in snake-cased form. The snake case form of ``GitHubWiki`` is ``git_hub_wiki``.
 
 The renderer mixins will be combined together with marko's default base renderer: ``HTMLRenderer``,
 which you need in most cases, to create a :class:`marko.renderer.Renderer` instance.
