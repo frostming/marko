@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed
+
+- Fix a recursion error when dispatching render methods in extensions.
+
 ## v2.1.2(2024-06-21)
 
 ### Changed
