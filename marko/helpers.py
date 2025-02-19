@@ -164,10 +164,15 @@ class _RendererDispatcher:
         return self.render_children(element)
 
     def super_render(self, r: Any, element: Element) -> Any:
+        """Call on the next class in the MRO which has the same method."""
+        klasses = (c for c in type(r).mro() if self.name in c.__dict__)
         try:
-            return getattr(super(type(r), r), self.name)(element)
-        except AttributeError:
+            next(klasses)  # skip the current class
+            parent = next(klasses)
+        except StopIteration:
             raise NotImplementedError(f"Unsupported renderer {type(r)}") from None
+        else:
+            return getattr(parent, self.name)(r, element)
 
     @overload
     def __get__(self: D, obj: None, owner: type) -> D: ...
@@ -185,7 +190,7 @@ class _RendererDispatcher:
 
 
 def render_dispatch(
-    types: type[Renderer] | tuple[type[Renderer], ...]
+    types: type[Renderer] | tuple[type[Renderer], ...],
 ) -> Callable[[RendererFunc], _RendererDispatcher]:
     def decorator(func: RendererFunc) -> _RendererDispatcher:
         return _RendererDispatcher(types, func)
