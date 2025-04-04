@@ -1,8 +1,9 @@
-## Unreleased
+## v2.1.3(2025-04-05)
 
 ### Fixed
 
 - Fix a recursion error when dispatching render methods in extensions.
+- Initialize `children` attribute when creating a `Document` instance.
 
 ## v2.1.2(2024-06-21)
 
