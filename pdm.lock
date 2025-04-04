@@ -470,7 +470,7 @@ files = [
 
 [[package]]
 name = "mistune"
-version = "3.1.1"
+version = "3.1.3"
 requires_python = ">=3.8"
 summary = "A sane and fast Markdown parser with useful plugins and renderers"
 groups = ["benchmark"]
@@ -478,8 +478,8 @@ dependencies = [
     "typing-extensions; python_version < \"3.11\"",
 ]
 files = [
-    {file = "mistune-3.1.1-py3-none-any.whl", hash = "sha256:02106ac2aa4f66e769debbfa028509a275069dcffce0dfa578edd7b991ee700a"},
-    {file = "mistune-3.1.1.tar.gz", hash = "sha256:e0740d635f515119f7d1feb6f9b192ee60f0cc649f80a8f944f905706a21654c"},
+    {file = "mistune-3.1.3-py3-none-any.whl", hash = "sha256:1a32314113cff28aa6432e99e522677c8587fd83e3d51c29b82a52409c842bd9"},
+    {file = "mistune-3.1.3.tar.gz", hash = "sha256:a7035c21782b2becb6be62f8f25d3df81ccb4d6fa477a6525b15af06539f02a0"},
 ]
 
 [[package]]
@@ -605,7 +605,7 @@ files = [
 
 [[package]]
 name = "pytest"
-version = "8.3.4"
+version = "8.3.5"
 requires_python = ">=3.8"
 summary = "pytest: simple powerful testing with Python"
 groups = ["dev"]
@@ -618,8 +618,8 @@ dependencies = [
     "tomli>=1; python_version < \"3.11\"",
 ]
 files = [
-    {file = "pytest-8.3.4-py3-none-any.whl", hash = "sha256:50e16d954148559c9a74109af1eaf0c945ba2d8f30f0a3d3335edde19788b6f6"},
-    {file = "pytest-8.3.4.tar.gz", hash = "sha256:965370d062bce11e73868e0335abac31b4d3de0e82f4007408d242b4f8610761"},
+    {file = "pytest-8.3.5-py3-none-any.whl", hash = "sha256:c69214aa47deac29fad6c2a4f590b9c4a9fdb16a403176fe154b79c0b4d4d820"},
+    {file = "pytest-8.3.5.tar.gz", hash = "sha256:f4efe70cc14e511565ac476b57c279e12a855b11f48f212af1080ef2263d3845"},
 ]
 
 [[package]]
@@ -642,7 +642,7 @@ name = "python-slugify"
 version = "8.0.4"
 requires_python = ">=3.7"
 summary = "A Python slugify application that also handles Unicode"
-groups = ["toc"]
+groups = ["doc", "toc"]
 dependencies = [
     "text-unidecode>=1.3",
 ]
@@ -681,7 +681,7 @@ files = [
 
 [[package]]
 name = "shibuya"
-version = "2025.2.11"
+version = "2025.3.24"
 requires_python = ">=3.8"
 summary = "A clean, responsive, and customizable Sphinx documentation theme with light/dark mode."
 groups = ["doc"]
@@ -689,8 +689,8 @@ dependencies = [
     "Sphinx",
 ]
 files = [
-    {file = "shibuya-2025.2.11-py3-none-any.whl", hash = "sha256:1960a86bb0587167ec47a6681bfbc368b539181cabc98e58ae6d76204e04ed78"},
-    {file = "shibuya-2025.2.11.tar.gz", hash = "sha256:10c71b333be03295e6441cc35e2b92416b0cb330277bb0e69f67986c60f77921"},
+    {file = "shibuya-2025.3.24-py3-none-any.whl", hash = "sha256:3eb7d20a028eb1d72d1b13a1133657df8ce3fda5bd6c4514b2967ee21f631896"},
+    {file = "shibuya-2025.3.24.tar.gz", hash = "sha256:63ff69697fc3a8b31c03c04617a337fd1c94911295fd3723a406f09d885f6240"},
 ]
 
 [[package]]
@@ -803,7 +803,7 @@ files = [
 name = "text-unidecode"
 version = "1.3"
 summary = "The most basic Text::Unidecode port"
-groups = ["toc"]
+groups = ["doc", "toc"]
 files = [
     {file = "text-unidecode-1.3.tar.gz", hash = "sha256:bad6603bb14d279193107714b288be206cac565dfa49aa5b105294dd5c4aab93"},
     {file = "text_unidecode-1.3-py2.py3-none-any.whl", hash = "sha256:1311f10e8b895935241623731c2ba64f4c455287888b18189350b67134a822e8"},
