@@ -1,76 +1,21 @@
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
 [project]
-# PEP 621 project metadata
-# See https://www.python.org/dev/peps/pep-0621/
-authors = [
-    {name = "Frost Ming", email = "mianghong@gmail.com"},
-]
-dynamic = ["version"]
-requires-python = ">=3.8"
-license = {text = "MIT"}
-dependencies = []
-description = "A markdown parser with high extensibility."
 name = "marko"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "curlink19",email = "p.kurochkin200@gmail.com"}
+]
 readme = "README.md"
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: Developers",
-    'Operating System :: OS Independent',
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+requires-python = ">=3.12,<4.0"
+dependencies = [
+    "commonmark (>=0.9.1,<0.10.0)",
+    "markdown (>=3.8,<4.0)",
+    "markdown-it-py (>=3.0.0,<4.0.0)",
+    "mistune (>=3.1.3,<4.0.0)",
+    "mistletoe (>=1.4.0,<2.0.0)"
 ]
 
-[project.urls]
-homepage = "https://github.com/frostming/marko"
-Documentation = "https://marko-py.readthedocs.io"
 
-[project.optional-dependencies]
-toc = ["python-slugify"]
-codehilite = ["pygments"]
-repr = ["objprint"]
-
-[project.scripts]
-marko = "marko.cli:main"
-
-[tool.pdm]
-plugins = [
-    "pdm-autoexport",
-]
-
-[tool.pdm.version]
-source = "file"
-path = "marko/__init__.py"
-
-[tool.pdm.dev-dependencies]
-benchmark = [
-    "commonmark>=0.9",
-    "markdown>=3.3",
-    "markdown-it-py>=2.0; python_version >= '3.7'",
-    "mistune>=2.0",
-    "mistletoe>=0.7",
-]
-dev = [
-    "pytest",
-    "pytest-cov",
-    "mypy>=0.950",
-]
-doc = [
-    "marko[toc]",
-    "sphinx>=5.3.0",
-    "shibuya>=2023.6.8",
-]
-
-[[tool.pdm.autoexport]]
-filename = "docs/reqs.txt"
-groups = ["doc"]
-without-hashes = true
-
-[tool.isort]
-profile = "black"
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
