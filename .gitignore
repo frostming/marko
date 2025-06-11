@@ -107,3 +107,4 @@ venv.bak/
 __pypackages__/
 .pdm-python
 .idea/
+.qodo
