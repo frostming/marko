@@ -5,7 +5,16 @@ Block level elements
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Match, NamedTuple, Sequence, cast
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Match,
+    NamedTuple,
+    cast,
+    ClassVar,
+    Optional,
+)
+from pydantic import Field
 
 from . import inline, inline_parser, patterns
 from .element import Element
@@ -34,18 +43,19 @@ __all__ = (
 class BlockElement(Element):
     """Any block element should inherit this class"""
 
-    #: An attribute to hold the children
-    children: Sequence[Element] = []
     #: Use to denote the precedence in parsing
-    priority = 5
+    priority: ClassVar[int] = 5
     #: if True, it won't be included in parsing process but produced by other elements
     #: other elements instead.
-    virtual = False
+    virtual: ClassVar[bool] = False
+    #: If true, will replace the element which it derives from.
+    override: ClassVar[bool] = False
+
+    #: An attribute to hold the children
+    children: list[Element] = Field(default_factory=list)
     #: If not empty, the body needs to be parsed as inline elements
     inline_body: str = ""
-    #: If true, will replace the element which it derives from.
-    override = False
-    _prefix = ""
+    _prefix: str = ""
 
     @classmethod
     def match(cls, source: Source) -> Any:
@@ -74,21 +84,20 @@ class BlockElement(Element):
 class Document(BlockElement):
     """Document node element."""
 
-    _prefix = ""
-    virtual = True
+    virtual: ClassVar[bool] = True
 
-    def __init__(self) -> None:
-        self.children = []
-        self.link_ref_defs: dict[str, tuple[str, str]] = {}
+    link_ref_defs: dict[str, tuple[str, str]] = Field(default_factory=dict)
 
 
 class BlankLine(BlockElement):
     """Blank lines"""
 
-    priority = 5
+    priority: ClassVar[int] = 5
 
-    def __init__(self, start: int) -> None:
-        self._anchor = start
+    anchor: int
+
+    def __init__(self, start: int):
+        super(BlockElement, self).__init__(**{"anchor": start})
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -106,15 +115,18 @@ class BlankLine(BlockElement):
 class Heading(BlockElement):
     """Heading element: (### Hello\n)"""
 
-    priority = 6
-    pattern = re.compile(
+    priority: ClassVar[int] = 6
+    pattern: ClassVar[re.Pattern] = re.compile(
         r" {0,3}(#{1,6})((?=\s)[^\n]*?|[^\n\S]*)(?:(?<=\s)(?<!\\)#+)?[^\n\S]*$\n?",
         flags=re.M,
     )
 
+    level: int
+
     def __init__(self, match: Match[str]) -> None:
-        self.level = len(match.group(1))
-        self.inline_body = match.group(2).strip()
+        super(BlockElement, self).__init__(
+            **{"inline_body": match.group(2).strip(), "level": len(match.group(1))}
+        )
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -133,22 +145,31 @@ class SetextHeading(BlockElement):
     It can only be created by Paragraph.parse.
     """
 
-    virtual = True
+    virtual: ClassVar[bool] = True
+
+    level: int
 
     def __init__(self, lines: list[str]) -> None:
-        self.level = 1 if lines.pop().strip()[0] == "=" else 2
-        self.inline_body = "".join(line.lstrip() for line in lines).strip()
+        super(BlockElement, self).__init__(
+            **{
+                "inline_body": "".join(line.lstrip() for line in lines).strip(),
+                "level": 1 if lines.pop().strip()[0] == "=" else 2,
+            }
+        )
 
 
 class CodeBlock(BlockElement):
     """Indented code block: (    this is a code block\n)"""
 
-    priority = 4
+    priority: ClassVar[int] = 4
+
+    lang: str = ""
+    extra: str = ""
 
     def __init__(self, lines: str) -> None:
-        self.children = [inline.RawText(lines, False)]
-        self.lang = ""
-        self.extra = ""
+        super(BlockElement, self).__init__(
+            **{"children": [inline.RawText(lines, False)]}
+        )
 
     @classmethod
     def match(cls, source: Source) -> str:
@@ -205,8 +226,13 @@ class CodeBlock(BlockElement):
 class FencedCode(BlockElement):
     """Fenced code block: (```python\nhello\n```\n)"""
 
-    priority = 7
-    pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
+    priority: ClassVar[int] = 7
+    pattern: ClassVar[re.Pattern] = re.compile(
+        r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M
+    )
+
+    lang: str
+    extra: str
 
     class ParseInfo(NamedTuple):
         prefix: str
@@ -215,9 +241,13 @@ class FencedCode(BlockElement):
         extra: str
 
     def __init__(self, match: tuple[str, str, str]) -> None:
-        self.lang = inline.Literal.strip_backslash(match[0])
-        self.extra = match[1]
-        self.children = [inline.RawText(match[2], False)]
+        super(BlockElement, self).__init__(
+            **{
+                "children": [inline.RawText(match[2], False)],
+                "lang": inline.Literal.strip_backslash(match[0]),
+                "extra": match[1],
+            }
+        )
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -258,8 +288,10 @@ class FencedCode(BlockElement):
 class ThematicBreak(BlockElement):
     """Horizontal rules: (----\n)"""
 
-    priority = 8
-    pattern = re.compile(r" {,3}([-_*][^\n\S]*){3,}$\n?", flags=re.M)
+    priority: ClassVar[int] = 8
+    pattern: ClassVar[re.Pattern] = re.compile(
+        r" {,3}([-_*][^\n\S]*){3,}$\n?", flags=re.M
+    )
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -277,10 +309,12 @@ class ThematicBreak(BlockElement):
 class HTMLBlock(BlockElement):
     """HTML blocks, parsed as it is"""
 
-    priority = 5
+    priority: ClassVar[int] = 5
 
-    def __init__(self, lines: str) -> None:
-        self.body = lines
+    body: str
+
+    def __init__(self, lines: str):
+        super(BlockElement, self).__init__(**{"body": lines})
 
     @classmethod
     def match(cls, source: Source) -> int | bool:
@@ -336,13 +370,15 @@ class HTMLBlock(BlockElement):
 class Paragraph(BlockElement):
     """A paragraph element"""
 
-    priority = 1
-    pattern = re.compile(r"[^\n]+$\n?", flags=re.M)
+    priority: ClassVar[int] = 1
+    pattern: ClassVar[re.Pattern] = re.compile(r"[^\n]+$\n?", flags=re.M)
+
+    _tight: bool = False
 
     def __init__(self, lines: list[str]) -> None:
-        str_lines = "".join(line.lstrip() for line in lines).rstrip("\n")
-        self.inline_body = str_lines
-        self._tight = False
+        super(BlockElement, self).__init__(
+            **{"inline_body": "".join(line.lstrip() for line in lines).rstrip("\n")}
+        )
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -427,8 +463,8 @@ class Paragraph(BlockElement):
 class Quote(BlockElement):
     """block quote element: (> hello world)"""
 
-    priority = 6
-    _prefix = r" {,3}>[^\n\S]?"
+    priority: ClassVar[int] = 6
+    _prefix: str = r" {,3}>[^\n\S]?"
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -445,9 +481,13 @@ class Quote(BlockElement):
 class List(BlockElement):
     """List block element"""
 
-    priority = 6
-    _prefix = ""
-    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+    priority: ClassVar[int] = 6
+    pattern: ClassVar[re.Pattern] = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+
+    bullet: str
+    ordered: bool
+    start: int
+    tight: bool = True
 
     class ParseInfo(NamedTuple):
         bullet: str
@@ -455,8 +495,9 @@ class List(BlockElement):
         start: int
 
     def __init__(self, info: List.ParseInfo) -> None:
-        self.bullet, self.ordered, self.start = info
-        self.tight = True
+        super(BlockElement, self).__init__(
+            **{"bullet": info[0], "ordered": info[1], "start": info[2]}
+        )
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -481,6 +522,7 @@ class List(BlockElement):
             while not source.exhausted:
                 if parser.block_elements["ListItem"].match(source):
                     el = parser.block_elements["ListItem"].parse(source)
+                    print("dsa")
                     if not isinstance(el, BlockElement):
                         el = cast("type[ListItem]", parser.block_elements["ListItem"])(
                             el
@@ -512,9 +554,16 @@ class List(BlockElement):
 class ListItem(BlockElement):
     """List item element. It can only be created by List.parse"""
 
-    virtual = True
-    _tight = False
-    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+    virtual: ClassVar[bool] = True
+    pattern: ClassVar[re.Pattern] = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+
+    _tight: bool = False
+
+    indent: int
+    bullet: str
+    mid: int
+
+    _second_prefix: str
 
     class ParseInfo(NamedTuple):
         indent: int
@@ -522,9 +571,16 @@ class ListItem(BlockElement):
         mid: int
 
     def __init__(self, info: ListItem.ParseInfo) -> None:
-        indent, bullet, mid = info
-        self._prefix = " " * indent + re.escape(bullet) + " " * mid
-        self._second_prefix = " " * (len(bullet) + indent + (mid or 1))
+        _indent, _bullet, _mid = info
+        super(BlockElement, self).__init__(
+            **{
+                "indent": _indent,
+                "bullet": _bullet,
+                "mid": _mid,
+                "_prefix": " " * _indent + re.escape(_bullet) + " " * _mid,
+                "_second_prefix": " " * (len(_bullet) + _indent + (_mid or 1)),
+            }
+        )
 
     @classmethod
     def parse_leading(cls, line: str, prefix_pos: int) -> tuple[int, str, int, str]:
@@ -575,7 +631,7 @@ class ListItem(BlockElement):
             # Remove the last blank line from list item
             blankline = cast(BlankLine, state.children.pop())
             if state.children:
-                source.pos = blankline._anchor
+                source.pos = blankline.anchor
         return state
 
 
@@ -584,7 +640,9 @@ class LinkRefDef(BlockElement):
     [label]: destination "title"
     """
 
-    pattern = re.compile(r" {,3}(\[[\s\S]*?)(?=\n\n|\Z)", flags=re.M)
+    pattern: ClassVar[re.Pattern] = re.compile(
+        r" {,3}(\[[\s\S]*?)(?=\n\n|\Z)", flags=re.M
+    )
 
     class ParseInfo(NamedTuple):
         link_label: inline_parser.Group
@@ -592,10 +650,14 @@ class LinkRefDef(BlockElement):
         link_title: inline_parser.Group
         end: int
 
+    label: str
+    dest: str
+    title: Optional[str]
+
     def __init__(self, label: str, text: str, title: str | None = None) -> None:
-        self.label = label
-        self.dest = text
-        self.title = title
+        super(BlockElement, self).__init__(
+            **{"label": label, "dest": text, "title": title}
+        )
 
     @classmethod
     def match(cls, source: Source) -> bool:
