@@ -69,7 +69,12 @@ COMMON_CASES = [
         "mixed_tab_space_in_list_item",
         "* foo\n\t* foo.bar",
         "<ul><li>foo<ul><li>foo.bar</li></ul></li></ul>",
-    )
+    ),
+    (
+        "non_whitespace_after_title_is_not_link_ref_def",
+        '[foo]: /url "title" ok',  # Same as spec but no line breaks.
+        '<p>[foo]: /url &quot;title&quot; ok</p>',
+    ),
 ]
 
 CMARK_CASES = [
