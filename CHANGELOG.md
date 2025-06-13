@@ -1,3 +1,9 @@
+## v2.1.4(2025-06-13)
+
+### Fixed
+
+- Correct the parsing of LinkRefDef if it is the last line but doesn't end with a line break.
+
 ## v2.1.3(2025-04-05)
 
 ### Fixed
