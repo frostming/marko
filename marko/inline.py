@@ -46,11 +46,11 @@ class InlineElement(Element):
     #: If true, will replace the element which it derives from.
     override: ClassVar[bool] = False
 
-    children: str | Sequence[Element] = Field(default_factory=list)
+    children: Optional[str | Sequence[Element]] = None
 
     def __init__(self, match: _Match) -> None:
         """Parses the matched object into an element"""
-        super().__init__(
+        super(Element, self).__init__(
             **(
                 {}
                 if self.parse_children

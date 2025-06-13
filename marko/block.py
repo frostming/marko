@@ -150,10 +150,11 @@ class SetextHeading(BlockElement):
     level: int
 
     def __init__(self, lines: list[str]) -> None:
+        _level = 1 if lines.pop().strip()[0] == "=" else 2
         super(BlockElement, self).__init__(
             **{
                 "inline_body": "".join(line.lstrip() for line in lines).strip(),
-                "level": 1 if lines.pop().strip()[0] == "=" else 2,
+                "level": _level,
             }
         )
 

@@ -5,7 +5,7 @@ Parse inline elements
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Match, NamedTuple, Union
+from typing import TYPE_CHECKING, Match, NamedTuple, Union, ClassVar
 
 from . import patterns
 from .helpers import find_next, is_paired, normalize_label
@@ -45,7 +45,7 @@ def parse(
     """
 
     class LinkOrEmph(InlineElement):
-        parse_children = True
+        parse_children: ClassVar[bool] = True
 
         def __new__(cls, match: _Match) -> InlineElement:  # type: ignore
             assert isinstance(match, MatchObj)
