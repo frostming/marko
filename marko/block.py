@@ -522,7 +522,6 @@ class List(BlockElement):
             while not source.exhausted:
                 if parser.block_elements["ListItem"].match(source):
                     el = parser.block_elements["ListItem"].parse(source)
-                    print("dsa")
                     if not isinstance(el, BlockElement):
                         el = cast("type[ListItem]", parser.block_elements["ListItem"])(
                             el
@@ -577,10 +576,10 @@ class ListItem(BlockElement):
                 "indent": _indent,
                 "bullet": _bullet,
                 "mid": _mid,
-                "_prefix": " " * _indent + re.escape(_bullet) + " " * _mid,
-                "_second_prefix": " " * (len(_bullet) + _indent + (_mid or 1)),
             }
         )
+        self._prefix = " " * _indent + re.escape(_bullet) + " " * _mid
+        self._second_prefix = " " * (len(_bullet) + _indent + (_mid or 1))
 
     @classmethod
     def parse_leading(cls, line: str, prefix_pos: int) -> tuple[int, str, int, str]:
