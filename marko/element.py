@@ -37,7 +37,7 @@ class Element(BaseModel):
         except ImportError:
             from pprint import pformat
 
-            if hasattr(self, "children"):
+            if hasattr(self, "children") and (not (self.children is None)):
                 children = f" children={pformat(self.children)}"
             else:
                 children = ""

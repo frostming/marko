@@ -17,23 +17,30 @@ Usage::
 from __future__ import annotations
 
 import re
+from typing import ClassVar
+from pydantic import Field
 
 from marko import HTMLRenderer, block, helpers, inline
 from marko.md_renderer import MarkdownRenderer
 
 
 class Document(block.Document):
-    def __init__(self):
-        super().__init__()
-        self.footnotes = {}
+    footnotes: dict = Field(default_factory=dict)
 
 
 class FootnoteDef(block.BlockElement):
-    pattern = re.compile(r" {,3}\[\^([^\]]+)\]:[^\n\S]*(?=\S| {4})")
-    priority = 6
+    pattern: ClassVar[re.Pattern] = re.compile(
+        r" {,3}\[\^([^\]]+)\]:[^\n\S]*(?=\S| {4})"
+    )
+    priority: ClassVar[int] = 6
+
+    label: str
+    _second_prefix: str = ""
 
     def __init__(self, match):
-        self.label = helpers.normalize_label(match.group(1))
+        super(block.BlockElement, self).__init__(
+            **{"label": helpers.normalize_label(match.group(1))}
+        )
         self._prefix = re.escape(match.group())
         self._second_prefix = r" {1,4}"
 
@@ -51,11 +58,15 @@ class FootnoteDef(block.BlockElement):
 
 
 class FootnoteRef(inline.InlineElement):
-    pattern = re.compile(r"\[\^([^\]]+)\]")
-    priority = 6
+    pattern: ClassVar[re.Pattern | str] = re.compile(r"\[\^([^\]]+)\]")
+    priority: ClassVar[int] = 6
+
+    label: str
 
     def __init__(self, match):
-        self.label = helpers.normalize_label(match.group(1))
+        super(inline.InlineElement, self).__init__(
+            **{"label": helpers.normalize_label(match.group(1))}
+        )
 
     @classmethod
     def find(cls, text, *, source):

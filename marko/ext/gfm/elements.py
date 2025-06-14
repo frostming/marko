@@ -6,29 +6,31 @@ from __future__ import annotations
 
 import itertools
 import re
-from typing import Any, cast
+from typing import Any, cast, ClassVar, Optional
 
 from marko import block, inline
 from marko.source import Source
 
 
 class Paragraph(block.Paragraph):
-    _task_list_item_pattern = re.compile(r"(\[[\sxX]\])\s+\S")
-    override = True
+    task_list_item_pattern: ClassVar[re.Pattern] = re.compile(r"(\[[\sxX]\])\s+\S")
+    override: ClassVar[bool] = True
+
+    checked: Optional[bool] = None
 
     def __init__(self, lines):
         super().__init__(lines)
-        m = self._task_list_item_pattern.match(self.inline_body)
+        m = self.task_list_item_pattern.match(self.inline_body)
         if m:
             self.checked = m.group(1)[1:-1].lower() == "x"
             self.inline_body = self.inline_body[m.end(1) :]
 
 
 class Strikethrough(inline.InlineElement):
-    pattern = re.compile(r"(?<!~)(~|~~)([^~]+)\1(?!~)")
-    priority = 5
-    parse_children = True
-    parse_group = 2
+    pattern: ClassVar[re.Pattern | str] = re.compile(r"(?<!~)(~|~~)([^~]+)\1(?!~)")
+    priority: ClassVar[int] = 5
+    parse_children: ClassVar[bool] = True
+    parse_group: ClassVar[int] = 2
 
 
 class _MatchObj:
@@ -59,15 +61,15 @@ class _MatchObj:
 
 
 class Url(inline.AutoLink):
-    www_pattern = re.compile(
+    www_pattern: ClassVar[re.Pattern] = re.compile(
         r"(?:^|(?<=[\s*_~(\uff00-\uffef]))(www\.([\w.\-]*?\.[\w.\-]+)[^<\s]*)"
     )
-    email_pattern = r"[\w.\-+]+@[\w.\-]*?\.[\w.\-]*[a-zA-Z0-9]"
-    bare_pattern = re.compile(
+    email_pattern: ClassVar[str] = r"[\w.\-+]+@[\w.\-]*?\.[\w.\-]*[a-zA-Z0-9]"
+    bare_pattern: ClassVar[re.Pattern] = re.compile(
         r"(?:^|(?<=[\s*_~(\uff00-\uffef]))((?:https?|ftp)://([\w.\-]*?\.[\w.\-]+)"
         r"[^<\s]*|%s(?=[\s.<]|\Z))" % email_pattern
     )
-    priority = 5
+    priority: ClassVar[int] = 5
 
     def __init__(self, match):
         super().__init__(match)
@@ -100,11 +102,12 @@ class Url(inline.AutoLink):
 class Table(block.BlockElement):
     """A table element."""
 
-    _prefix = ""
+    delimiters: list[str]
 
     def __init__(self, children: list[TableRow], delimiters: list[str]) -> None:
-        self.children = children
-        self.delimiters = delimiters
+        super(block.BlockElement, self).__init__(
+            **{"children": children, "delimiters": delimiters}
+        )
 
     @property
     def head(self) -> TableRow:
@@ -169,12 +172,12 @@ class Table(block.BlockElement):
 class TableRow(block.BlockElement):
     """A table row element."""
 
-    splitter = re.compile(r"\s*(?<!\\)\|\s*")
-    delimiter = re.compile(r":?-+:?")
-    virtual = True
+    splitter: ClassVar[re.Pattern] = re.compile(r"\s*(?<!\\)\|\s*")
+    delimiter: ClassVar[re.Pattern] = re.compile(r":?-+:?")
+    virtual: ClassVar[bool] = True
 
     def __init__(self, cells: list[TableCell]) -> None:
-        self.children = cells
+        super(block.BlockElement, self).__init__(**{"children": cells})
 
     @classmethod
     def match(cls, source: Source) -> Any:
@@ -210,9 +213,12 @@ class TableRow(block.BlockElement):
 class TableCell(block.BlockElement):
     """A table cell element."""
 
-    virtual = True
+    virtual: ClassVar[bool] = True
+
+    header: bool = False
+    align: Optional[str] = None
 
     def __init__(self, text: str) -> None:
-        self.inline_body = text.strip().replace("\\|", "|")
-        self.header = False
-        self.align: str | None = None
+        super(block.BlockElement, self).__init__(
+            **{"inline_body": text.strip().replace("\\|", "|")}
+        )

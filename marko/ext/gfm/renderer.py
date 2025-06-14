@@ -20,7 +20,7 @@ class GFMRendererMixin:
     def render_paragraph(self, element):
         children = self.render_children(element)
         template = '<input{} disabled="" type="checkbox">{}'
-        if hasattr(element, "checked"):
+        if not (element.checked is None):
             children = template.format(
                 ' checked=""' if element.checked else "", children
             )
@@ -32,7 +32,7 @@ class GFMRendererMixin:
     @render_paragraph.dispatch(MarkdownRenderer)
     def render_paragraph(self, element):
         para = self.render_children(element)
-        if hasattr(element, "checked"):
+        if not (element.checked is None):
             para = f"[{'x' if element.checked else ' '}]{para}"
         line = self._prefix + para + "\n"
         self._prefix = self._second_prefix
