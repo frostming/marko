@@ -1,10 +1,10 @@
 from typing import ClassVar
-from pydantic import BaseModel, ConfigDict
+from langchain_core.load.serializable import Serializable
 
 from .helpers import camel_to_snake_case
 
 
-class Element(BaseModel):
+class Element(Serializable):
     """This class holds attributes common to both the BlockElement and
     InlineElement classes.
     This class should not be subclassed by any other classes beside these.
@@ -30,6 +30,10 @@ class Element(BaseModel):
         else:
             name = cls.__name__
         return camel_to_snake_case(name) if snake_case else name
+
+    @classmethod
+    def is_lc_serializable(cls) -> bool:
+        return True
 
     def __repr__(self) -> str:
         try:
