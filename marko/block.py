@@ -681,7 +681,7 @@ class LinkRefDef(BlockElement):
         if end >= 0:
             end += 1
         else:
-            end = i
+            end = len(text)
         if text[i:end].strip():
             if link_title.text and "\n" in text[link_dest.end : link_title.start]:
                 link_title = inline_parser._EMPTY_GROUP
