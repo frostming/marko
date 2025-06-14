@@ -17,7 +17,7 @@ Usage::
 from __future__ import annotations
 
 import re
-from typing import ClassVar
+from typing import ClassVar, Any
 from pydantic import Field
 
 from marko import HTMLRenderer, block, helpers, inline
@@ -37,12 +37,13 @@ class FootnoteDef(block.BlockElement):
     label: str
     _second_prefix: str = ""
 
-    def __init__(self, match):
-        super(block.BlockElement, self).__init__(
-            **{"label": helpers.normalize_label(match.group(1))}
-        )
-        self._prefix = re.escape(match.group())
-        self._second_prefix = r" {1,4}"
+    @classmethod
+    def initialize_kwargs(cls, match) -> dict[str, Any]:
+        return {
+            "label": helpers.normalize_label(match.group(1)),
+            "_prefix": re.escape(match.group()),
+            "_second_prefix": r" {1,4}",
+        }
 
     @classmethod
     def match(cls, source):
@@ -50,7 +51,7 @@ class FootnoteDef(block.BlockElement):
 
     @classmethod
     def parse(cls, source):
-        state = cls(source.match)
+        state = cls.initialize(source.match)
         with source.under_state(state):
             state.children = source.parser.parse_source(source)
         source.root.footnotes[state.label] = state
@@ -63,10 +64,9 @@ class FootnoteRef(inline.InlineElement):
 
     label: str
 
-    def __init__(self, match):
-        super(inline.InlineElement, self).__init__(
-            **{"label": helpers.normalize_label(match.group(1))}
-        )
+    @classmethod
+    def initialize_kwargs(cls, match) -> dict[str, Any]:
+        return {"label": helpers.normalize_label(match.group(1))}
 
     @classmethod
     def find(cls, text, *, source):

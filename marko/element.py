@@ -1,4 +1,6 @@
-from typing import ClassVar
+from __future__ import annotations
+
+from typing import ClassVar, Any, Self
 from langchain_core.load.serializable import Serializable
 
 from .helpers import camel_to_snake_case
@@ -11,6 +13,26 @@ class Element(Serializable):
     """
 
     override: ClassVar[bool]
+
+    @classmethod
+    def initialize(cls, *args, **kwargs) -> Self:
+        kwargs = cls.initialize_kwargs(*args, **kwargs)
+
+        private_kwargs = dict()
+        for field_name in list(kwargs.keys()):
+            if field_name.startswith("_"):
+                private_kwargs[field_name] = kwargs.pop(field_name)
+
+        result = cls(**kwargs)
+
+        for name, value in private_kwargs.items():
+            setattr(result, name, value)
+
+        return result
+
+    @classmethod
+    def initialize_kwargs(cls, *args, **kwargs) -> dict[str, Any]:
+        return dict()
 
     @classmethod
     def get_type(cls, snake_case: bool = False) -> str:

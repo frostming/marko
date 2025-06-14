@@ -5,7 +5,7 @@ Inline(span) level elements
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Iterator, Pattern, Sequence, ClassVar, Optional
+from typing import TYPE_CHECKING, Iterator, Pattern, Sequence, ClassVar, Optional, Any
 from pydantic import Field
 
 from . import patterns
@@ -48,15 +48,10 @@ class InlineElement(Element):
 
     children: Optional[str | Sequence[Element]] = None
 
-    def __init__(self, match: _Match) -> None:
+    @classmethod
+    def initialize_kwargs(cls, match: _Match) -> dict[str, Any]:
         """Parses the matched object into an element"""
-        super(Element, self).__init__(
-            **(
-                {}
-                if self.parse_children
-                else {"children": match.group(self.parse_group)}
-            ),
-        )
+        return {} if cls.parse_children else {"children": match.group(cls.parse_group)}
 
     @classmethod
     def find(cls, text: str, *, source: Source) -> Iterator[_Match]:
@@ -91,13 +86,12 @@ class LineBreak(InlineElement):
 
     soft: bool
 
-    def __init__(self, match: _Match) -> None:
-        super(InlineElement, self).__init__(
-            **{
-                "soft": not match.group(1).startswith(("  ", "\\")),
-                "children": "\n",
-            }
-        )
+    @classmethod
+    def initialize_kwargs(cls, match: _Match) -> dict[str, Any]:
+        return {
+            "soft": not match.group(1).startswith(("  ", "\\")),
+            "children": "\n",
+        }
 
 
 class InlineHTML(InlineElement):
@@ -136,21 +130,20 @@ class Link(InlineElement):
     dest: str
     title: Optional[str]
 
-    def __init__(self, match: _Match) -> None:
+    @classmethod
+    def initialize_kwargs(cls, match: _Match) -> dict[str, Any]:
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             _dest = match.group(2)[1:-1]
         else:
             _dest = match.group(2) or ""
-        super(InlineElement, self).__init__(
-            **{
-                "dest": Literal.strip_backslash(_dest),
-                "title": (
-                    Literal.strip_backslash(match.group(3)[1:-1])
-                    if match.group(3)
-                    else None
-                ),
-            }
-        )
+        return {
+            "dest": Literal.strip_backslash(_dest),
+            "title": (
+                Literal.strip_backslash(match.group(3)[1:-1])
+                if match.group(3)
+                else None
+            ),
+        }
 
 
 class Image(InlineElement):
@@ -162,21 +155,20 @@ class Image(InlineElement):
     dest: str
     title: Optional[str]
 
-    def __init__(self, match: _Match) -> None:
+    @classmethod
+    def initialize_kwargs(cls, match: _Match) -> dict[str, Any]:
         if match.group(2) and match.group(2)[0] == "<" and match.group(2)[-1] == ">":
             _dest = match.group(2)[1:-1]
         else:
             _dest = match.group(2) or ""
-        super(InlineElement, self).__init__(
-            **{
-                "dest": Literal.strip_backslash(_dest),
-                "title": (
-                    Literal.strip_backslash(match.group(3)[1:-1])
-                    if match.group(3)
-                    else None
-                ),
-            }
-        )
+        return {
+            "dest": Literal.strip_backslash(_dest),
+            "title": (
+                Literal.strip_backslash(match.group(3)[1:-1])
+                if match.group(3)
+                else None
+            ),
+        }
 
 
 class CodeSpan(InlineElement):
@@ -187,15 +179,14 @@ class CodeSpan(InlineElement):
         r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)"
     )
 
-    def __init__(self, match: _Match) -> None:
+    @classmethod
+    def initialize_kwargs(cls, match: _Match) -> dict[str, Any]:
         _children = match.group(2).replace("\n", " ")
         if _children.strip() and _children[0] == _children[-1] == " ":
             _children = _children[1:-1]
-        super(InlineElement, self).__init__(
-            **{
-                "children": _children,
-            }
-        )
+        return {
+            "children": _children,
+        }
 
 
 class AutoLink(InlineElement):
@@ -209,13 +200,16 @@ class AutoLink(InlineElement):
     dest: str
     title: Optional[str]
 
-    def __init__(self, match: _Match) -> None:
+    @classmethod
+    def initialize_kwargs(cls, match: _Match) -> dict[str, Any]:
         _dest = match.group(1)
         if re.match(patterns.email, _dest):
             _dest = "mailto:" + _dest
-        super(InlineElement, self).__init__(
-            **{"children": [RawText(match.group(1))], "title": "", "dest": _dest}
-        )
+        return {
+            "children": [RawText.initialize(match.group(1))],
+            "title": "",
+            "dest": _dest,
+        }
 
 
 class RawText(InlineElement):
@@ -225,10 +219,9 @@ class RawText(InlineElement):
 
     escape: bool
 
-    def __init__(self, match: str, escape: bool = True) -> None:
-        super(InlineElement, self).__init__(
-            **{
-                "children": match,
-                "escape": escape,
-            }
-        )
+    @classmethod
+    def initialize_kwargs(cls, match: str, escape: bool = True) -> dict[str, Any]:  # type: ignore[override]
+        return {
+            "children": match,
+            "escape": escape,
+        }

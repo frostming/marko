@@ -18,8 +18,7 @@ class Paragraph(block.Paragraph):
 
     checked: Optional[bool] = None
 
-    def __init__(self, lines):
-        super().__init__(lines)
+    def model_post_init(self, context: Any) -> None:
         m = self.task_list_item_pattern.match(self.inline_body)
         if m:
             self.checked = m.group(1)[1:-1].lower() == "x"
@@ -71,8 +70,7 @@ class Url(inline.AutoLink):
     )
     priority: ClassVar[int] = 5
 
-    def __init__(self, match):
-        super().__init__(match)
+    def model_post_init(self, context: Any) -> None:
         if self.www_pattern.match(self.dest):
             self.dest = "http://" + self.dest
 
@@ -104,10 +102,11 @@ class Table(block.BlockElement):
 
     delimiters: list[str]
 
-    def __init__(self, children: list[TableRow], delimiters: list[str]) -> None:
-        super(block.BlockElement, self).__init__(
-            **{"children": children, "delimiters": delimiters}
-        )
+    @classmethod
+    def initialize_kwargs(
+        cls, children: list[TableRow], delimiters: list[str]
+    ) -> dict[str, Any]:
+        return {"children": children, "delimiters": delimiters}
 
     @property
     def head(self) -> TableRow:
@@ -127,7 +126,9 @@ class Table(block.BlockElement):
         # consume the first row, we don't use source.consume() here
         # because that may unexpectedly update the line prefix.
         source.pos = source.match.end()
-        head = TableRow([TableCell(cell) for cell in source.context.cells])
+        head = TableRow.initialize(
+            [TableCell.initialize(cell) for cell in source.context.cells]
+        )
         if (
             not TableRow.match(source)
             or not source.context.is_delimiter
@@ -176,8 +177,9 @@ class TableRow(block.BlockElement):
     delimiter: ClassVar[re.Pattern] = re.compile(r":?-+:?")
     virtual: ClassVar[bool] = True
 
-    def __init__(self, cells: list[TableCell]) -> None:
-        super(block.BlockElement, self).__init__(**{"children": cells})
+    @classmethod
+    def initialize_kwargs(cls, cells: list[TableCell]) -> dict[str, Any]:
+        return {"children": cells}
 
     @classmethod
     def match(cls, source: Source) -> Any:
@@ -204,10 +206,10 @@ class TableRow(block.BlockElement):
             cells.extend("" for _ in range(parent.num_of_cols - len(cells)))
         elif len(cells) > parent.num_of_cols:
             cells = cells[: parent.num_of_cols]
-        cell_elements = [TableCell(cell) for cell in cells]
+        cell_elements = [TableCell.initialize(cell) for cell in cells]
         for head, cell in zip(parent.head.children, cell_elements):
             cell.align = cast(TableCell, head).align
-        return cls(cell_elements)
+        return cls.initialize(cell_elements)
 
 
 class TableCell(block.BlockElement):
@@ -218,7 +220,6 @@ class TableCell(block.BlockElement):
     header: bool = False
     align: Optional[str] = None
 
-    def __init__(self, text: str) -> None:
-        super(block.BlockElement, self).__init__(
-            **{"inline_body": text.strip().replace("\\|", "|")}
-        )
+    @classmethod
+    def initialize_kwargs(cls, text: str) -> dict[str, Any]:
+        return {"inline_body": text.strip().replace("\\|", "|")}

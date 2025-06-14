@@ -47,9 +47,10 @@ def parse(
     class LinkOrEmph(InlineElement):
         parse_children: ClassVar[bool] = True
 
-        def __new__(cls, match: _Match) -> InlineElement:  # type: ignore
+        @classmethod
+        def initialize(cls, match: _Match) -> InlineElement:  # type: ignore
             assert isinstance(match, MatchObj)
-            return source.parser.inline_elements[match.etype](match)
+            return source.parser.inline_elements[match.etype].initialize(match)
 
     # A raw list of elements that may contain overlaps.
     tokens: list[Token] = []
@@ -104,11 +105,11 @@ def make_elements(
     prev_end = start
     for token in tokens:
         if prev_end < token.start:
-            result.append(fallback(text[prev_end : token.start]))  # type: ignore
+            result.append(fallback.initialize(text[prev_end : token.start]))  # type: ignore
         result.append(token.as_element())
         prev_end = token.end
     if prev_end < end:
-        result.append(fallback(text[prev_end:end]))  # type: ignore
+        result.append(fallback.initialize(text[prev_end:end]))  # type: ignore
     return result
 
 
@@ -155,7 +156,7 @@ class Token:
         self.children.append(child)
 
     def as_element(self) -> InlineElement:
-        e = self.etype(self.match)
+        e = self.etype.initialize(self.match)
         if e.parse_children:
             self.children = _resolve_overlap(self.children)
             e.children = make_elements(

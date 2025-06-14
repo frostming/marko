@@ -78,7 +78,7 @@ class Parser:
                         # In some cases ``parse()`` won't return the element, but
                         # instead some information to create one, which will be passed
                         # to ``__init__()``.
-                        result = ele_type(result)  # type: ignore
+                        result = ele_type.initialize(result)  # type: ignore
                     ast.append(result)
                     break
             else:

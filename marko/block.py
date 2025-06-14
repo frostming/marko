@@ -96,8 +96,9 @@ class BlankLine(BlockElement):
 
     anchor: int
 
-    def __init__(self, start: int):
-        super(BlockElement, self).__init__(**{"anchor": start})
+    @classmethod
+    def initialize_kwargs(cls, anchor: int) -> dict[str, Any]:
+        return {"anchor": anchor}
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -123,10 +124,9 @@ class Heading(BlockElement):
 
     level: int
 
-    def __init__(self, match: Match[str]) -> None:
-        super(BlockElement, self).__init__(
-            **{"inline_body": match.group(2).strip(), "level": len(match.group(1))}
-        )
+    @classmethod
+    def initialize_kwargs(cls, match: Match[str]) -> dict[str, Any]:
+        return {"inline_body": match.group(2).strip(), "level": len(match.group(1))}
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -149,14 +149,13 @@ class SetextHeading(BlockElement):
 
     level: int
 
-    def __init__(self, lines: list[str]) -> None:
+    @classmethod
+    def initialize_kwargs(cls, lines: list[str]) -> dict[str, Any]:
         _level = 1 if lines.pop().strip()[0] == "=" else 2
-        super(BlockElement, self).__init__(
-            **{
-                "inline_body": "".join(line.lstrip() for line in lines).strip(),
-                "level": _level,
-            }
-        )
+        return {
+            "inline_body": "".join(line.lstrip() for line in lines).strip(),
+            "level": _level,
+        }
 
 
 class CodeBlock(BlockElement):
@@ -167,10 +166,9 @@ class CodeBlock(BlockElement):
     lang: str = ""
     extra: str = ""
 
-    def __init__(self, lines: str) -> None:
-        super(BlockElement, self).__init__(
-            **{"children": [inline.RawText(lines, False)]}
-        )
+    @classmethod
+    def initialize_kwargs(cls, lines: str) -> dict[str, Any]:
+        return {"children": [inline.RawText.initialize(lines, False)]}
 
     @classmethod
     def match(cls, source: Source) -> str:
@@ -241,14 +239,13 @@ class FencedCode(BlockElement):
         lang: str
         extra: str
 
-    def __init__(self, match: tuple[str, str, str]) -> None:
-        super(BlockElement, self).__init__(
-            **{
-                "children": [inline.RawText(match[2], False)],
-                "lang": inline.Literal.strip_backslash(match[0]),
-                "extra": match[1],
-            }
-        )
+    @classmethod
+    def initialize_kwargs(cls, match: tuple[str, str, str]) -> dict[str, Any]:
+        return {
+            "children": [inline.RawText.initialize(match[2], False)],
+            "lang": inline.Literal.strip_backslash(match[0]),
+            "extra": match[1],
+        }
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -314,8 +311,9 @@ class HTMLBlock(BlockElement):
 
     body: str
 
-    def __init__(self, lines: str):
-        super(BlockElement, self).__init__(**{"body": lines})
+    @classmethod
+    def initialize_kwargs(cls, lines: str):
+        return {"body": lines}
 
     @classmethod
     def match(cls, source: Source) -> int | bool:
@@ -376,10 +374,9 @@ class Paragraph(BlockElement):
 
     _tight: bool = False
 
-    def __init__(self, lines: list[str]) -> None:
-        super(BlockElement, self).__init__(
-            **{"inline_body": "".join(line.lstrip() for line in lines).rstrip("\n")}
-        )
+    @classmethod
+    def initialize_kwargs(cls, lines: list[str]) -> dict[str, Any]:
+        return {"inline_body": "".join(line.lstrip() for line in lines).rstrip("\n")}
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -441,7 +438,9 @@ class Paragraph(BlockElement):
                     return cast(
                         "type[SetextHeading]",
                         source.parser.block_elements["SetextHeading"],
-                    )(lines)
+                    ).initialize(
+                        lines
+                    )  # type: ignore
             else:
                 # check lazy continuation, store the previous state stack
                 states = source._states[:]
@@ -495,10 +494,9 @@ class List(BlockElement):
         ordered: bool
         start: int
 
-    def __init__(self, info: List.ParseInfo) -> None:
-        super(BlockElement, self).__init__(
-            **{"bullet": info[0], "ordered": info[1], "start": info[2]}
-        )
+    @classmethod
+    def initialize_kwargs(cls, info: List.ParseInfo) -> dict[str, Any]:
+        return {"bullet": info[0], "ordered": info[1], "start": info[2]}
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -514,7 +512,7 @@ class List(BlockElement):
 
     @classmethod
     def parse(cls, source: Source) -> List:
-        state = cls(source.context.list_info)
+        state = cls.initialize(source.context.list_info)
         children = []
         tight = True
         has_blank_line = False
@@ -524,9 +522,9 @@ class List(BlockElement):
                 if parser.block_elements["ListItem"].match(source):
                     el = parser.block_elements["ListItem"].parse(source)
                     if not isinstance(el, BlockElement):
-                        el = cast("type[ListItem]", parser.block_elements["ListItem"])(
-                            el
-                        )
+                        el = cast(
+                            "type[ListItem]", parser.block_elements["ListItem"]
+                        ).initialize(el)
                     children.append(el)
                     source.anchor()
                     if has_blank_line:
@@ -570,17 +568,16 @@ class ListItem(BlockElement):
         bullet: str
         mid: int
 
-    def __init__(self, info: ListItem.ParseInfo) -> None:
+    @classmethod
+    def initialize_kwargs(cls, info: ListItem.ParseInfo) -> dict[str, Any]:
         _indent, _bullet, _mid = info
-        super(BlockElement, self).__init__(
-            **{
-                "indent": _indent,
-                "bullet": _bullet,
-                "mid": _mid,
-            }
-        )
-        self._prefix = " " * _indent + re.escape(_bullet) + " " * _mid
-        self._second_prefix = " " * (len(_bullet) + _indent + (_mid or 1))
+        return {
+            "indent": _indent,
+            "bullet": _bullet,
+            "mid": _mid,
+            "_prefix": " " * _indent + re.escape(_bullet) + " " * _mid,
+            "_second_prefix": " " * (len(_bullet) + _indent + (_mid or 1)),
+        }
 
     @classmethod
     def parse_leading(cls, line: str, prefix_pos: int) -> tuple[int, str, int, str]:
@@ -619,7 +616,7 @@ class ListItem(BlockElement):
 
     @classmethod
     def parse(cls, source: Source) -> ListItem:
-        state = cls(source.context.list_item_info)
+        state = cls.initialize(source.context.list_item_info)
         state.children = []
         with source.under_state(state):
             if not source.next_line().strip():  # type: ignore[union-attr]
@@ -654,10 +651,11 @@ class LinkRefDef(BlockElement):
     dest: str
     title: Optional[str]
 
-    def __init__(self, label: str, text: str, title: str | None = None) -> None:
-        super(BlockElement, self).__init__(
-            **{"label": label, "dest": text, "title": title}
-        )
+    @classmethod
+    def initialize_kwargs(
+        cls, label: str, text: str, title: str | None = None
+    ) -> dict[str, Any]:
+        return {"label": label, "dest": text, "title": title}
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -702,4 +700,4 @@ class LinkRefDef(BlockElement):
         if normalized_label not in link_ref_defs:
             link_ref_defs[normalized_label] = (dest.text, title.text)
         source.pos = pos
-        return cls(normalized_label, dest.text, title.text)
+        return cls.initialize(normalized_label, dest.text, title.text)
