@@ -220,6 +220,7 @@ summary = "Code coverage measurement for Python"
 groups = ["dev"]
 dependencies = [
     "coverage==6.1.2",
+    "coverage==6.1.2",
     "tomli",
 ]
 files = [
