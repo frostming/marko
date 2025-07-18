@@ -15,13 +15,13 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, cast
 
 from .helpers import MarkoExtension, load_extension
-from .html_renderer import HTMLRenderer
+from marko.renderers.html_renderer import HTMLRenderer
 from .parser import Parser
-from .renderer import Renderer
+from marko.renderers import BaseRenderer
 
 if TYPE_CHECKING:
-    from .block import Document
-    from .parser import ElementType
+    from marko.elements.block import Document
+    from .parser import BaseElementType
 
 __version__ = "2.1.4"
 
@@ -50,7 +50,7 @@ class Markdown:
     def __init__(
         self,
         parser: type[Parser] = Parser,
-        renderer: type[Renderer] = HTMLRenderer,
+        renderer: type[BaseRenderer] = HTMLRenderer,
         extensions: Iterable[str | MarkoExtension] | None = None,
     ) -> None:
         if not issubclass(parser, Parser):
@@ -58,12 +58,12 @@ class Markdown:
         self._base_parser = parser
         self._parser_mixins: list[type] = []
 
-        if not issubclass(renderer, Renderer):
+        if not issubclass(renderer, BaseRenderer):
             raise TypeError("renderer must be a subclass of Renderer.")
         self._base_renderer = renderer
         self._renderer_mixins: list[type] = []
 
-        self._extra_elements: list[ElementType] = []
+        self._extra_elements: list[BaseElementType] = []
         self._setup_done = False
         if extensions:
             self.use(*extensions)
@@ -100,7 +100,7 @@ class Markdown:
         for e in self._extra_elements:
             self.parser.add_element(e)
         self.renderer = cast(
-            Renderer,
+            BaseRenderer,
             type(
                 "_Renderer",
                 tuple(self._renderer_mixins) + (self._base_renderer,),
@@ -173,6 +173,6 @@ __all__ = [
     "render",
     "load_extension",
     "Parser",
-    "Renderer",
+    "BaseRenderer",
     "HTMLRenderer",
 ]

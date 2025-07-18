@@ -2,6 +2,7 @@ import pytest
 
 import marko.source
 from marko import helpers
+from marko.utils import is_paired, partition_by_spaces
 
 
 @pytest.mark.parametrize(
@@ -16,7 +17,7 @@ from marko import helpers
     ],
 )
 def test_is_paired(raw_string):
-    assert helpers.is_paired(raw_string)
+    assert is_paired(raw_string)
 
 
 @pytest.mark.parametrize(
@@ -28,7 +29,7 @@ def test_is_paired(raw_string):
     ],
 )
 def test_is_not_paired(raw_string):
-    assert not helpers.is_paired(raw_string)
+    assert not is_paired(raw_string)
 
 
 def test_source_no_state():
@@ -55,9 +56,9 @@ def test_load_extension_object():
 def test_load_illegal_extension_object():
     with pytest.raises(
         AttributeError,
-        match="Module marko.block does not have 'make_extension' attributte",
+        match="Module marko.elements.block does not have 'make_extension' attributte",
     ):
-        helpers.load_extension("marko.block")
+        helpers.load_extension("marko.elements.block")
 
 
 @pytest.mark.parametrize(
@@ -71,4 +72,4 @@ def test_load_illegal_extension_object():
     ],
 )
 def test_partition_by_spaces(text, expected):
-    assert helpers.partition_by_spaces(text) == expected
+    assert partition_by_spaces(text) == expected

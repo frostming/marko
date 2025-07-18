@@ -5,15 +5,14 @@ Inline(span) level elements
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Iterator, Pattern, Sequence, ClassVar, Optional, Any
-from pydantic import Field
+from typing import TYPE_CHECKING, Iterator, Sequence, ClassVar, Optional, Any
 
-from . import patterns
-from .element import Element
+from marko import patterns
+from marko.elements.base import BaseElement
 
 if TYPE_CHECKING:
-    from .inline_parser import _Match
-    from .source import Source
+    from marko.parser.inline_parsing import _Match
+    from marko.source import Source
 
 __all__ = (
     "LineBreak",
@@ -29,7 +28,7 @@ __all__ = (
 )
 
 
-class InlineElement(Element):
+class InlineElement(BaseElement):
     """Any inline element should inherit this class"""
 
     #: Use to denote the precedence in parsing.
@@ -46,7 +45,7 @@ class InlineElement(Element):
     #: If true, will replace the element which it derives from.
     override: ClassVar[bool] = False
 
-    children: Optional[str | Sequence[Element]] = None
+    children: Optional[str | Sequence[BaseElement]] = None
 
     @classmethod
     def initialize_kwargs(cls, match: _Match) -> dict[str, Any]:

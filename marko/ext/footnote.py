@@ -20,8 +20,10 @@ import re
 from typing import ClassVar, Any
 from pydantic import Field
 
-from marko import HTMLRenderer, block, helpers, inline
-from marko.md_renderer import MarkdownRenderer
+from marko import HTMLRenderer, helpers
+from marko.elements import inline, block
+from marko.renderers.md_renderer import MarkdownRenderer
+from marko.utils import normalize_label
 
 
 class Document(block.Document):
@@ -40,7 +42,7 @@ class FootnoteDef(block.BlockElement):
     @classmethod
     def initialize_kwargs(cls, match) -> dict[str, Any]:
         return {
-            "label": helpers.normalize_label(match.group(1)),
+            "label": normalize_label(match.group(1)),
             "_prefix": re.escape(match.group()),
             "_second_prefix": r" {1,4}",
         }
@@ -66,12 +68,12 @@ class FootnoteRef(inline.InlineElement):
 
     @classmethod
     def initialize_kwargs(cls, match) -> dict[str, Any]:
-        return {"label": helpers.normalize_label(match.group(1))}
+        return {"label": normalize_label(match.group(1))}
 
     @classmethod
     def find(cls, text, *, source):
         for match in super().find(text, source=source):
-            label = helpers.normalize_label(match.group(1))
+            label = normalize_label(match.group(1))
             if label in source.root.footnotes:
                 yield match
 

@@ -8,13 +8,13 @@ import re
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Generator, cast
 
-from .renderer import Renderer
+from .base import BaseRenderer
 
 if TYPE_CHECKING:
-    from . import block, inline
+    from marko.elements import block, inline
 
 
-class MarkdownRenderer(Renderer):
+class MarkdownRenderer(BaseRenderer):
     """Render the AST back to markdown document.
 
     It is useful for, e.g. merging sections and formatting documents.
@@ -171,7 +171,7 @@ class MarkdownRenderer(Renderer):
         return f"\\{element.children}"
 
     def render_raw_text(self, element: inline.RawText) -> str:
-        from .ext.pangu import PANGU_RE
+        from marko.ext.pangu import PANGU_RE
 
         return re.sub(PANGU_RE, " ", element.children)
 

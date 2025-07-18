@@ -6,13 +6,14 @@ from langchain_core.load.serializable import Serializable
 from marko.utils import camel_to_snake_case
 
 
-class Element(Serializable):
+class BaseElement(Serializable):
     """This class holds attributes common to both the BlockElement and
     InlineElement classes.
     This class should not be subclassed by any other classes beside these.
     """
 
     override: ClassVar[bool]
+    children: Any
 
     @classmethod
     def initialize(cls, *args, **kwargs) -> Self:
@@ -46,7 +47,7 @@ class Element(Serializable):
         if (
             cls.override
             and cls.__base__
-            and cls.__base__ not in Element.__subclasses__()
+            and cls.__base__ not in BaseElement.__subclasses__()
         ):
             name = cls.__base__.__name__
         else:

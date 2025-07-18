@@ -28,7 +28,7 @@ import re
 from slugify import slugify
 
 from marko.helpers import MarkoExtension, render_dispatch  # type: ignore
-from marko.html_renderer import HTMLRenderer
+from marko.renderers.html_renderer import HTMLRenderer
 
 
 class TocRendererMixin:

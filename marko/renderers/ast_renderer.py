@@ -8,17 +8,17 @@ import html
 import json
 from typing import TYPE_CHECKING, Any, overload
 
-from marko.html_renderer import HTMLRenderer
+from marko.renderers.html_renderer import HTMLRenderer
 
 from marko.utils import camel_to_snake_case
-from .renderer import Renderer, force_delegate
+from marko.renderers import BaseRenderer, force_delegate
 
 if TYPE_CHECKING:
-    from marko import inline
-    from marko.element import Element
+    from marko.elements import inline
+    from marko.elements.base import BaseElement
 
 
-class ASTRenderer(Renderer):
+class ASTRenderer(BaseRenderer):
     """Render as AST structure.
 
     Example::
@@ -43,10 +43,10 @@ class ASTRenderer(Renderer):
         }
 
     @overload
-    def render_children(self, element: list[Element]) -> list[dict[str, Any]]: ...
+    def render_children(self, element: list[BaseElement]) -> list[dict[str, Any]]: ...
 
     @overload
-    def render_children(self, element: Element) -> dict[str, Any]: ...
+    def render_children(self, element: BaseElement) -> dict[str, Any]: ...
 
     @overload
     def render_children(self, element: str) -> str: ...
@@ -63,7 +63,7 @@ class ASTRenderer(Renderer):
         return rv
 
 
-class XMLRenderer(Renderer):
+class XMLRenderer(BaseRenderer):
     """Render as XML format AST.
 
     It will render the parsed result and XML string and you can print it or
@@ -91,7 +91,7 @@ class XMLRenderer(Renderer):
         self.indent = 0
         return super().__exit__(*args)
 
-    def render_children(self, element: Element) -> str:
+    def render_children(self, element: BaseElement) -> str:
         lines = []
         if element is self.root_node:
             lines.append(" " * self.indent + '<?xml version="1.0" encoding="UTF-8"?>')

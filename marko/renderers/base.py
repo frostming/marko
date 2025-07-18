@@ -9,14 +9,14 @@ import re
 from typing import TYPE_CHECKING, Any, Callable, TypeVar
 
 if TYPE_CHECKING:
-    from .block import Document
-    from .element import Element
+    from marko.elements.block import Document
+    from marko.elements.base import BaseElement
 
-_T = TypeVar("_T", bound="Renderer")
+_T = TypeVar("_T", bound="BaseRenderer")
 _charref_bak = html._charref  # type: ignore[attr-defined]
 
 
-class Renderer:
+class BaseRenderer:
     """The base class of renderers.
 
     A custom renderer should subclass this class and include your own render functions.
@@ -54,13 +54,13 @@ class Renderer:
         html._charref = _charref_bak  # type: ignore[attr-defined]
         self.root_node = None
 
-    def render(self, element: Element) -> Any:
+    def render(self, element: BaseElement) -> Any:
         """Renders the given element to string.
 
         :param element: a element to be rendered.
         :returns: the output string or any values.
         """
-        from .block import Document
+        from marko.elements.block import Document
 
         # Store the root node since it may be required by the render functions
         if not self.root_node:  # pragma: no cover

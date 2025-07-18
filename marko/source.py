@@ -6,7 +6,7 @@ import types
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Generator, Match, Pattern, cast, overload
 
-from marko.block import BlockElement, Document
+from marko.elements.block import BlockElement, Document
 
 if TYPE_CHECKING:
     from typing import Literal

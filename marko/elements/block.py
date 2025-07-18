@@ -16,12 +16,14 @@ from typing import (
 )
 from pydantic import Field
 
-from . import inline, inline_parser, patterns
-from .element import Element
-from .helpers import find_next, normalize_label, partition_by_spaces
+from marko import patterns
+from marko.elements import inline
+from marko.elements.base import BaseElement
+from marko.parser import inline_parsing
+from marko.utils import find_next, normalize_label, partition_by_spaces
 
 if TYPE_CHECKING:
-    from .source import Source
+    from marko.source import Source
 
 __all__ = (
     "Document",
@@ -40,7 +42,7 @@ __all__ = (
 )
 
 
-class BlockElement(Element):
+class BlockElement(BaseElement):
     """Any block element should inherit this class"""
 
     #: Use to denote the precedence in parsing
@@ -52,7 +54,7 @@ class BlockElement(Element):
     override: ClassVar[bool] = False
 
     #: An attribute to hold the children
-    children: list[Element] = Field(default_factory=list)
+    children: list[BaseElement] = Field(default_factory=list)
     #: If not empty, the body needs to be parsed as inline elements
     inline_body: str = ""
     _prefix: str = ""
@@ -642,9 +644,9 @@ class LinkRefDef(BlockElement):
     )
 
     class ParseInfo(NamedTuple):
-        link_label: inline_parser.Group
-        link_dest: inline_parser.Group
-        link_title: inline_parser.Group
+        link_label: inline_parsing.Group
+        link_dest: inline_parsing.Group
+        link_title: inline_parsing.Group
         end: int
 
     label: str
@@ -663,16 +665,16 @@ class LinkRefDef(BlockElement):
         if not m:
             return False
         text = source._buffer
-        link_label = inline_parser._parse_link_label(text, m.start(1))
+        link_label = inline_parsing._parse_link_label(text, m.start(1))
         if not link_label:  # no ending bracket
             return False
         if link_label.end >= len(text) or text[link_label.end] != ":":
             # no colon after the ending bracket
             return False
-        i = inline_parser._parse_link_separator(text, link_label.end + 1)
+        i = inline_parsing._parse_link_separator(text, link_label.end + 1)
         try:
-            link_dest, link_title = inline_parser._parse_link_dest_title(text, i)
-        except inline_parser.ParseError:
+            link_dest, link_title = inline_parsing._parse_link_dest_title(text, i)
+        except inline_parsing.ParseError:
             return False
         i = max(link_dest.end, link_title.end)
         end = find_next(text, "\n", i)
@@ -682,7 +684,7 @@ class LinkRefDef(BlockElement):
             end = len(text)
         if text[i:end].strip():
             if link_title.text and "\n" in text[link_dest.end : link_title.start]:
-                link_title = inline_parser._EMPTY_GROUP
+                link_title = inline_parsing._EMPTY_GROUP
                 end = find_next(text, "\n", link_dest.end) + 1
             else:
                 # There is content after the link title

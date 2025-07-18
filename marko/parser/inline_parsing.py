@@ -7,16 +7,17 @@ from __future__ import annotations
 import re
 from typing import TYPE_CHECKING, Match, NamedTuple, Union, ClassVar
 
-from . import patterns
-from .helpers import find_next, is_paired, normalize_label
-from .inline import InlineElement
+from marko import patterns
+from marko.utils import find_next, is_paired, normalize_label
+from marko.elements.inline import InlineElement
+
 
 if TYPE_CHECKING:
-    from .source import Source
+    from marko.source import Source
 
     _Match = Union[Match[str], "MatchObj"]
 
-    ElementType = type[InlineElement]
+    BaseElementType = type[InlineElement]
 
 
 class Group(NamedTuple):
@@ -35,7 +36,10 @@ class ParseError(ValueError):
 
 
 def parse(
-    text: str, elements: list[ElementType], fallback: ElementType, source: Source
+    text: str,
+    elements: list[BaseElementType],
+    fallback: BaseElementType,
+    source: Source,
 ) -> list[InlineElement]:
     """Parse given text and produce a list of inline elements.
 
@@ -88,7 +92,7 @@ def make_elements(
     text: str,
     start: int = 0,
     end: int | None = None,
-    fallback: ElementType | None = None,
+    fallback: BaseElementType | None = None,
 ) -> list[InlineElement]:
     """Make elements from a list of parsed tokens.
     It will turn all unmatched holes into fallback elements.
@@ -124,7 +128,11 @@ class Token:
     SHADE = 3
 
     def __init__(
-        self, etype: ElementType, match: _Match, text: str, fallback: ElementType
+        self,
+        etype: BaseElementType,
+        match: _Match,
+        text: str,
+        fallback: BaseElementType,
     ) -> None:
         self.etype = etype
         self.match = match

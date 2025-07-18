@@ -2,8 +2,8 @@
 import re
 
 from marko.helpers import render_dispatch
-from marko.html_renderer import HTMLRenderer
-from marko.md_renderer import MarkdownRenderer
+from marko.renderers.html_renderer import HTMLRenderer
+from marko.renderers.md_renderer import MarkdownRenderer
 
 
 class GFMRendererMixin:

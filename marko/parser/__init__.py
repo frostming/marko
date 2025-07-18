@@ -7,7 +7,9 @@ from __future__ import annotations
 import itertools
 from typing import TYPE_CHECKING, Type, cast
 
-from .source import Source
+from marko.parser import inline_parsing
+from marko.source import Source
+from marko.elements import BlockElement, InlineElement, BaseElement, block, inline
 
 
 class Parser:
@@ -32,7 +34,7 @@ class Parser:
         ):
             self.add_element(el)
 
-    def add_element(self, element: ElementType) -> None:
+    def add_element(self, element: BaseElementType) -> None:
         """Add an element to the parser.
 
         :param element: the element class.
@@ -40,7 +42,7 @@ class Parser:
         .. note:: If one needs to call it inside ``__init__()``, please call it after
              ``super().__init__()`` is called.
         """
-        dest: dict[str, ElementType] = {}
+        dest: dict[str, BaseElementType] = {}
         if issubclass(element, inline.InlineElement):
             dest = self.inline_elements  # type: ignore
         elif issubclass(element, block.BlockElement):
@@ -108,7 +110,7 @@ class Parser:
         :returns: a list of inline elements.
         """
         element_list = self._build_inline_element_list()
-        return inline_parser.parse(
+        return inline_parsing.parse(
             text, element_list, fallback=self.inline_elements["RawText"], source=source
         )
 
@@ -127,9 +129,7 @@ class Parser:
         return [e for e in self.inline_elements.values() if not e.virtual]
 
 
-from . import block, element, inline, inline_parser  # noqa
-
 if TYPE_CHECKING:
-    BlockElementType = Type[block.BlockElement]
-    InlineElementType = Type[inline.InlineElement]
-    ElementType = Type[element.Element]
+    BlockElementType = Type[BlockElement]
+    InlineElementType = Type[InlineElement]
+    BaseElementType = Type[BaseElement]

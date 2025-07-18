@@ -8,7 +8,7 @@ import logging
 from typing import Iterable
 
 from marko.helpers import MarkoExtension
-from marko.renderer import Renderer
+from marko.renderers import BaseRenderer
 
 _logger = logging.getLogger(__name__)
 
@@ -164,7 +164,7 @@ class LatexRendererMixin:
         return f"\\begin{{{env_name}}}{options_str}\n{content}\\end{{{env_name}}}\n"
 
 
-class LatexRenderer(LatexRendererMixin, Renderer):
+class LatexRenderer(LatexRendererMixin, BaseRenderer):
     """Render the parsed Markdown to LaTeX format."""
 
 

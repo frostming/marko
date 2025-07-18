@@ -8,13 +8,13 @@ import html
 from typing import TYPE_CHECKING, Any, cast
 from urllib.parse import quote
 
-from .renderer import Renderer
+from .base import BaseRenderer
 
 if TYPE_CHECKING:
-    from . import block, inline
+    from marko.elements import block, inline
 
 
-class HTMLRenderer(Renderer):
+class HTMLRenderer(BaseRenderer):
     """The most common renderer for markdown parser"""
 
     def render_paragraph(self, element: block.Paragraph) -> str:
