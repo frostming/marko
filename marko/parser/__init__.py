@@ -4,57 +4,88 @@ Base parser
 
 from __future__ import annotations
 
-import itertools
-from typing import TYPE_CHECKING, Type, cast
+from typing import cast, Type
+from pydantic import BaseModel, Field, model_validator, ConfigDict
 
 from marko.parser import inline_parsing
 from marko.source import Source
-from marko.elements import BlockElement, InlineElement, BaseElement, block, inline
+from marko.elements import (
+    BlockElement,
+    InlineElement,
+    BaseElement,
+    INLINE_ELEMENTS,
+    BLOCK_ELEMENTS,
+)
+from marko.elements.block import Document
 
 
-class Parser:
-    r"""
-    All elements defined in CommonMark's spec are included in the parser
-    by default.
+BlockElementType = Type[BlockElement]
+InlineElementType = Type[InlineElement]
+BaseElementType = Type[BaseElement]
 
-    Attributes:
-        block_elements(dict): a dict of name: block_element pairs
-        inline_elements(dict): a dict of name: inline_element pairs
 
-    :param \*extras: extra elements to be included in parsing process.
-    """
+class Parser(BaseModel):
+    """All elements defined in CommonMark's spec are included in the parser by default."""
 
-    def __init__(self) -> None:
-        self.block_elements: dict[str, BlockElementType] = {}
-        self.inline_elements: dict[str, InlineElementType] = {}
+    block_elements: dict[str, BlockElementType] = Field(default_factory=dict)
+    """Block elements: give only custom ones."""
+    inline_elements: dict[str, InlineElementType] = Field(default_factory=dict)
+    """Inline elements: give only custom ones."""
 
-        for el in itertools.chain(
-            (getattr(block, name) for name in block.__all__),
-            (getattr(inline, name) for name in inline.__all__),
-        ):
-            self.add_element(el)
+    extra_elements: list[BaseElementType] = Field(default_factory=list)
+    """Non-CommonMark elements."""
 
-    def add_element(self, element: BaseElementType) -> None:
-        """Add an element to the parser.
+    model_config = ConfigDict(frozen=True)
 
-        :param element: the element class.
+    @model_validator(mode="before")
+    @classmethod
+    def add_default_elements(cls, data: dict) -> dict:
+        """Add CommonMark elements."""
 
-        .. note:: If one needs to call it inside ``__init__()``, please call it after
-             ``super().__init__()`` is called.
-        """
-        dest: dict[str, BaseElementType] = {}
-        if issubclass(element, inline.InlineElement):
-            dest = self.inline_elements  # type: ignore
-        elif issubclass(element, block.BlockElement):
-            dest = self.block_elements  # type: ignore
-        else:
-            raise TypeError(
-                "The element should be a subclass of either `BlockElement` or "
-                "`InlineElement`."
-            )
-        dest[element.get_type()] = element
+        block_elements = {}
+        inline_elements = {}
 
-    def parse(self, text: str) -> block.Document:
+        for element in data.get("extra_elements", []):
+            # Add an element to the parser
+            dest: dict[str, BaseElementType] = {}
+            if issubclass(element, InlineElement):
+                dest = inline_elements  # type: ignore
+            elif issubclass(element, BlockElement):
+                dest = block_elements  # type: ignore
+            else:
+                raise TypeError(
+                    "The element should be a subclass of either `BlockElement` or "
+                    "`InlineElement`."
+                )
+            dest[element.get_type()] = element
+
+        inline_elements = {
+            **inline_elements,
+            **data.get("inline_elements", {}),
+        }
+
+        block_elements = {
+            **block_elements,
+            **data.get("block_elements", {}),
+        }
+
+        extra_elements: list[BaseElementType] = list(inline_elements.values()) + list(
+            block_elements.values()
+        )
+
+        return {
+            "inline_elements": {
+                **INLINE_ELEMENTS,
+                **inline_elements,
+            },
+            "block_elements": {
+                **BLOCK_ELEMENTS,
+                **block_elements,
+            },
+            "extra_elements": extra_elements,
+        }
+
+    def parse(self, text: str) -> Document:
         """Do the actual parsing and returns an AST or parsed element.
 
         :param text: the text to parse.
@@ -62,16 +93,16 @@ class Parser:
         """
         source = Source(text)
         source.parser = self
-        doc = cast(block.Document, self.block_elements["Document"]())
+        doc = cast(Document, self.block_elements["Document"]())
         with source.under_state(doc):
             doc.children = self.parse_source(source)
             self.parse_inline(doc, source)
         return doc
 
-    def parse_source(self, source: Source) -> list[block.BlockElement]:
+    def parse_source(self, source: Source) -> list[BlockElement]:
         """Parse the source into a list of block elements."""
         element_list = self._build_block_element_list()
-        ast: list[block.BlockElement] = []
+        ast: list[BlockElement] = []
         while not source.exhausted:
             for ele_type in element_list:
                 if ele_type.match(source):
@@ -88,7 +119,7 @@ class Parser:
                 break
         return ast
 
-    def parse_inline(self, element: block.BlockElement, source: Source) -> None:
+    def parse_inline(self, element: BlockElement, source: Source) -> None:
         """Inline parsing is postponed so that all link references
         are seen before that.
         """
@@ -98,10 +129,10 @@ class Parser:
             element.inline_body = ""
         else:
             for child in element.children:
-                if isinstance(child, block.BlockElement):
+                if isinstance(child, BlockElement):
                     self.parse_inline(child, source)
 
-    def _parse_inline(self, text: str, source: Source) -> list[inline.InlineElement]:
+    def _parse_inline(self, text: str, source: Source) -> list[InlineElement]:
         """Parses text into inline elements.
         RawText is not considered in parsing but created as a wrapper of holes
         that don't match any other elements.
@@ -127,9 +158,3 @@ class Parser:
         with the same priority.
         """
         return [e for e in self.inline_elements.values() if not e.virtual]
-
-
-if TYPE_CHECKING:
-    BlockElementType = Type[BlockElement]
-    InlineElementType = Type[InlineElement]
-    BaseElementType = Type[BaseElement]

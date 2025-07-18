@@ -21,7 +21,7 @@ from marko.renderers import BaseRenderer
 
 if TYPE_CHECKING:
     from marko.elements.block import Document
-    from .parser import BaseElementType
+    from marko.parser import BaseElementType
 
 __version__ = "2.1.4"
 
@@ -95,10 +95,10 @@ class Markdown:
             return
         self.parser = cast(
             Parser,
-            type("_Parser", tuple(self._parser_mixins) + (self._base_parser,), {})(),
+            type("_Parser", tuple(self._parser_mixins) + (self._base_parser,), {})(
+                extra_elements=self._extra_elements
+            ),
         )
-        for e in self._extra_elements:
-            self.parser.add_element(e)
         self.renderer = cast(
             BaseRenderer,
             type(
