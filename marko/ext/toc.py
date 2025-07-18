@@ -25,10 +25,13 @@ Usage::
 
 import re
 
-from slugify import slugify
-
 from marko.helpers import MarkoExtension, render_dispatch  # type: ignore
 from marko.html_renderer import HTMLRenderer
+
+try:
+    from slugify import slugify
+except ImportError:
+    slugify = None  # type: ignore[assignment]
 
 
 class TocRendererMixin:
@@ -71,7 +74,11 @@ class TocRendererMixin:
     @render_dispatch(HTMLRenderer)
     def render_heading(self, element):
         children = self.render_children(element)
-        slug = slugify(re.sub(r"<.+?>", "", children))
+        raw = re.sub(r"<.+?>", "", children)
+        if slugify is not None:
+            slug = slugify(raw)
+        else:
+            slug = re.sub(r"[^\w\- ]+", "", raw).strip().lower().replace(" ", "-")
         self.headings.append((int(element.level), slug, children))
         return '<h{0} id="{1}">{2}</h{0}>\n'.format(element.level, slug, children)
 
