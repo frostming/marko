@@ -73,7 +73,7 @@ COMMON_CASES = [
     (
         "non_whitespace_after_title_is_not_link_ref_def",
         '[foo]: /url "title" ok',  # Same as spec but no line breaks.
-        '<p>[foo]: /url &quot;title&quot; ok</p>',
+        "<p>[foo]: /url &quot;title&quot; ok</p>",
     ),
 ]
 
