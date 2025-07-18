@@ -28,6 +28,7 @@ GFM = MarkoExtension(
         elements.Table,
         elements.TableRow,
         elements.TableCell,
+        elements.Alert,
     ],
     renderer_mixins=[renderer.GFMRendererMixin],
 )
