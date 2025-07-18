@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import ClassVar, Any, Self
 from langchain_core.load.serializable import Serializable
 
-from .helpers import camel_to_snake_case
+from marko.utils import camel_to_snake_case
 
 
 class Element(Serializable):

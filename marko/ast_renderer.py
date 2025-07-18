@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any, overload
 
 from marko.html_renderer import HTMLRenderer
 
-from .helpers import camel_to_snake_case
+from marko.utils import camel_to_snake_case
 from .renderer import Renderer, force_delegate
 
 if TYPE_CHECKING:

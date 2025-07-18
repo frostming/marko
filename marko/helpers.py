@@ -4,28 +4,21 @@ Helper functions and data structures
 
 from __future__ import annotations
 
-import dataclasses
 import re
 from functools import partial
 from importlib import import_module
-from typing import TYPE_CHECKING, overload
+from pydantic import BaseModel, Field, ConfigDict
+from typing import List, Type, TYPE_CHECKING, overload
 
 from marko.renderer import Renderer
+from marko.element import Element
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Container, Iterable, TypeVar
 
-    from .element import Element
-
     RendererFunc = Callable[[Any, Element], Any]
     TRenderer = TypeVar("TRenderer", bound=RendererFunc)
     D = TypeVar("D", bound="_RendererDispatcher")
-
-
-def camel_to_snake_case(name: str) -> str:
-    """Takes a camelCased string and converts to snake_case."""
-    pattern = r"[A-Z][a-z]+|[A-Z]+(?![a-z])"
-    return "_".join(map(str.lower, re.findall(pattern, name)))
 
 
 def is_paired(text: Iterable[str], open: str = "(", close: str = ")") -> bool:
@@ -105,11 +98,14 @@ def partition_by_spaces(text: str, spaces: str = " \t") -> tuple[str, str, str]:
     return text[:start], text[start:end], text[end:]
 
 
-@dataclasses.dataclass(frozen=True)
-class MarkoExtension:
-    parser_mixins: list[type] = dataclasses.field(default_factory=list)
-    renderer_mixins: list[type] = dataclasses.field(default_factory=list)
-    elements: list[type[Element]] = dataclasses.field(default_factory=list)
+class MarkoExtension(BaseModel):
+    parser_mixins: List[Type] = Field(default_factory=list)
+    renderer_mixins: List[Type] = Field(default_factory=list)
+
+    elements: List[Type] = Field(default_factory=list)
+    # must be Type[Element], but tests use as Any
+
+    model_config = ConfigDict(frozen=True, extra="forbid")
 
 
 def load_extension(name: str, **kwargs: Any) -> MarkoExtension:
