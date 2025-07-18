@@ -148,6 +148,9 @@ class TestExtension:
             | Apple | $1 |
             | Orange | $2 |
 
+            > [!CAUTION]
+            > Upcoming bugs
+
             [^1]: go to https://example.com
             """
         )
