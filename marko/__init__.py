@@ -15,7 +15,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Iterable, cast
 
 from .helpers import MarkoExtension, load_extension
-from marko.renderers.md_renderer import MarkdownRenderer
+from marko.renderers.html_renderer import HTMLRenderer
 from .parser import Parser
 from marko.renderers import BaseRenderer
 
@@ -50,7 +50,7 @@ class Markdown:
     def __init__(
         self,
         parser: type[Parser] = Parser,
-        renderer: type[BaseRenderer] = MarkdownRenderer,
+        renderer: type[BaseRenderer] = HTMLRenderer,
         extensions: Iterable[str | MarkoExtension] | None = None,
     ) -> None:
         if not issubclass(parser, Parser):
@@ -174,5 +174,5 @@ __all__ = [
     "load_extension",
     "Parser",
     "BaseRenderer",
-    "MarkdownRenderer",
+    "HTMLRenderer",
 ]
