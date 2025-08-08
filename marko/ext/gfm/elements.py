@@ -216,3 +216,26 @@ class TableCell(block.BlockElement):
         self.inline_body = text.strip().replace("\\|", "|")
         self.header = False
         self.align: str | None = None
+
+
+class Alert(block.Quote):
+    """Alert block element: block quote with a header like WARNING, NOTE, TIP, IMPORTANT, or CAUTION."""
+
+    priority = block.Quote.priority + 1
+
+    @classmethod
+    def match(cls, source):
+        return source.expect_re(r" {,3}>\s*\[\!(WARNING|NOTE|TIP|IMPORTANT|CAUTION)\]")
+
+    @classmethod
+    def parse(cls, source):
+        alert_type = source.match.group(1)
+        source.next_line(require_prefix=False)
+        source.consume()
+        state = cls(alert_type)
+        with source.under_state(state):
+            state.children = source.parser.parse_source(source)
+        return state
+
+    def __init__(self, alert_type):
+        self.alert_type = alert_type
