@@ -15,3 +15,23 @@ def tests(session):
 def benchmark(session):
     session.run("pdm", "install", "-dG", "benchmark", external=True)
     session.run("python", "-m", "tests.benchmark")
+
+
+@nox.session
+def docs(session):
+    session.install("-r", "docs/reqs.txt")
+    session.install("sphinx-autobuild")
+
+    session.run(
+        "sphinx-autobuild",
+        "docs/",
+        "docs/_build/html",
+        # Rebuild all files when rebuilding
+        "-a",
+        # Trigger rebuilds on code changes (for autodoc)
+        "--watch",
+        "marko",
+        # Use a not-common high-numbered port
+        "--port",
+        "8765",
+    )
