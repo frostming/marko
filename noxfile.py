@@ -19,7 +19,7 @@ def benchmark(session):
 
 @nox.session
 def docs(session):
-    session.install("-r", "docs/reqs.txt")
+    session.install("pdm", "install", "-G", "doc", external=True)
     session.install("sphinx-autobuild")
 
     session.run(
