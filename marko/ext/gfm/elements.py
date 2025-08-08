@@ -244,7 +244,7 @@ class Alert(block.Quote):
         alert_type = source.match.group(1)
         source.next_line(require_prefix=False)
         source.consume()
-        state = cls(alert_type)
+        state = cls.initialize(alert_type)
         with source.under_state(state):
             state.children = source.parser.parse_source(source)
         return state

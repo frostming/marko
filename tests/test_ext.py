@@ -100,7 +100,7 @@ class TestCodeHilite:
 class TestGFMAlert:
     def setup_method(self):
         from marko import Markdown
-        from marko.ast_renderer import ASTRenderer
+        from marko.renderers.ast_renderer import ASTRenderer
         from marko.ext.gfm import GFM
 
         self.md_ast = Markdown(renderer=ASTRenderer, extensions=[GFM])
