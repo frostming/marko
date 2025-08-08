@@ -95,3 +95,31 @@ class TestCodeHilite:
     def test_render_code_block_with_extra(self):
         content = '```python filename="test.py"\nprint("hello")\n```'
         assert '<span class="filename">test.py</span>' in self.markdown(content)
+
+
+class TestGFMAlert:
+    def setup_method(self):
+        from marko import Markdown
+        from marko.ast_renderer import ASTRenderer
+        from marko.ext.gfm import GFM
+
+        self.md_ast = Markdown(renderer=ASTRenderer, extensions=[GFM])
+        self.md_html = Markdown(extensions=[GFM])
+
+    def test_alert_ast(self):
+        text = "> [!WARNING]\n> Foo bar\n> Bar\n"
+        ast = self.md_ast(text)
+        admon = ast["children"][0]
+        assert admon["element"] == "alert"
+        assert admon["alert_type"] == "WARNING"
+        inner = admon["children"][0]["children"]
+        assert inner[0]["children"] == "Foo bar"
+        assert inner[1]["element"] == "line_break"
+        assert inner[2]["children"] == "Bar"
+
+    def test_alert_html(self):
+        text = "> [!WARNING]\n> Foo bar\n> Bar\n"
+        html = self.md_html(text)
+        assert '<blockquote class="alert alert-warning">' in html
+        assert "<p>Warning</p>" in html
+        assert "<p>Foo bar\nBar</p>" in html

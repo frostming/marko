@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from marko.elements.block import Document
     from marko.parser import BaseElementType
 
-__version__ = "2.1.4"
+__version__ = "2.2.0"
 
 
 class SetupDone(Exception):

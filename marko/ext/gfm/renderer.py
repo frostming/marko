@@ -1,4 +1,6 @@
 # mypy: disable-error-code="no-redef"
+from __future__ import annotations
+
 import re
 
 from marko.helpers import render_dispatch
@@ -104,3 +106,22 @@ class GFMRendererMixin:
     @render_url.dispatch(MarkdownRenderer)
     def render_url(self, element):
         return element.dest
+
+    @render_dispatch(HTMLRenderer)
+    def render_alert(self, element):
+        header = self.escape_html(element.alert_type)
+        children = self.render_children(element)
+        return (
+            f'<blockquote class="alert alert-{element.alert_type.lower()}">\n'
+            f"<p>{header.title()}</p>\n{children}</blockquote>\n"
+        )
+
+    @render_alert.dispatch(MarkdownRenderer)
+    def render_alert(self, element):
+        lines: list[str] = []
+        lines.append(self._prefix + f"> [!{element.alert_type}]\n")
+        with self.container("> ", "> "):
+            for child in element.children:
+                lines.append(self.render(child))
+        self._prefix = self._second_prefix
+        return "".join(lines)

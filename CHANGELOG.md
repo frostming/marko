@@ -1,3 +1,18 @@
+## v2.2.0(2025-08-08)
+
+### Added
+
+- Add comprehensive usage documentation guide.
+- Support GFM alerts in GitHub Flavored Markdown extension.
+
+### Changed
+
+- Make python-slugify dependency optional for the TOC extension.
+
+### Fixed
+
+- Fix code formatting issues.
+
 ## v2.1.4(2025-06-13)
 
 ### Fixed
