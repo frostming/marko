@@ -437,6 +437,7 @@ def process_emphasis(
                 underscore_bottom = bottom
             if not d_closer.can_open:
                 delimiters.remove(d_closer)
+                cur = cur - 1 if cur > 0 else None
         cur = _next_closer(delimiters, cur)
     lower = stack_bottom + 1 if stack_bottom is not None else 0
     del delimiters[lower:]
