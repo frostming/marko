@@ -90,6 +90,11 @@ CMARK_CASES = [
         "![foo\nbar\nbaz](/image.png)",
         '<p><img src="/image.png" alt="foo\nbar\nbaz" /></p>',
     ),
+    (
+        "emphasis_underscore_in_strong",
+        "**a_{b}**",
+        "<p><strong>a_{b}</strong></p>",
+    )
 ]
 
 
