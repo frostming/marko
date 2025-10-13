@@ -10,11 +10,11 @@ from marko.md_renderer import MarkdownRenderer
 
 class GFMRendererMixin:
     tagfilter = re.compile(
-        r"<(title|texarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
+        r"<(title|textarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
         flags=re.I,
     )
     tagfilter_no_open = re.compile(
-        r"(?<!^)( *)<(title|texarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
+        r"(?<!^)( *)<(title|textarea|style|xmp|iframe|noembed|noframes|script|plaintext)",
         flags=re.I,
     )
 
