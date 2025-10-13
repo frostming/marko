@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          python-version: '3.12'
       - name: Build artifacts
         run: |
           pipx run build
@@ -28,5 +28,4 @@ jobs:
           [[ $output == "<h1>hello world</h1>" ]] || false
       - name: Upload to Pypi
         run: |
-          pip install twine
-          twine upload --username __token__ --password ${{ secrets.PYPI_TOKEN }} dist/*
+          pipx run twine upload --username __token__ --password ${{ secrets.PYPI_TOKEN }} dist/*
