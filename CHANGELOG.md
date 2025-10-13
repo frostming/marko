@@ -1,3 +1,14 @@
+## v2.2.1(2025-10-13)
+
+### Changed
+
+- Add support for Python 3.14 and drop support for Python 3.8.
+
+### Fixed
+
+- Fix mis-spelled textarea in regex for escaping (GFM).
+- Fix an inline parsing edge case with nested emphasis.
+
 ## v2.2.0(2025-08-08)
 
 ### Added
