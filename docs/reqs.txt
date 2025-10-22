@@ -17,7 +17,7 @@ pygments==2.19.2
 pygments-styles==0.2.0
 python-slugify==8.0.4
 requests==2.31.0
-shibuya==2025.9.25
+shibuya==2025.10.21
 snowballstemmer==2.2.0
 sphinx==7.4.7
 sphinxcontrib-applehelp==1.0.2
