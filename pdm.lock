@@ -573,13 +573,13 @@ files = [
 
 [[package]]
 name = "mistletoe"
-version = "1.4.0"
+version = "1.5.0"
 requires_python = "~=3.5"
 summary = "A fast, extensible Markdown parser in pure Python."
 groups = ["benchmark"]
 files = [
-    {file = "mistletoe-1.4.0-py3-none-any.whl", hash = "sha256:44a477803861de1237ba22e375c6b617690a31d2902b47279d1f8f7ed498a794"},
-    {file = "mistletoe-1.4.0.tar.gz", hash = "sha256:1630f906e5e4bbe66fdeb4d29d277e2ea515d642bb18a9b49b136361a9818c9d"},
+    {file = "mistletoe-1.5.0-py3-none-any.whl", hash = "sha256:d4e77b991b998c5efe3c4eab4e1b472263b5349688acd50d79bd9a6c317a9df1"},
+    {file = "mistletoe-1.5.0.tar.gz", hash = "sha256:68b73be68bf8075ec882e035176d5c379d0d7f3401392c6f39c2cc9cd3264d44"},
 ]
 
 [[package]]
@@ -798,7 +798,7 @@ files = [
 
 [[package]]
 name = "shibuya"
-version = "2025.9.25"
+version = "2025.10.21"
 requires_python = ">=3.9"
 summary = "A clean, responsive, and customizable Sphinx documentation theme with light/dark mode."
 groups = ["doc"]
@@ -807,8 +807,8 @@ dependencies = [
     "pygments-styles",
 ]
 files = [
-    {file = "shibuya-2025.9.25-py3-none-any.whl", hash = "sha256:93e439181167936dd1950874880c23920d551f90ff475888ce278af1d2efa4eb"},
-    {file = "shibuya-2025.9.25.tar.gz", hash = "sha256:03131beb0f8e31cf4f501a4b744cd9c3f387cf23696259476d141b9ca976156b"},
+    {file = "shibuya-2025.10.21-py3-none-any.whl", hash = "sha256:916e48c97ba5cc4b1949742beac19cf48923e12965a0d1689fda460d363f4d82"},
+    {file = "shibuya-2025.10.21.tar.gz", hash = "sha256:a668f2a33c8b57d33d78bd6edf723eece5734d01f129f973333e7096ad6b3690"},
 ]
 
 [[package]]
