@@ -225,11 +225,13 @@ class Alert(block.Quote):
 
     @classmethod
     def match(cls, source):
-        return source.expect_re(r" {,3}>\s*\[\!(WARNING|NOTE|TIP|IMPORTANT|CAUTION)\]")
+        return source.expect_re(
+            r"(?im) {,3}>\s*\[\!(WARNING|NOTE|TIP|IMPORTANT|CAUTION)\]\s*$"
+        )
 
     @classmethod
     def parse(cls, source):
-        alert_type = source.match.group(1)
+        alert_type = source.match.group(1).upper()
         source.next_line(require_prefix=False)
         source.consume()
         state = cls(alert_type)
