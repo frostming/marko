@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed
+
+- Fix a bug in GFM alert block parsing where alert types were case-sensitive.
+
 ## v2.2.1(2025-10-13)
 
 ### Changed

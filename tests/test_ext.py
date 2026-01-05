@@ -1,3 +1,5 @@
+import pytest
+
 from marko import Markdown
 
 
@@ -106,20 +108,26 @@ class TestGFMAlert:
         self.md_ast = Markdown(renderer=ASTRenderer, extensions=[GFM])
         self.md_html = Markdown(extensions=[GFM])
 
-    def test_alert_ast(self):
-        text = "> [!WARNING]\n> Foo bar\n> Bar\n"
+    @pytest.mark.parametrize(
+        "alert_type", ["WARNING", "CAUTION", "TIP", "warning", "Caution"]
+    )
+    def test_alert_ast(self, alert_type):
+        text = f"> [!{alert_type}]\n> Foo bar\n> Bar\n"
         ast = self.md_ast(text)
         admon = ast["children"][0]
         assert admon["element"] == "alert"
-        assert admon["alert_type"] == "WARNING"
+        assert admon["alert_type"] == alert_type.upper()
         inner = admon["children"][0]["children"]
         assert inner[0]["children"] == "Foo bar"
         assert inner[1]["element"] == "line_break"
         assert inner[2]["children"] == "Bar"
 
-    def test_alert_html(self):
-        text = "> [!WARNING]\n> Foo bar\n> Bar\n"
+    @pytest.mark.parametrize(
+        "alert_type", ["WARNING", "CAUTION", "TIP", "warning", "Caution"]
+    )
+    def test_alert_html(self, alert_type):
+        text = f"> [!{alert_type}]\n> Foo bar\n> Bar\n"
         html = self.md_html(text)
-        assert '<blockquote class="alert alert-warning">' in html
-        assert "<p>Warning</p>" in html
+        assert f'<blockquote class="alert alert-{alert_type.lower()}">' in html
+        assert f"<p>{alert_type.title()}</p>" in html
         assert "<p>Foo bar\nBar</p>" in html
