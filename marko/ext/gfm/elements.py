@@ -226,7 +226,7 @@ class Alert(block.Quote):
     @classmethod
     def match(cls, source):
         return source.expect_re(
-            r"(?i) {,3}>\s*\[\!(WARNING|NOTE|TIP|IMPORTANT|CAUTION)\]"
+            r"(?im) {,3}>\s*\[\!(WARNING|NOTE|TIP|IMPORTANT|CAUTION)\]\s*$"
         )
 
     @classmethod

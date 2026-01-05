@@ -131,3 +131,9 @@ class TestGFMAlert:
         assert f'<blockquote class="alert alert-{alert_type.lower()}">' in html
         assert f"<p>{alert_type.title()}</p>" in html
         assert "<p>Foo bar\nBar</p>" in html
+
+    def test_alert_disallow_content_on_header_line(self):
+        text = "> [!NOTE] This is not allowed.\n> Foo bar\n"
+        html = self.md_html(text)
+        # Should be treated as a normal blockquote.
+        assert "<blockquote>\n<p>[!NOTE] This is not allowed." in html
