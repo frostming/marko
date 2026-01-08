@@ -8,7 +8,7 @@ import dataclasses
 import re
 from functools import partial
 from importlib import import_module
-from typing import TYPE_CHECKING, overload
+from typing import TYPE_CHECKING, cast, overload
 
 from marko.renderer import Renderer
 
@@ -129,7 +129,7 @@ def load_extension(name: str, **kwargs: Any) -> MarkoExtension:
             raise ImportError(f"Extension {name} cannot be imported") from e
 
     try:
-        return module.make_extension(**kwargs)
+        return cast(MarkoExtension, module.make_extension(**kwargs))
     except AttributeError:
         raise AttributeError(
             f"Module {name} does not have 'make_extension' attributte."
