@@ -137,3 +137,17 @@ class TestGFMAlert:
         html = self.md_html(text)
         # Should be treated as a normal blockquote.
         assert "<blockquote>\n<p>[!NOTE] This is not allowed." in html
+
+
+class TestGFMTableLlistElement:
+    def setup_method(self):
+        from marko import Markdown
+        from marko.ext.gfm import GFM
+        from marko.md_renderer import MarkdownRenderer
+
+        self.md_md = Markdown(renderer=MarkdownRenderer, extensions=[GFM])
+
+    def test_render_table_in_list_indented(self):
+        text = "- Item.\n\n  |foo|bar|\n  |---|---|\n  |foo|bar|"
+        md = self.md_md(text)
+        assert md == "- Item.\n\n  | foo | bar |\n  | --- | --- |\n  | foo | bar |\n"
