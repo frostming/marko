@@ -71,10 +71,10 @@ class GFMRendererMixin:
     def render_table(self, element):
         lines = []
         head, *body = element.children
-        lines.append(self.render(head))
-        lines.append(f"| {' | '.join(element.delimiters)} |\n")
+        lines.append(self._prefix + self.render(head))
+        lines.append(self._prefix + f"| {' | '.join(element.delimiters)} |\n")
         for row in body:
-            lines.append(self.render(row))
+            lines.append(self._prefix + self.render(row))
         return "".join(lines)
 
     @render_dispatch(HTMLRenderer)

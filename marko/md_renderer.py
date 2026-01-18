@@ -117,9 +117,8 @@ class MarkdownRenderer(Renderer):
         return self.render_heading(cast("block.Heading", element))
 
     def render_blank_line(self, element: block.BlankLine) -> str:
-        result = self._prefix + "\n"
         self._prefix = self._second_prefix
-        return result
+        return "\n"
 
     def render_link_ref_def(self, element: block.LinkRefDef) -> str:
         link_text = element.dest
