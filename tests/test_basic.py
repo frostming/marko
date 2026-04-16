@@ -193,5 +193,7 @@ class TestExtension:
         res = md.parse(text)
 
         assert len(res.children) == 4
+        assert isinstance(res.children[0], block.BlankLine)
         assert isinstance(res.children[1], block.Paragraph)
         assert isinstance(res.children[2], CustomElement)
+        assert isinstance(res.children[3], block.BlankLine)
