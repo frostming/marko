@@ -45,6 +45,8 @@ class BlockElement(Element):
     inline_body: str = ""
     #: If true, will replace the element which it derives from.
     override = False
+    #: If true, the element can break (end) a Paragraph block.
+    breaks_paragraph = False
     _prefix = ""
 
     @classmethod
@@ -86,6 +88,7 @@ class BlankLine(BlockElement):
     """Blank lines"""
 
     priority = 5
+    breaks_paragraph = True
 
     def __init__(self, start: int) -> None:
         self._anchor = start
@@ -111,6 +114,7 @@ class Heading(BlockElement):
         r" {0,3}(#{1,6})((?=\s)[^\n]*?|[^\n\S]*)(?:(?<=\s)(?<!\\)#+)?[^\n\S]*$\n?",
         flags=re.M,
     )
+    breaks_paragraph = True
 
     def __init__(self, match: Match[str]) -> None:
         self.level = len(match.group(1))
@@ -207,6 +211,7 @@ class FencedCode(BlockElement):
 
     priority = 7
     pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
+    breaks_paragraph = True
 
     class ParseInfo(NamedTuple):
         prefix: str
@@ -357,11 +362,10 @@ class Paragraph(BlockElement):
         parser = source.parser
         prev_match = source.match
         try:
+            elements = parser.block_elements.values()
+            breaking_elements = [element for element in elements if element.breaks_paragraph]
             if (
-                parser.block_elements["Quote"].match(source)
-                or parser.block_elements["Heading"].match(source)
-                or parser.block_elements["BlankLine"].match(source)
-                or parser.block_elements["FencedCode"].match(source)
+                any(element.match(source) for element in breaking_elements)
             ):
                 return True
             if (
@@ -428,6 +432,7 @@ class Quote(BlockElement):
     """block quote element: (> hello world)"""
 
     priority = 6
+    breaks_paragraph = True
     _prefix = r" {,3}>[^\n\S]?"
 
     @classmethod
