@@ -793,13 +793,13 @@ files = [
 
 [[package]]
 name = "pygments"
-version = "2.19.2"
-requires_python = ">=3.8"
+version = "2.20.0"
+requires_python = ">=3.9"
 summary = "Pygments is a syntax highlighting package written in Python."
 groups = ["codehilite", "dev", "doc"]
 files = [
-    {file = "pygments-2.19.2-py3-none-any.whl", hash = "sha256:86540386c03d588bb81d44bc3928634ff26449851e99741617ecb9037ee5ec0b"},
-    {file = "pygments-2.19.2.tar.gz", hash = "sha256:636cb2477cec7f8952536970bc533bc43743542f70392ae026374600add5b887"},
+    {file = "pygments-2.20.0-py3-none-any.whl", hash = "sha256:81a9e26dd42fd28a23a2d169d86d7ac03b46e2f8b59ed4698fb4785f946d0176"},
+    {file = "pygments-2.20.0.tar.gz", hash = "sha256:6757cd03768053ff99f3039c1a36d6c0aa0b263438fcab17520b30a303a82b5f"},
 ]
 
 [[package]]
@@ -838,7 +838,7 @@ files = [
 
 [[package]]
 name = "pytest-cov"
-version = "7.0.0"
+version = "7.1.0"
 requires_python = ">=3.9"
 summary = "Pytest plugin for measuring coverage."
 groups = ["dev"]
@@ -848,8 +848,8 @@ dependencies = [
     "pytest>=7",
 ]
 files = [
-    {file = "pytest_cov-7.0.0-py3-none-any.whl", hash = "sha256:3b8e9558b16cc1479da72058bdecf8073661c7f57f7d3c5f22a1c23507f2d861"},
-    {file = "pytest_cov-7.0.0.tar.gz", hash = "sha256:33c97eda2e049a0c5298e91f519302a1334c26ac65c1a483d6206fd458361af1"},
+    {file = "pytest_cov-7.1.0-py3-none-any.whl", hash = "sha256:a0461110b7865f9a271aa1b51e516c9a95de9d696734a2f71e3e78f46e1d4678"},
+    {file = "pytest_cov-7.1.0.tar.gz", hash = "sha256:30674f2b5f6351aa09702a9c8c364f6a01c27aae0c1366ae8016160d1efc56b2"},
 ]
 
 [[package]]
