@@ -171,11 +171,11 @@ class TestExtension:
 
 
             @classmethod
-            def match(cls, source: Source) -> re.Match[str] | None:
+            def match(cls, source: Source) -> "re.Match[str] | None":
                 return source.expect_re(cls.pattern)
 
             @classmethod
-            def parse(cls, source: Source) -> re.Match[str] | None:
+            def parse(cls, source: Source) -> "re.Match[str] | None":
                 m = source.match
                 source.consume()
                 return m
