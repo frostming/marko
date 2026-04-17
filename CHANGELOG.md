@@ -1,3 +1,14 @@
+## Unreleased
+
+### Changed
+
+- Allow extension block elements to break a paragraph.
+
+### Fixed
+
+- Fix a potential security issue in the URL escaping logic of the Markdown renderer.
+- Fix GFM table indentation in list.
+
 ## v2.2.2(2026-01-05)
 
 ### Fixed
