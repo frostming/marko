@@ -1,3 +1,5 @@
+from typing import cast
+
 from .helpers import camel_to_snake_case
 
 
@@ -41,4 +43,4 @@ class Element:
 
             return f"<{self.__class__.__name__}{children}>"
         else:
-            return objstr(self, honor_existing=False, include=["children"])
+            return cast(str, objstr(self, honor_existing=False, include=["children"]))

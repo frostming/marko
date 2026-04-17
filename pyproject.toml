@@ -1,18 +1,15 @@
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
 [project]
 # PEP 621 project metadata
 # See https://www.python.org/dev/peps/pep-0621/
 authors = [
     {name = "Frost Ming", email = "mianghong@gmail.com"},
+    {name = "Jeff-Lowrey", email = "jeff@jaral.org"},
 ]
 dynamic = ["version"]
-requires-python = ">=3.9"
+requires-python = "==3.13.*"
 license = {text = "MIT"}
 dependencies = []
-description = "A markdown parser with high extensibility."
+description = "Default template for PDM package"
 name = "marko"
 readme = "README.md"
 classifiers = [
@@ -27,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
 ]
+version = "0.1.0"
 
 [project.urls]
 homepage = "https://github.com/frostming/marko"
@@ -44,6 +42,7 @@ marko = "marko.cli:main"
 plugins = [
     "pdm-autoexport",
 ]
+distribution = false
 
 [tool.pdm.version]
 source = "file"
@@ -75,3 +74,10 @@ without-hashes = true
 
 [tool.isort]
 profile = "black"
+
+[tool.mypy]
+python_version = "3.13"
+mypy_path = "."
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
