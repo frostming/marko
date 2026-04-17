@@ -15,7 +15,8 @@ if TYPE_CHECKING:
 
 
 def _preprocess_text(text: str) -> str:
-    return text.replace("\r\n", "\n")
+    # Normalize line terminators so block parsers can always advance on line reads.
+    return text.replace("\r\n", "\n").replace("\r", "\n").replace("\f", "\n")
 
 
 class Source:
@@ -102,7 +103,8 @@ class Source:
         :returns: the match object.
         """
         prefix_len = self.match_prefix(
-            self.prefix, self.next_line(require_prefix=False)  # type: ignore
+            self.prefix,
+            self.next_line(require_prefix=False),  # type: ignore
         )
         if prefix_len >= 0:
             match = self._expect_re(regexp, self.pos + prefix_len)

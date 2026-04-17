@@ -2,17 +2,21 @@
 import re
 import textwrap
 
-from marko.source import Source
 import pytest
 
 import marko
 from marko import block
 from marko.ast_renderer import ASTRenderer, XMLRenderer
 from marko.md_renderer import MarkdownRenderer
+from marko.source import Source
 from tests.normalize import normalize_html
 
 
 class TestBasic:
+    @pytest.mark.parametrize("text", ["-\r-", "-\f-"])
+    def test_non_lf_line_terminators_no_infinite_loop(self, text):
+        assert marko.convert(text) == marko.convert("-\n-")
+
     def test_xml_renderer(self):
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)
@@ -168,7 +172,6 @@ class TestExtension:
 
             def __init__(self, match: re.Match[str]) -> None:
                 self.inline_body = match.group(1).strip()
-
 
             @classmethod
             def match(cls, source: Source) -> "re.Match[str] | None":
