@@ -1,6 +1,8 @@
 #! -*- coding: utf-8 -*-
+import re
 import textwrap
 
+from marko.source import Source
 import pytest
 
 import marko
@@ -158,3 +160,40 @@ class TestExtension:
         md = marko.Markdown(extensions=["gfm", "footnote"], renderer=MarkdownRenderer)
         res = md.convert(text)
         assert res == text
+
+    def test_paragraph_breaking_element(self):
+        class CustomElement(block.BlockElement):
+            breaks_paragraph = True
+            pattern = re.compile(r" {,3}@broken (.*)", flags=re.M)
+
+            def __init__(self, match: re.Match[str]) -> None:
+                self.inline_body = match.group(1).strip()
+
+
+            @classmethod
+            def match(cls, source: Source) -> "re.Match[str] | None":
+                return source.expect_re(cls.pattern)
+
+            @classmethod
+            def parse(cls, source: Source) -> "re.Match[str] | None":
+                m = source.match
+                source.consume()
+                return m
+
+        my_extension = marko.MarkoExtension(elements=[CustomElement])
+
+        text = textwrap.dedent(
+            """
+            some text that is
+            @broken by a custom element
+            """
+        )
+
+        md = marko.Markdown(extensions=[my_extension])
+        res = md.parse(text)
+
+        assert len(res.children) == 4
+        assert isinstance(res.children[0], block.BlankLine)
+        assert isinstance(res.children[1], block.Paragraph)
+        assert isinstance(res.children[2], CustomElement)
+        assert isinstance(res.children[3], block.BlankLine)
