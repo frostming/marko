@@ -61,6 +61,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "mypy>=0.950",
+    "types-Pygments>=2.19.0.20251121",
 ]
 doc = [
     "marko[toc]",
