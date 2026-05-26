@@ -393,7 +393,7 @@ class Paragraph(BlockElement):
 
     @classmethod
     def parse(cls, source: Source) -> list[str] | SetextHeading:
-        lines = [cast(str, source.next_line())]
+        lines = [source.next_line()]
         source.consume()
         end_parse = False
         while not source.exhausted and not end_parse:
@@ -547,7 +547,7 @@ class ListItem(BlockElement):
             return False
         if not source.expect_re(cls.pattern):
             return False
-        next_line = cast(str, source.next_line(False)).expandtabs(4)
+        next_line = source.next_line(False).expandtabs(4)
         prefix_pos = 0
         m = re.match(source.prefix, next_line)
         if m is not None:
