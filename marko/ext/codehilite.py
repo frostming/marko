@@ -18,6 +18,7 @@ Usage::
 """
 
 import json
+from typing import TYPE_CHECKING
 
 from pygments import highlight
 from pygments.formatters import html
@@ -26,6 +27,9 @@ from pygments.util import ClassNotFound
 
 from marko import HTMLRenderer
 from marko.helpers import MarkoExtension, render_dispatch
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 def _parse_extras(line):
@@ -44,7 +48,7 @@ def _parse_extras(line):
 
 
 class CodeHiliteRendererMixin:
-    options = {}  # type: dict
+    options: dict[str, Any] = {}
 
     @render_dispatch(HTMLRenderer)
     def render_fenced_code(self, element):
