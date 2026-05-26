@@ -109,13 +109,13 @@ class XMLRenderer(Renderer):
         children = getattr(element, "body", None) or getattr(element, "children", None)
         if children:
             self.indent += 2
-            if isinstance(children, str):  # type: ignore
+            if isinstance(children, str):
                 lines.append(
                     " " * self.indent
-                    + HTMLRenderer.escape_html(json.dumps(children)[1:-1])  # type: ignore
+                    + HTMLRenderer.escape_html(json.dumps(children)[1:-1])
                 )
             else:
-                lines.extend(self.render(child) for child in children)  # type: ignore
+                lines.extend(self.render(child) for child in children)
             self.indent -= 2
             lines.append(" " * self.indent + f"</{element_name}>")
         else:

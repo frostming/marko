@@ -93,7 +93,7 @@ class MarkdownRenderer(Renderer):
         return "\n".join(lines) + "\n"
 
     def render_html_block(self, element: block.HTMLBlock) -> str:
-        result = self._prefix + element.body + "\n"  # type: ignore[attr-defined]
+        result = self._prefix + element.body + "\n"
         self._prefix = self._second_prefix
         return result
 

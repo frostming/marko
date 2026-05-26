@@ -91,7 +91,7 @@ class Renderer:
 
         :param element: a branch node who has children attribute.
         """
-        rendered = [self.render(child) for child in element.children]  # type: ignore
+        rendered = [self.render(child) for child in element.children]
         return "".join(rendered)
 
 

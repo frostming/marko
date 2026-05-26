@@ -571,9 +571,9 @@ class ListItem(BlockElement):
         state = cls(source.context.list_item_info)
         state.children = []
         with source.under_state(state):
-            if not source.next_line().strip():  # type: ignore[union-attr]
+            if not source.next_line().strip():
                 source.consume()
-                if not source.next_line() or not source.next_line().strip():  # type: ignore[union-attr]
+                if not source.next_line() or not source.next_line().strip():
                     return state
             state.children = source.parser.parse_source(source)
         if isinstance(state.children[-1], BlankLine):

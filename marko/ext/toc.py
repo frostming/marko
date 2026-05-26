@@ -25,7 +25,7 @@ Usage::
 
 import re
 
-from marko.helpers import MarkoExtension, render_dispatch  # type: ignore
+from marko.helpers import MarkoExtension, render_dispatch
 from marko.html_renderer import HTMLRenderer
 
 try:

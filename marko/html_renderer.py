@@ -21,7 +21,7 @@ class HTMLRenderer(Renderer):
 
     def render_paragraph(self, element: block.Paragraph) -> str:
         children = self.render_children(element)
-        if element._tight:  # type: ignore
+        if element._tight:
             return children
         else:
             return f"<p>{children}</p>\n"
@@ -38,7 +38,7 @@ class HTMLRenderer(Renderer):
         )
 
     def render_list_item(self, element: block.ListItem) -> str:
-        if len(element.children) == 1 and getattr(element.children[0], "_tight", False):  # type: ignore
+        if len(element.children) == 1 and getattr(element.children[0], "_tight", False):
             sep = ""
         else:
             sep = "\n"
