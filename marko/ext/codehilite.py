@@ -17,6 +17,8 @@ Usage::
     markdown.convert('```python filename="my_script.py"\nprint('hello world')\n```')
 """
 
+from __future__ import annotations
+
 import json
 from typing import TYPE_CHECKING
 
