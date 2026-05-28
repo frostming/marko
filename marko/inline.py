@@ -69,7 +69,7 @@ class Literal(InlineElement):
 
     @classmethod
     def strip_backslash(cls, text: str) -> str:
-        return cls.pattern.sub(r"\1", text)  # type: ignore[unio]
+        return cls.pattern.sub(r"\1", text)
 
 
 class LineBreak(InlineElement):

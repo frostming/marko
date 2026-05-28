@@ -104,7 +104,7 @@ class Source:
         """
         prefix_len = self.match_prefix(
             self.prefix,
-            self.next_line(require_prefix=False),  # type: ignore
+            self.next_line(require_prefix=False),
         )
         if prefix_len >= 0:
             match = self._expect_re(regexp, self.pos + prefix_len)
@@ -154,4 +154,4 @@ class Source:
     def _update_prefix(self) -> None:
         for s in self._states:
             if hasattr(s, "_second_prefix"):
-                s._prefix = s._second_prefix  # type: ignore
+                s._prefix = s._second_prefix

@@ -61,6 +61,7 @@ dev = [
     "pytest",
     "pytest-cov",
     "mypy>=0.950",
+    "types-Pygments>=2.19.0.20251121",
 ]
 doc = [
     "marko[toc]",
@@ -75,3 +76,8 @@ without-hashes = true
 
 [tool.isort]
 profile = "black"
+
+[[tool.mypy.overrides]]
+# objprint is typed, just missing a py.typed marker
+module = ["objprint.*"]
+follow_untyped_imports = true
