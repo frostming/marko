@@ -94,7 +94,22 @@ CMARK_CASES = [
         "emphasis_underscore_in_strong",
         "**a_{b}**",
         "<p><strong>a_{b}</strong></p>",
-    )
+    ),
+    (
+        "insecure_null_in_text",
+        "a\x00b",
+        "<p>a�b</p>",
+    ),
+    (
+        "insecure_null_in_code_span",
+        "`a\x00b`",
+        "<p><code>a�b</code></p>",
+    ),
+    (
+        "insecure_null_in_fenced_code",
+        "```\na\x00b\n```",
+        "<pre><code>a�b\n</code></pre>",
+    ),
 ]
 
 

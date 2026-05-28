@@ -16,7 +16,8 @@ if TYPE_CHECKING:
 
 def _preprocess_text(text: str) -> str:
     # Normalize line terminators so block parsers can always advance on line reads.
-    return text.replace("\r\n", "\n").replace("\r", "\n").replace("\f", "\n")
+    text = text.replace("\r\n", "\n").replace("\r", "\n").replace("\f", "\n")
+    return text.replace("\x00", "�")
 
 
 class Source:
