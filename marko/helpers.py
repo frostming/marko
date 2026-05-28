@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 T = TypeVar("T")
 U = TypeVar("U")
-ElementT = TypeVar("ElementT", bound=Element)
+ElementT = TypeVar("ElementT", bound="Element")
 RendererFunc = Callable[[T, ElementT], U]
 
 def camel_to_snake_case(name: str) -> str:
@@ -110,7 +110,7 @@ def partition_by_spaces(text: str, spaces: str = " \t") -> tuple[str, str, str]:
 class MarkoExtension:
     parser_mixins: list[type] = dataclasses.field(default_factory=list)
     renderer_mixins: list[type] = dataclasses.field(default_factory=list)
-    elements: list[type[Element]] = dataclasses.field(default_factory=list)
+    elements: list[type["Element"]] = dataclasses.field(default_factory=list)
 
 
 def load_extension(name: str, **kwargs: Any) -> MarkoExtension:
@@ -164,10 +164,10 @@ class _RendererDispatcher(Generic[T, ElementT, U]):
         self.name = name
 
     @staticmethod
-    def render_ast(self, element: Element) -> Any:
+    def render_ast(self, element: "Element") -> Any:
         return self.render_children(element)
 
-    def super_render(self, r: Any, element: Element) -> Any:
+    def super_render(self, r: Any, element: "Element") -> Any:
         """Call on the next class in the MRO which has the same method."""
         klasses = (c for c in type(r).mro() if self.name in c.__dict__)
         try:
