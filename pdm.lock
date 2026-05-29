@@ -5,7 +5,7 @@
 groups = ["default", "benchmark", "codehilite", "dev", "doc", "repr", "toc"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:883754358bef3df17a052b7a3ba528dd9e8a462b9a46c110cae5e59f60d6f2c1"
+content_hash = "sha256:39a01fd8951ed388321472028763d6d1d40d4f44cbb855ede2f2b78fa7ddde86"
 
 [[metadata.targets]]
 requires_python = ">=3.9"
@@ -144,15 +144,15 @@ files = [
 
 [[package]]
 name = "commonmark"
-version = "0.9.1"
+version = "0.9.2"
 summary = "Python parser for the CommonMark Markdown spec"
 groups = ["benchmark"]
 dependencies = [
     "future>=0.14.0; python_version < \"3\"",
 ]
 files = [
-    {file = "commonmark-0.9.1-py2.py3-none-any.whl", hash = "sha256:da2f38c92590f83de410ba1a3cbceafbc74fee9def35f9251ba9a971d6d66fd9"},
-    {file = "commonmark-0.9.1.tar.gz", hash = "sha256:452f9dc859be7f06631ddcb328b6919c67984aca654e5fefb3914d54691aed60"},
+    {file = "commonmark-0.9.2-py2.py3-none-any.whl", hash = "sha256:cc7dfaea4557c79e32ce1ad36727185ea8cfe9c7e797cf79297c5cdffe6c7f5a"},
+    {file = "commonmark-0.9.2.tar.gz", hash = "sha256:194d693e0c1ac49e83c26455bdeeb2483235e6280313c58b11d0b71c19f58ed1"},
 ]
 
 [[package]]
@@ -1065,6 +1065,31 @@ files = [
     {file = "tomli-2.3.0-cp314-cp314t-win_amd64.whl", hash = "sha256:70a251f8d4ba2d9ac2542eecf008b3c8a9fc5c3f9f02c56a9d7952612be2fdba"},
     {file = "tomli-2.3.0-py3-none-any.whl", hash = "sha256:e95b1af3c5b07d9e643909b5abbec77cd9f1217e6d0bca72b0234736b9fb1f1b"},
     {file = "tomli-2.3.0.tar.gz", hash = "sha256:64be704a875d2a59753d80ee8a533c3fe183e3f06807ff7dc2232938ccb01549"},
+]
+
+[[package]]
+name = "types-docutils"
+version = "0.22.3.20251115"
+requires_python = ">=3.9"
+summary = "Typing stubs for docutils"
+groups = ["dev"]
+files = [
+    {file = "types_docutils-0.22.3.20251115-py3-none-any.whl", hash = "sha256:c6e53715b65395d00a75a3a8a74e352c669bc63959e65a207dffaa22f4a2ad6e"},
+    {file = "types_docutils-0.22.3.20251115.tar.gz", hash = "sha256:0f79ea6a7bd4d12d56c9f824a0090ffae0ea4204203eb0006392906850913e16"},
+]
+
+[[package]]
+name = "types-pygments"
+version = "2.19.0.20251121"
+requires_python = ">=3.9"
+summary = "Typing stubs for Pygments"
+groups = ["dev"]
+dependencies = [
+    "types-docutils",
+]
+files = [
+    {file = "types_pygments-2.19.0.20251121-py3-none-any.whl", hash = "sha256:cb3bfde34eb75b984c98fb733ce4f795213bd3378f855c32e75b49318371bb25"},
+    {file = "types_pygments-2.19.0.20251121.tar.gz", hash = "sha256:eef114fde2ef6265365522045eac0f8354978a566852f69e75c531f0553822b1"},
 ]
 
 [[package]]
