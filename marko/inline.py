@@ -86,6 +86,16 @@ class LineBreak(InlineElement):
         self.soft = not match.group(1).startswith(("  ", "\\"))
         self.children = "\n"
 
+    @classmethod
+    def find(cls, text: str, *, source: Source) -> Iterator[_Match]:
+        """This method should return an iterable containing matches of this element."""
+        # HACK: short circuit to avoid quadratic runtime when text doesn't have a linebreak.
+        # ideally the regex pattern should be rewritten, but this works for now.
+        # see issue #219
+        if '\n' not in text:
+            return []
+        return super().find(text, source=source)
+
 
 class InlineHTML(InlineElement):
     priority = 7
