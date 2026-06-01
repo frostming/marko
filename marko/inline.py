@@ -92,7 +92,7 @@ class LineBreak(InlineElement):
         # HACK: short circuit to avoid quadratic runtime when text doesn't have a linebreak.
         # ideally the regex pattern should be rewritten, but this works for now.
         # see issue #219
-        if '\n' not in text:
+        if "\n" not in text:
             return []
         return super().find(text, source=source)
 
