@@ -64,6 +64,17 @@ class TestBasic:
         rerendered = markdown.convert(text)
         assert rerendered == text
 
+    def test_markdown_renderer_email_autolink(self):
+        # An email autolink must keep its original address, not the synthetic
+        # "mailto:"-prefixed dest, otherwise the round-trip is corrupted.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        assert markdown("<mail@x.com>") == "<mail@x.com>\n"
+        for text in ("<mail@x.com>\n", "<http://example.org>\n"):
+            rerendered = markdown(text)
+            assert normalize_html(marko.convert(rerendered)) == normalize_html(
+                marko.convert(text)
+            )
+
 
 class TestExtension:
     def test_extension_use(self):

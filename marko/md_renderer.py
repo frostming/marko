@@ -157,7 +157,12 @@ class MarkdownRenderer(Renderer):
         return f"[{link_text}]({element.dest}{title})"
 
     def render_auto_link(self, element: inline.AutoLink) -> str:
-        return f"<{element.dest}>"
+        # Render the original text, not ``dest``: for an email autolink
+        # ``AutoLink`` prepends "mailto:" to ``dest`` while keeping the original
+        # address in the children, so emitting ``dest`` would turn
+        # ``<mail@x.com>`` into ``<mailto:mail@x.com>`` and break the round-trip.
+        # For URI autolinks the children equal ``dest``, so they are unchanged.
+        return f"<{self.render_children(element)}>"
 
     def render_image(self, element: inline.Image) -> str:
         template = "![{}]({}{})"
