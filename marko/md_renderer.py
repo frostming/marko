@@ -61,7 +61,8 @@ class MarkdownRenderer(Renderer):
                 with self.container(f"{element.bullet} ", "  "):
                     result.append(self.render(child))
         self._prefix = self._second_prefix
-        return "".join(result)
+        sep = "\n" if not element.tight else ""
+        return sep.join(result)
 
     def render_list_item(self, element: block.ListItem) -> str:
         return self.render_children(element)

@@ -50,6 +50,23 @@ class TestBasic:
             marko.convert(text)
         )
 
+    def test_markdown_renderer_loose_list(self):
+        # A loose list (items separated by blank lines) must round-trip unchanged.
+        # Before the fix, render_list() emitted tight spacing regardless of
+        # element.tight, converting the loose list to a tight list and producing
+        # different HTML output.
+        for text in (
+            "- item1\n\n- item2\n",
+            "- a\n\n- b\n\n- c\n",
+            "1. first\n\n2. second\n",
+        ):
+            markdown = marko.Markdown(renderer=MarkdownRenderer)
+            rerendered = markdown(text)
+            assert rerendered == text, f"loose list not preserved: {text!r} -> {rerendered!r}"
+            assert normalize_html(marko.convert(rerendered)) == normalize_html(
+                marko.convert(text)
+            )
+
     def test_markdown_renderer_preserve_link_refs(self):
         text = textwrap.dedent(
             """\
