@@ -34,7 +34,8 @@ class FootnoteDef(block.BlockElement):
 
     def __init__(self, match):
         self.label = helpers.normalize_label(match.group(1))
-        self._prefix = re.escape(match.group())
+        # expandtabs to match the tab-expanded line; a raw tab loops forever
+        self._prefix = re.escape(match.group().expandtabs(4))
         self._second_prefix = r" {1,4}"
 
     @classmethod

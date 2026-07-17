@@ -17,6 +17,16 @@ class TestFootnote:
         result = self.markdown("foo[^1]")
         assert result.rstrip() == "<p>foo[^1]</p>"
 
+    def test_footnote_def_separated_by_tab(self):
+        # A footnote definition may use a tab after the colon. The continuation
+        # prefix was built from the raw match (with a literal tab) while lines are
+        # matched tab-expanded, so the tab prefix never re-matched, the body
+        # advanced nothing, and parsing looped forever. It must parse like a space.
+        tabbed = self.markdown("this is a footnote[^1].\n\n[^1]:\tfoo\n")
+        spaced = self.markdown("this is a footnote[^1].\n\n[^1]: foo\n")
+        assert tabbed == spaced
+        assert 'foo<a href="#fnref-1" class="footnote">&#8617;</a>' in tabbed
+
 
 class TestToc:
     def setup_method(self):
