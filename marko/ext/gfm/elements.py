@@ -9,6 +9,7 @@ import re
 from typing import Any, cast
 
 from marko import block, inline
+from marko.element import _SourceMap
 from marko.source import Source
 
 
@@ -22,6 +23,8 @@ class Paragraph(block.Paragraph):
         if m:
             self.checked = m.group(1)[1:-1].lower() == "x"
             self.inline_body = self.inline_body[m.end(1) :]
+            if self._inline_positions is not None:
+                self._inline_positions = self._inline_positions[m.end(1) :]
 
 
 class Strikethrough(inline.InlineElement):
@@ -74,6 +77,9 @@ class Url(inline.AutoLink):
         if self.www_pattern.match(self.dest):
             self.dest = "http://" + self.dest
 
+    def _syntax_spans(self, match):
+        return None
+
     @classmethod
     def find(cls, text, *, source):
         for match in itertools.chain(
@@ -116,15 +122,23 @@ class Table(block.BlockElement):
 
     @classmethod
     def match(cls, source):
+        table_start = source._current_pos
         source.anchor()
         if not TableRow.match(source) or source.context.is_delimiter:
             return False
+        head_span = source.context.row_span
         if TableRow.splitter.search(source.next_line()) is None:
             return False
         # consume the first row, we don't use source.consume() here
         # because that may unexpectedly update the line prefix.
         source.pos = source.match.end()
-        head = TableRow([TableCell(cell) for cell in source.context.cells])
+        head = TableRow(
+            [
+                TableCell(cell, start)
+                for cell, start in zip(source.context.cells, source.context.cell_starts)
+            ]
+        )
+        head.source_span = head_span
         if (
             not TableRow.match(source)
             or not source.context.is_delimiter
@@ -136,12 +150,14 @@ class Table(block.BlockElement):
             "children": [head],
             "delimiters": source.context.cells,
         }
+        source.context.table_start = table_start
         source.consume()  # consume the second row
         return True
 
     @classmethod
     def parse(cls, source):
         rv = cls(**source.context.table_info)
+        table_start = source.context.table_start
         with source.under_state(rv):
             for d, th in zip(rv.delimiters, rv.head.children):
                 stripped_d = d.strip()
@@ -163,6 +179,7 @@ class Table(block.BlockElement):
                         rv.children.append(TableRow.parse(source))
                         continue
                 break
+        rv.source_span = (table_start, source.pos)
         return rv
 
 
@@ -181,14 +198,29 @@ class TableRow(block.BlockElement):
         line = source.next_line()
         if not line or not re.match(r" {,3}\S", line):
             return False
-        parts = cls.splitter.split(line.strip())
+        line_start = source.match.start() if source.match else source.pos
+        source.context.row_span = (line_start, line_start + len(line))
+        stripped = line.strip()
+        leading = len(line) - len(line.lstrip())
+        parts = []
+        starts = []
+        last = 0
+        for m in cls.splitter.finditer(stripped):
+            parts.append(stripped[last : m.start()])
+            starts.append(line_start + leading + last)
+            last = m.end()
+        parts.append(stripped[last:])
+        starts.append(line_start + leading + last)
         if parts and not parts[0]:
             parts.pop(0)
+            starts.pop(0)
         if parts and not parts[-1]:
             parts.pop()
+            starts.pop()
         if len(parts) < 1:
             return False
         source.context.cells = parts
+        source.context.cell_starts = starts
         source.context.is_delimiter = all(cls.delimiter.match(cell) for cell in parts)
         return True
 
@@ -197,14 +229,20 @@ class TableRow(block.BlockElement):
         source.consume()
         parent = cast(Table, source.state)
         cells: list[str] = source.context.cells[:]
+        starts: list[int | None] = source.context.cell_starts[:]
         if len(cells) < parent.num_of_cols:
-            cells.extend("" for _ in range(parent.num_of_cols - len(cells)))
+            pad = parent.num_of_cols - len(cells)
+            cells.extend("" for _ in range(pad))
+            starts.extend(None for _ in range(pad))
         elif len(cells) > parent.num_of_cols:
             cells = cells[: parent.num_of_cols]
-        cell_elements = [TableCell(cell) for cell in cells]
+            starts = starts[: parent.num_of_cols]
+        cell_elements = [TableCell(cell, start) for cell, start in zip(cells, starts)]
         for head, cell in zip(parent.head.children, cell_elements):
             cell.align = cast(TableCell, head).align
-        return cls(cell_elements)
+        rv = cls(cell_elements)
+        rv.source_span = source.context.row_span
+        return rv
 
 
 class TableCell(block.BlockElement):
@@ -212,10 +250,23 @@ class TableCell(block.BlockElement):
 
     virtual = True
 
-    def __init__(self, text: str) -> None:
-        self.inline_body = text.strip().replace("\\|", "|")
+    def __init__(self, text: str, position: int | None = None) -> None:
+        stripped = text.strip()
+        self.inline_body = stripped.replace("\\|", "|")
         self.header = False
         self.align: str | None = None
+        if position is not None:
+            self.source_span = (position, position + len(text))
+            pos = position + (len(text) - len(text.lstrip()))
+            self._inline_positions = _SourceMap.from_positions(
+                pos + i
+                for i in range(len(stripped))
+                if not (
+                    stripped[i] == "\\"
+                    and i + 1 < len(stripped)
+                    and stripped[i + 1] == "|"
+                )
+            )
 
 
 class Alert(block.Quote):

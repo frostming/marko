@@ -52,6 +52,9 @@ Inline Elements
 Helper Classes
 --------------
 
+.. autoclass:: marko.element.Element
+    :members:
+
 .. autoclass:: marko.source.Source
     :members:
 

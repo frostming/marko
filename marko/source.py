@@ -3,8 +3,10 @@ from __future__ import annotations
 import functools
 import re
 import types
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Generator, Match, Pattern, cast, overload
+from re import Match, Pattern
+from typing import TYPE_CHECKING, cast, overload
 
 from marko.block import BlockElement, Document
 
@@ -72,6 +74,15 @@ class Source:
     def prefix(self) -> str:
         """The prefix of each line when parsing."""
         return "".join(s._prefix for s in self._states)
+
+    @property
+    def _current_pos(self) -> int:
+        """Return the current source offset after the active block prefixes."""
+        match = self._expect_re(r"(?m)[^\n]*$\n?", self.pos)
+        if match is None:
+            return self.pos
+        prefix_len = self.match_prefix(self.prefix, match.group())
+        return self.pos + max(prefix_len, 0)
 
     def _expect_re(self, regexp: Pattern[str] | str, pos: int) -> Match[str] | None:
         if isinstance(regexp, str):
