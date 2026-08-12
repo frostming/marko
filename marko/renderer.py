@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import html
 import re
-from typing import TYPE_CHECKING, Any, Callable, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, ParamSpec, TypeVar
 
 if TYPE_CHECKING:
     from .block import Document
@@ -95,11 +95,11 @@ class Renderer:
         return "".join(rendered)
 
 
-_FT = TypeVar("_FT")
-_F = TypeVar("_F", bound=Callable[..., _FT])
+_P = ParamSpec("_P")
+_R = TypeVar("_R")
 
 
-def force_delegate(func: _F) -> _F:
+def force_delegate(func: Callable[_P, _R]) -> Callable[_P, _R]:
     """
     A decorator to allow delegation for the specified method even if cls.delegate = False
     """

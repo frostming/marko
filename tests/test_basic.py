@@ -1,4 +1,5 @@
-#! -*- coding: utf-8 -*-
+from __future__ import annotations
+
 import re
 import textwrap
 
@@ -62,21 +63,21 @@ class TestBasic:
         ):
             markdown = marko.Markdown(renderer=MarkdownRenderer)
             rerendered = markdown(text)
-            assert rerendered == text, f"loose list not preserved: {text!r} -> {rerendered!r}"
+            assert (
+                rerendered == text
+            ), f"loose list not preserved: {text!r} -> {rerendered!r}"
             assert normalize_html(marko.convert(rerendered)) == normalize_html(
                 marko.convert(text)
             )
 
     def test_markdown_renderer_preserve_link_refs(self):
-        text = textwrap.dedent(
-            """\
+        text = textwrap.dedent("""\
             This is a [link ref][1], [1] and a [link](abc "title").
             This is a footnote [^1].
 
             [1]: def
             [^1]: ghi
-            """
-        )
+            """)
         markdown = marko.Markdown(renderer=MarkdownRenderer, extensions=["footnote"])
         rerendered = markdown.convert(text)
         assert rerendered == text
@@ -157,8 +158,7 @@ class TestExtension:
         assert raw_text["children"] == "Hello world"
 
     def test_gfm_markdown_renderer(self):
-        text = textwrap.dedent(
-            """\
+        text = textwrap.dedent("""\
             ## TODO
 
             - [x] Shopping[^1]
@@ -175,8 +175,7 @@ class TestExtension:
             > Upcoming bugs
 
             [^1]: go to https://example.com
-            """
-        )
+            """)
 
         md = marko.Markdown(extensions=["gfm", "footnote"], renderer=MarkdownRenderer)
         res = md.convert(text)
@@ -185,29 +184,27 @@ class TestExtension:
     def test_paragraph_breaking_element(self):
         class CustomElement(block.BlockElement):
             breaks_paragraph = True
-            pattern = re.compile(r" {,3}@broken (.*)", flags=re.M)
+            pattern = re.compile(r" {,3}@broken (.*)", flags=re.MULTILINE)
 
             def __init__(self, match: re.Match[str]) -> None:
                 self.inline_body = match.group(1).strip()
 
             @classmethod
-            def match(cls, source: Source) -> "re.Match[str] | None":
+            def match(cls, source: Source) -> re.Match[str] | None:
                 return source.expect_re(cls.pattern)
 
             @classmethod
-            def parse(cls, source: Source) -> "re.Match[str] | None":
+            def parse(cls, source: Source) -> re.Match[str] | None:
                 m = source.match
                 source.consume()
                 return m
 
         my_extension = marko.MarkoExtension(elements=[CustomElement])
 
-        text = textwrap.dedent(
-            """
+        text = textwrap.dedent("""
             some text that is
             @broken by a custom element
-            """
-        )
+            """)
 
         md = marko.Markdown(extensions=[my_extension])
         res = md.parse(text)

@@ -12,7 +12,8 @@ r"""
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Iterable, cast
+from collections.abc import Iterable
+from typing import TYPE_CHECKING, cast
 
 from .helpers import MarkoExtension, load_extension
 from .html_renderer import HTMLRenderer
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
     from .block import Document
     from .parser import ElementType
 
-__version__ = "2.2.3"
+__version__ = "2.2.4"
 
 
 class SetupDone(Exception):
@@ -166,13 +167,13 @@ def render(parsed: Document) -> str:
 
 
 __all__ = [
-    "MarkoExtension",
+    "HTMLRenderer",
     "Markdown",
-    "convert",
-    "parse",
-    "render",
-    "load_extension",
+    "MarkoExtension",
     "Parser",
     "Renderer",
-    "HTMLRenderer",
+    "convert",
+    "load_extension",
+    "parse",
+    "render",
 ]

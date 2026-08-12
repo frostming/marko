@@ -127,7 +127,7 @@ class LineBreak(InlineElement):
         # ideally the regex pattern should be rewritten, but this works for now.
         # see issue #219
         if "\n" not in text:
-            return []
+            return iter(())
         return super().find(text, source=source)
 
 

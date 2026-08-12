@@ -351,12 +351,12 @@ def render_element(el: Element, text: str, b: HtmlBuilder) -> None:
     for a, c in zip(cuts, cuts[1:]):
         if a >= c:
             continue
-        child = next(
+        matching_child = next(
             (ch for ch, (cs, ce) in zip(children, child_spans) if cs <= a and ce >= c),
             None,
         )
-        if child is not None:
-            render_element(child, text, b)
+        if matching_child is not None:
+            render_element(matching_child, text, b)
             continue
         spcls = next((k for x, y, k in special if x <= a and y >= c), None)
         if spcls is not None:
