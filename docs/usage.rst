@@ -113,6 +113,48 @@ The parsed document is an Abstract Syntax Tree (AST) that you can traverse and m
 
 For more details about element types, see :ref:`elements`.
 
+Source Positions
+----------------
+
+Each element in the AST carries the positions of its corresponding text in the
+source, which is useful for implementing features like syntax highlighters.
+
+Every element has a :attr:`~marko.element.Element.source_span` attribute, a
+``(start, end)`` tuple of indices into the source text, and the convenience
+properties :attr:`~marko.element.Element.start_pos` and
+:attr:`~marko.element.Element.end_pos`. The positions are ``None`` when not
+available (e.g. for elements produced by extensions that don't record them)::
+
+    from marko import Markdown
+
+    text = "[Google](https://google.com)"
+    doc = Markdown().parse(text + "\n")
+    paragraph = doc.children[0]
+    link = paragraph.children[0]
+    print(link.source_span)          # (0, 28)
+    print(text[link.start_pos:link.end_pos])  # [Google](https://google.com)
+
+For inline elements, the parts of the span that are pure syntax (e.g. the
+markers of emphasis, the backticks of a code span, the brackets of a link) are
+exposed via :attr:`~marko.element.Element.syntax_spans`, while the content
+spans are covered by the element's children::
+
+    print(link.syntax_spans)  # [(0, 1), (7, 28)] -> "[" and "](https://google.com)"
+    print(link.children[0].source_span)  # (1, 7) -> "Google"
+
+For :class:`~marko.inline.Link` and :class:`~marko.inline.Image` elements, the
+destination and title are also exposed separately via the ``dest_span`` and
+``title_span`` attributes::
+
+    print(link.dest_span)  # (9, 27) -> "https://google.com"
+
+.. note::
+
+   Positions are indices into the *normalized* source text: line terminators
+   (``\r\n``, ``\r``) are normalized to ``\n`` before parsing, and U+0000 is
+   replaced with U+FFFD. For plain LF text the positions map directly to the
+   original string.
+
 Custom Rendering
 ----------------
 

@@ -5,7 +5,8 @@ Base parser
 from __future__ import annotations
 
 import itertools
-from typing import TYPE_CHECKING, Type, cast
+from collections.abc import Sequence
+from typing import TYPE_CHECKING, cast
 
 from .source import Source
 
@@ -61,6 +62,7 @@ class Parser:
         source = Source(text)
         source.parser = self
         doc = cast(block.Document, self.block_elements["Document"]())
+        doc.source_span = (0, len(source._buffer))
         with source.under_state(doc):
             doc.children = self.parse_source(source)
             self.parse_inline(doc, source)
@@ -71,14 +73,18 @@ class Parser:
         element_list = self._build_block_element_list()
         ast: list[block.BlockElement] = []
         while not source.exhausted:
+            start = source._current_pos
             for ele_type in element_list:
                 if ele_type.match(source):
                     result = ele_type.parse(source)
+                    end = source.pos
                     if not hasattr(result, "priority"):
                         # In some cases ``parse()`` won't return the element, but
                         # instead some information to create one, which will be passed
                         # to ``__init__()``.
                         result = ele_type(result)  # type: ignore
+                    if result.source_span is None:
+                        result.source_span = (start, end)
                     ast.append(result)
                     break
             else:
@@ -91,25 +97,42 @@ class Parser:
         are seen before that.
         """
         if element.inline_body:
-            element.children = self._parse_inline(element.inline_body, source)
+            element.children = self._parse_inline(
+                element.inline_body,
+                source,
+                positions=element._inline_positions,
+            )
             # clear the inline body to avoid parsing it again.
             element.inline_body = ""
+            element._inline_positions = None
         else:
             for child in element.children:
                 if isinstance(child, block.BlockElement):
                     self.parse_inline(child, source)
 
-    def _parse_inline(self, text: str, source: Source) -> list[inline.InlineElement]:
+    def _parse_inline(
+        self,
+        text: str,
+        source: Source,
+        positions: Sequence[int] | None = None,
+    ) -> list[inline.InlineElement]:
         """Parses text into inline elements.
         RawText is not considered in parsing but created as a wrapper of holes
         that don't match any other elements.
 
         :param text: the text to be parsed.
+        :param source: the source object of the content being parsed.
+        :param positions: an optional parallel mapping of the indices in ``text``
+            to the positions in the source text.
         :returns: a list of inline elements.
         """
         element_list = self._build_inline_element_list()
         return inline_parser.parse(
-            text, element_list, fallback=self.inline_elements["RawText"], source=source
+            text,
+            element_list,
+            fallback=self.inline_elements["RawText"],
+            source=source,
+            positions=positions,
         )
 
     def _build_block_element_list(self) -> list[BlockElementType]:
@@ -127,9 +150,9 @@ class Parser:
         return [e for e in self.inline_elements.values() if not e.virtual]
 
 
-from . import block, element, inline, inline_parser  # noqa
+from . import block, element, inline, inline_parser
 
 if TYPE_CHECKING:
-    BlockElementType = Type[block.BlockElement]
-    InlineElementType = Type[inline.InlineElement]
-    ElementType = Type[element.Element]
+    BlockElementType = type[block.BlockElement]
+    InlineElementType = type[inline.InlineElement]
+    ElementType = type[element.Element]

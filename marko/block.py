@@ -5,29 +5,31 @@ Block level elements
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Any, Match, NamedTuple, Sequence, cast
+from collections.abc import Sequence
+from re import Match
+from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 from . import inline, inline_parser, patterns
-from .element import Element
+from .element import Element, _SourceMap
 from .helpers import find_next, normalize_label, partition_by_spaces
 
 if TYPE_CHECKING:
     from .source import Source
 
 __all__ = (
-    "Document",
+    "BlankLine",
     "CodeBlock",
+    "Document",
+    "FencedCode",
+    "HTMLBlock",
     "Heading",
+    "LinkRefDef",
     "List",
     "ListItem",
-    "BlankLine",
-    "Quote",
-    "FencedCode",
-    "ThematicBreak",
-    "HTMLBlock",
-    "LinkRefDef",
-    "SetextHeading",
     "Paragraph",
+    "Quote",
+    "SetextHeading",
+    "ThematicBreak",
 )
 
 
@@ -84,6 +86,29 @@ class Document(BlockElement):
         self.link_ref_defs: dict[str, tuple[str, str]] = {}
 
 
+class _ParsedLines(list[str]):
+    """Paragraph lines with their prefix-aware source offsets."""
+
+    def __init__(self, lines: Sequence[str], line_starts: Sequence[int]) -> None:
+        super().__init__(lines)
+        self.line_starts = list(line_starts)
+
+
+def _build_inline_positions(
+    lines: Sequence[str], line_starts: Sequence[int]
+) -> _SourceMap:
+    """Build a parallel mapping from the indices of the inline body
+    (i.e. the lines with leading whitespace stripped and joined) to the
+    positions in the source text.
+    """
+    runs: list[tuple[int, int]] = []
+    for line, base in zip(lines, line_starts):
+        stripped = line.lstrip()
+        leading = len(line) - len(stripped)
+        runs.append((base + leading, len(stripped)))
+    return _SourceMap(runs)
+
+
 class BlankLine(BlockElement):
     """Blank lines"""
 
@@ -112,13 +137,22 @@ class Heading(BlockElement):
     priority = 6
     pattern = re.compile(
         r" {0,3}(#{1,6})((?=\s)[^\n]*?|[^\n\S]*)(?:(?<=\s)(?<!\\)#+)?[^\n\S]*$\n?",
-        flags=re.M,
+        flags=re.MULTILINE,
     )
     breaks_paragraph = True
 
     def __init__(self, match: Match[str]) -> None:
         self.level = len(match.group(1))
         self.inline_body = match.group(2).strip()
+        group = match.group(2)
+        start = match.start(2)
+        a = 0
+        while a < len(group) and group[a].isspace():
+            a += 1
+        b = len(group)
+        while b > a and group[b - 1].isspace():
+            b -= 1
+        self._inline_positions = _SourceMap([(start + a, b - a)])
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -140,8 +174,14 @@ class SetextHeading(BlockElement):
     virtual = True
 
     def __init__(self, lines: list[str]) -> None:
-        self.level = 1 if lines.pop().strip()[0] == "=" else 2
+        line_starts = getattr(lines, "line_starts", None)
+        underline = lines.pop()
+        self.level = 1 if underline.strip()[0] == "=" else 2
         self.inline_body = "".join(line.lstrip() for line in lines).strip()
+        if line_starts is not None:
+            self._inline_positions = _build_inline_positions(
+                lines, line_starts[: len(lines)]
+            )[: len(self.inline_body)]
 
 
 class CodeBlock(BlockElement):
@@ -210,7 +250,7 @@ class FencedCode(BlockElement):
     """Fenced code block: (```python\nhello\n```\n)"""
 
     priority = 7
-    pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.M)
+    pattern = re.compile(r"( {,3})(`{3,}|~{3,})[^\n\S]*(.*?)$", re.MULTILINE)
     breaks_paragraph = True
 
     class ParseInfo(NamedTuple):
@@ -247,7 +287,7 @@ class FencedCode(BlockElement):
             if line is None:
                 break
             source.consume()
-            m = re.match(r" {,3}(~+|`+)[^\n\S]*$", line, flags=re.M)
+            m = re.match(r" {,3}(~+|`+)[^\n\S]*$", line, flags=re.MULTILINE)
             if m and parse_info.leading in m.group(1):
                 break
 
@@ -264,7 +304,7 @@ class ThematicBreak(BlockElement):
     """Horizontal rules: (----\n)"""
 
     priority = 8
-    pattern = re.compile(r" {,3}([-_*][^\n\S]*){3,}$\n?", flags=re.M)
+    pattern = re.compile(r" {,3}([-_*][^\n\S]*){3,}$\n?", flags=re.MULTILINE)
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -342,12 +382,17 @@ class Paragraph(BlockElement):
     """A paragraph element"""
 
     priority = 1
-    pattern = re.compile(r"[^\n]+$\n?", flags=re.M)
+    pattern = re.compile(r"[^\n]+$\n?", flags=re.MULTILINE)
 
     def __init__(self, lines: list[str]) -> None:
         str_lines = "".join(line.lstrip() for line in lines).rstrip("\n")
         self.inline_body = str_lines
         self._tight = False
+        line_starts = getattr(lines, "line_starts", None)
+        if line_starts is not None:
+            self._inline_positions = _build_inline_positions(lines, line_starts)[
+                : len(str_lines)
+            ]
 
     @classmethod
     def match(cls, source: Source) -> bool:
@@ -363,10 +408,10 @@ class Paragraph(BlockElement):
         prev_match = source.match
         try:
             elements = parser.block_elements.values()
-            breaking_elements = [element for element in elements if element.breaks_paragraph]
-            if (
-                any(element.match(source) for element in breaking_elements)
-            ):
+            breaking_elements = [
+                element for element in elements if element.breaks_paragraph
+            ]
+            if any(element.match(source) for element in breaking_elements):
                 return True
             if (
                 lazy
@@ -393,7 +438,12 @@ class Paragraph(BlockElement):
 
     @classmethod
     def parse(cls, source: Source) -> list[str] | SetextHeading:
-        lines = [source.next_line()]
+        first_line = source.next_line()
+        assert first_line is not None
+        lines = _ParsedLines(
+            [first_line],
+            [source.match.start() if source.match else source.pos],
+        )
         source.consume()
         end_parse = False
         while not source.exhausted and not end_parse:
@@ -403,6 +453,9 @@ class Paragraph(BlockElement):
             # the prefix is matched and not breakers
             if line:
                 lines.append(line)
+                lines.line_starts.append(
+                    source.match.start() if source.match else source.pos
+                )
                 source.consume()
                 if cls.is_setext_heading(line):
                     return cast(
@@ -422,6 +475,9 @@ class Paragraph(BlockElement):
                             end_parse = True
                         else:
                             lines.append(next_line)
+                            lines.line_starts.append(
+                                source.match.start() if source.match else source.pos
+                            )
                             source.consume()
                         break
                 source._states = states
@@ -484,12 +540,14 @@ class List(BlockElement):
         parser = source.parser
         with source.under_state(state):
             while not source.exhausted:
+                item_start = source._current_pos
                 if parser.block_elements["ListItem"].match(source):
                     el = parser.block_elements["ListItem"].parse(source)
                     if not isinstance(el, BlockElement):
                         el = cast("type[ListItem]", parser.block_elements["ListItem"])(
                             el
                         )
+                    el.source_span = (item_start, source.pos)
                     children.append(el)
                     source.anchor()
                     if has_blank_line:
@@ -589,7 +647,7 @@ class LinkRefDef(BlockElement):
     [label]: destination "title"
     """
 
-    pattern = re.compile(r" {,3}(\[[\s\S]*?)(?=\n\n|\Z)", flags=re.M)
+    pattern = re.compile(r" {,3}(\[[\s\S]*?)(?=\n\n|\Z)", flags=re.MULTILINE)
 
     class ParseInfo(NamedTuple):
         link_label: inline_parser.Group

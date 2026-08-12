@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>demo.md</title>
+<style>
+:root {
+  color-scheme: dark;
+  --bg: #0d1117;
+  --fg: #c9d1d9;
+  --muted: #8b949e;
+  --line-num: #3d444d;
+  --syntax: #6e7681;
+  --heading: #e6edf3;
+  --heading-mark: #9da7b3;
+  --link: #58a6ff;
+  --link-dest: #7d8590;
+  --link-title: #3fb950;
+  --image-alt: #f778ba;
+  --code-fg: #ffa657;
+  --code-bg: #161b22;
+  --code-chip: #21262d;
+  --emphasis: #d2a8ff;
+  --quote: #8b949e;
+  --quote-border: #30363d;
+  --html: #7ee787;
+  --literal: #e3b341;
+  --strike: #8b949e;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #ffffff;
+    --fg: #1f2328;
+    --muted: #59636e;
+    --line-num: #afb8c1;
+    --syntax: #89929b;
+    --heading: #1f2328;
+    --heading-mark: #59636e;
+    --link: #0969da;
+    --link-dest: #59636e;
+    --link-title: #1a7f37;
+    --image-alt: #bf3989;
+    --code-fg: #cf222e;
+    --code-bg: #f6f8fa;
+    --code-chip: #eff1f3;
+    --emphasis: #8250df;
+    --quote: #59636e;
+    --quote-border: #d1d9e0;
+    --html: #116329;
+    --literal: #9a6700;
+    --strike: #59636e;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  margin: 0;
+  padding: 2rem 1rem;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+}
+main { max-width: 960px; margin: 0 auto; }
+.page-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--fg);
+  margin: 0 0 0.75rem;
+  padding-left: 0.25rem;
+}
+.hl {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  font-size: 13.5px;
+  line-height: 1.6;
+  border: 1px solid var(--line-num);
+  border-radius: 8px;
+  padding: 0.6rem 0;
+  overflow-x: auto;
+}
+.hl-line { white-space: pre; padding: 0 0.6rem; }
+.hl-line:hover { background: color-mix(in srgb, var(--fg) 4%, transparent); }
+.hl-ln {
+  display: inline-block;
+  width: 3.2em;
+  margin-right: 1.2em;
+  text-align: right;
+  color: var(--line-num);
+  user-select: none;
+}
+
+/* ---- generic ---- */
+.tok-syntax { color: var(--syntax); }
+.tok-dest { color: var(--link-dest); }
+.tok-title { color: var(--link-title); }
+.tok-link-ref-def { color: var(--muted); }
+
+/* ---- headings ---- */
+.tok-heading, .tok-setext-heading { color: var(--heading); font-weight: 700; }
+.tok-heading { font-size: 1.25em; }
+.tok-heading.tok-level-1 { font-size: 1.7em; }
+.tok-heading.tok-level-2 { font-size: 1.5em; }
+.tok-heading.tok-level-3 { font-size: 1.35em; }
+.tok-heading.tok-level-4 { font-size: 1.25em; }
+.tok-heading.tok-level-5, .tok-heading.tok-level-6 { font-size: 1.15em; }
+.tok-setext-heading.tok-level-1 { font-size: 1.5em; }
+.tok-setext-heading.tok-level-2 { font-size: 1.35em; }
+
+/* ---- inline text ---- */
+.tok-emphasis { font-style: italic; color: var(--emphasis); }
+.tok-strong-emphasis { font-weight: 700; }
+.tok-strong-emphasis .tok-emphasis { color: var(--emphasis); }
+.tok-code-span {
+  color: var(--code-fg);
+  background: var(--code-chip);
+  border-radius: 4px;
+  padding: 0.05em 0.35em;
+}
+.tok-literal { color: var(--literal); }
+.tok-strikethrough { color: var(--strike); text-decoration: line-through; }
+
+/* ---- links & images ---- */
+.tok-link { color: var(--link); }
+.tok-link .tok-raw-text { color: var(--link); text-decoration: underline; }
+.tok-auto-link { color: var(--link); text-decoration: underline; }
+.tok-image .tok-raw-text { color: var(--image-alt); font-style: italic; }
+
+/* ---- code blocks ---- */
+.tok-fenced-code, .tok-code-block {
+  background: var(--code-bg);
+  color: var(--fg);
+}
+
+/* ---- quotes ---- */
+.tok-quote, .tok-alert { color: var(--quote); }
+.tok-quote .tok-raw-text, .tok-alert .tok-raw-text { color: var(--quote); }
+.tok-quote, .tok-alert {
+  border-left: 3px solid var(--quote-border);
+  padding-left: 0.75em;
+}
+
+/* ---- misc blocks ---- */
+.tok-thematic-break { color: var(--syntax); }
+.tok-html-block, .tok-inline-html { color: var(--html); }
+.tok-list-item .tok-syntax { color: var(--syntax); }
+
+/* ---- legend ---- */
+details.legend {
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+details.legend summary { cursor: pointer; margin-bottom: 0.5rem; }
+.legend-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.35rem 1rem; }
+.legend-grid span { white-space: nowrap; }
+.swatch { font-family: ui-monospace, Menlo, Consolas, monospace; margin-right: 0.4em; }
+
+</style>
+</head>
+<body>
+<main>
+<h1 class="page-title">demo.md</h1>
+<div class="hl">
+<div class="hl-line"><span class="hl-ln">1</span><span class="tok-document"><span class="tok-heading tok-level-1"><span class="tok-syntax"># </span><span class="tok-raw-text">Marko Syntax Highlighting Demo</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">2</span><span class="tok-document"><span class="tok-heading tok-level-1"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">3</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-paragraph"><span class="tok-raw-text">This document demonstrates how Marko&#x27;s source mapping info can be used to</span><span class="tok-line-break"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">4</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-raw-text">build a </span><span class="tok-strong-emphasis"><span class="tok-syntax">**</span><span class="tok-raw-text">syntax highlighter</span><span class="tok-syntax">**</span></span><span class="tok-raw-text">. Every token below is colored by its element</span><span class="tok-line-break"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">5</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-raw-text">type, using the </span><span class="tok-code-span"><span class="tok-syntax">`</span>source_span<span class="tok-syntax">`</span></span><span class="tok-raw-text"> and </span><span class="tok-code-span"><span class="tok-syntax">`</span>syntax_spans<span class="tok-syntax">`</span></span><span class="tok-raw-text"> attributes.</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">6</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">7</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-2"><span class="tok-syntax">## </span><span class="tok-raw-text">Headings &amp; emphasis</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">8</span><span class="tok-document"><span class="tok-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">9</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-3"><span class="tok-syntax">### </span><span class="tok-raw-text">Level three </span><span class="tok-emphasis"><span class="tok-syntax">*</span><span class="tok-raw-text">with emphasis</span><span class="tok-syntax">*</span></span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">10</span><span class="tok-document"><span class="tok-heading tok-level-3"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">11</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-4"><span class="tok-syntax">#### </span><span class="tok-raw-text">Level four with </span><span class="tok-code-span"><span class="tok-syntax">`</span>inline code<span class="tok-syntax">`</span></span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">12</span><span class="tok-document"><span class="tok-heading tok-level-4"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">13</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-setext-heading tok-level-1"><span class="tok-raw-text">Setext heading</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">14</span><span class="tok-document"><span class="tok-setext-heading tok-level-1"><span class="tok-syntax">==============</span></span></span></div>
+<div class="hl-line"><span class="hl-ln">15</span><span class="tok-document"><span class="tok-setext-heading tok-level-1"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">16</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-setext-heading tok-level-2"><span class="tok-raw-text">Second level</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">17</span><span class="tok-document"><span class="tok-setext-heading tok-level-2"><span class="tok-syntax">------------</span></span></span></div>
+<div class="hl-line"><span class="hl-ln">18</span><span class="tok-document"><span class="tok-setext-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">19</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-paragraph"><span class="tok-raw-text">Text with </span><span class="tok-emphasis"><span class="tok-syntax">*</span><span class="tok-raw-text">emphasis</span><span class="tok-syntax">*</span></span><span class="tok-raw-text">, </span><span class="tok-strong-emphasis"><span class="tok-syntax">**</span><span class="tok-raw-text">strong emphasis</span><span class="tok-syntax">**</span></span><span class="tok-raw-text">, </span><span class="tok-emphasis"><span class="tok-syntax">*</span><span class="tok-strong-emphasis"><span class="tok-syntax">**</span><span class="tok-raw-text">both</span><span class="tok-syntax">**</span></span><span class="tok-syntax">*</span></span><span class="tok-raw-text">, and </span><span class="tok-strikethrough"><span class="tok-syntax">~~</span><span class="tok-raw-text">strikethrough</span><span class="tok-syntax">~~</span></span><span class="tok-line-break"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">20</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-raw-text">(GFM). Escaped characters like </span><span class="tok-literal"><span class="tok-syntax">\</span>*</span><span class="tok-raw-text">stars</span><span class="tok-literal"><span class="tok-syntax">\</span>*</span><span class="tok-raw-text"> and </span><span class="tok-literal"><span class="tok-syntax">\</span>#</span><span class="tok-raw-text"> hashes stay literal.</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">21</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">22</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-2"><span class="tok-syntax">## </span><span class="tok-raw-text">Links, images &amp; autolinks</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">23</span><span class="tok-document"><span class="tok-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">24</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-paragraph"><span class="tok-raw-text">Here is </span><span class="tok-link"><span class="tok-syntax">[</span><span class="tok-raw-text">a link</span><span class="tok-syntax">](</span><span class="tok-dest">https://example.com</span><span class="tok-syntax">)</span></span><span class="tok-raw-text">, one </span><span class="tok-link"><span class="tok-syntax">[</span><span class="tok-raw-text">with a title</span><span class="tok-syntax">](</span><span class="tok-dest">https://example.com</span><span class="tok-syntax"> </span><span class="tok-title">&quot;The title&quot;</span><span class="tok-syntax">)</span></span><span class="tok-raw-text">,</span><span class="tok-line-break"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">25</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-raw-text">and a </span><span class="tok-link"><span class="tok-syntax">[</span><span class="tok-raw-text">reference link</span><span class="tok-syntax">][ref]</span></span><span class="tok-raw-text">. An image: </span><span class="tok-image"><span class="tok-syntax">![</span><span class="tok-raw-text">Marko logo</span><span class="tok-syntax">](</span><span class="tok-dest">https://example.com/logo.png</span><span class="tok-syntax"> </span><span class="tok-title">&quot;Logo&quot;</span><span class="tok-syntax">)</span></span><span class="tok-raw-text">.</span><span class="tok-line-break"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">26</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-raw-text">Autolinks like </span><span class="tok-auto-link"><span class="tok-syntax">&lt;</span><span class="tok-raw-text">https://example.org</span><span class="tok-syntax">&gt;</span></span><span class="tok-raw-text"> and email </span><span class="tok-auto-link"><span class="tok-syntax">&lt;</span><span class="tok-raw-text">me@example.com</span><span class="tok-syntax">&gt;</span></span><span class="tok-raw-text"> work too.</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">27</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">28</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-link-ref-def">[ref]: https://example.com/ref &quot;Reference&quot;</span></span></div>
+<div class="hl-line"><span class="hl-ln">29</span><span class="tok-document"><span class="tok-link-ref-def"></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">30</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-2"><span class="tok-syntax">## </span><span class="tok-raw-text">Code</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">31</span><span class="tok-document"><span class="tok-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">32</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-paragraph"><span class="tok-raw-text">Inline code: use </span><span class="tok-code-span"><span class="tok-syntax">`</span>marko.parse(text)<span class="tok-syntax">`</span></span><span class="tok-raw-text"> to get the AST, then check</span><span class="tok-line-break"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">33</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-code-span"><span class="tok-syntax">`</span>element.source_span<span class="tok-syntax">`</span></span><span class="tok-raw-text">.</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">34</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">35</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-fenced-code"><span class="tok-syntax">```python</span></span></span></div>
+<div class="hl-line"><span class="hl-ln">36</span><span class="tok-document"><span class="tok-fenced-code"><span class="tok-syntax"></span>import marko</span></span></div>
+<div class="hl-line"><span class="hl-ln">37</span><span class="tok-document"><span class="tok-fenced-code"></span></span></div>
+<div class="hl-line"><span class="hl-ln">38</span><span class="tok-document"><span class="tok-fenced-code">doc = marko.parse(&quot;# Hello&quot;)</span></span></div>
+<div class="hl-line"><span class="hl-ln">39</span><span class="tok-document"><span class="tok-fenced-code">heading = doc.children[0]</span></span></div>
+<div class="hl-line"><span class="hl-ln">40</span><span class="tok-document"><span class="tok-fenced-code">print(heading.source_span)  # (0, 10)</span></span></div>
+<div class="hl-line"><span class="hl-ln">41</span><span class="tok-document"><span class="tok-fenced-code"><span class="tok-syntax">```</span></span></span></div>
+<div class="hl-line"><span class="hl-ln">42</span><span class="tok-document"><span class="tok-fenced-code"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">43</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-code-block">    An indented code block looks like this one,</span></span></div>
+<div class="hl-line"><span class="hl-ln">44</span><span class="tok-document"><span class="tok-code-block">    and keeps its own color.</span></span></div>
+<div class="hl-line"><span class="hl-ln">45</span><span class="tok-document"><span class="tok-code-block"></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">46</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-2"><span class="tok-syntax">## </span><span class="tok-raw-text">Block quotes</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">47</span><span class="tok-document"><span class="tok-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">48</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-quote"><span class="tok-syntax">&gt; </span><span class="tok-paragraph"><span class="tok-raw-text">A block quote with </span><span class="tok-emphasis"><span class="tok-syntax">*</span><span class="tok-raw-text">styled</span><span class="tok-syntax">*</span></span><span class="tok-raw-text"> content.</span><span class="tok-line-break"></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">49</span><span class="tok-document"><span class="tok-quote"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-syntax">&gt; </span><span class="tok-raw-text">It spans multiple lines.</span><span class="tok-syntax"></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">50</span><span class="tok-document"><span class="tok-quote"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-syntax">&gt;</span><span class="tok-blank-line"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">51</span><span class="tok-document"><span class="tok-quote"><span class="tok-blank-line"></span><span class="tok-syntax">&gt; </span><span class="tok-quote"><span class="tok-syntax">&gt; </span><span class="tok-paragraph"><span class="tok-raw-text">And can be nested.</span><span class="tok-syntax"></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">52</span><span class="tok-document"><span class="tok-quote"><span class="tok-quote"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">53</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-2"><span class="tok-syntax">## </span><span class="tok-raw-text">Lists</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">54</span><span class="tok-document"><span class="tok-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">55</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-list"><span class="tok-list-item"><span class="tok-syntax">- </span><span class="tok-paragraph"><span class="tok-raw-text">unordered item with </span><span class="tok-code-span"><span class="tok-syntax">`</span>code<span class="tok-syntax">`</span></span><span class="tok-syntax"></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">56</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span><span class="tok-list-item"><span class="tok-syntax">- </span><span class="tok-paragraph"><span class="tok-raw-text">another item</span><span class="tok-syntax"></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">57</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-syntax">  </span><span class="tok-list"><span class="tok-list-item"><span class="tok-syntax">- </span><span class="tok-paragraph"><span class="tok-raw-text">nested item one</span><span class="tok-syntax"></span></span></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">58</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span><span class="tok-syntax">  </span><span class="tok-list-item"><span class="tok-syntax">- </span><span class="tok-paragraph"><span class="tok-raw-text">nested item two</span><span class="tok-syntax"></span></span></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">59</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span></span></span><span class="tok-list-item"><span class="tok-syntax">- </span><span class="tok-paragraph"><span class="tok-syntax">[x]</span><span class="tok-raw-text"> a completed task</span><span class="tok-syntax"></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">60</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span><span class="tok-list-item"><span class="tok-syntax">- </span><span class="tok-paragraph"><span class="tok-syntax">[ ]</span><span class="tok-raw-text"> a pending task</span><span class="tok-syntax"></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">61</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">62</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-list"><span class="tok-list-item"><span class="tok-syntax">1. </span><span class="tok-paragraph"><span class="tok-raw-text">first ordered item</span><span class="tok-syntax"></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">63</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span><span class="tok-list-item"><span class="tok-syntax">2. </span><span class="tok-paragraph"><span class="tok-raw-text">second ordered item</span><span class="tok-syntax"></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">64</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-syntax">   </span><span class="tok-list"><span class="tok-list-item"><span class="tok-syntax">1. </span><span class="tok-paragraph"><span class="tok-raw-text">nested ordered</span><span class="tok-syntax"></span></span></span></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">65</span><span class="tok-document"><span class="tok-list"><span class="tok-list-item"><span class="tok-list"><span class="tok-list-item"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span></span></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">66</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-2"><span class="tok-syntax">## </span><span class="tok-raw-text">Tables (GFM)</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">67</span><span class="tok-document"><span class="tok-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">68</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-table"><span class="tok-table-row"><span class="tok-syntax">| </span><span class="tok-table-cell"><span class="tok-raw-text">Name</span></span><span class="tok-syntax">   | </span><span class="tok-table-cell"><span class="tok-raw-text">Price</span></span><span class="tok-syntax"> | </span><span class="tok-table-cell"><span class="tok-raw-text">Quantity</span></span><span class="tok-syntax"> |</span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">69</span><span class="tok-document"><span class="tok-table"><span class="tok-table-row"><span class="tok-syntax"></span></span><span class="tok-syntax">| ------ | ----- | -------- |</span></span></span></div>
+<div class="hl-line"><span class="hl-ln">70</span><span class="tok-document"><span class="tok-table"><span class="tok-syntax"></span><span class="tok-table-row"><span class="tok-syntax">| </span><span class="tok-table-cell"><span class="tok-raw-text">Apple</span></span><span class="tok-syntax">  | </span><span class="tok-table-cell"><span class="tok-raw-text">$1</span></span><span class="tok-syntax">    | </span><span class="tok-table-cell"><span class="tok-raw-text">10</span></span><span class="tok-syntax">       |</span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">71</span><span class="tok-document"><span class="tok-table"><span class="tok-table-row"><span class="tok-syntax"></span></span><span class="tok-table-row"><span class="tok-syntax">| </span><span class="tok-table-cell"><span class="tok-raw-text">Banana</span></span><span class="tok-syntax"> | </span><span class="tok-table-cell"><span class="tok-raw-text">$0.5</span></span><span class="tok-syntax">  | </span><span class="tok-table-cell"><span class="tok-raw-text">3</span></span><span class="tok-syntax">        |</span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">72</span><span class="tok-document"><span class="tok-table"><span class="tok-table-row"><span class="tok-syntax"></span></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">73</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-heading tok-level-2"><span class="tok-syntax">## </span><span class="tok-raw-text">Other blocks</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">74</span><span class="tok-document"><span class="tok-heading tok-level-2"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">75</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-thematic-break">---</span></span></div>
+<div class="hl-line"><span class="hl-ln">76</span><span class="tok-document"><span class="tok-thematic-break"></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">77</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-paragraph"><span class="tok-raw-text">Some </span><span class="tok-inline-html">&lt;span style=&quot;color: red&quot;&gt;</span><span class="tok-raw-text">raw HTML</span><span class="tok-inline-html">&lt;/span&gt;</span><span class="tok-raw-text"> inline, and a block below:</span><span class="tok-syntax"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">78</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-syntax"></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">79</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-html-block">&lt;div class=&quot;note&quot;&gt;</span></span></div>
+<div class="hl-line"><span class="hl-ln">80</span><span class="tok-document"><span class="tok-html-block">  This is an HTML block.</span></span></div>
+<div class="hl-line"><span class="hl-ln">81</span><span class="tok-document"><span class="tok-html-block">&lt;/div&gt;</span></span></div>
+<div class="hl-line"><span class="hl-ln">82</span><span class="tok-document"><span class="tok-html-block"></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">83</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-alert"><span class="tok-syntax">&gt; [!NOTE]</span></span></span></div>
+<div class="hl-line"><span class="hl-ln">84</span><span class="tok-document"><span class="tok-alert"><span class="tok-syntax">&gt; </span><span class="tok-paragraph"><span class="tok-raw-text">GFM alert boxes are supported too.</span><span class="tok-syntax"></span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">85</span><span class="tok-document"><span class="tok-alert"><span class="tok-paragraph"><span class="tok-syntax"></span></span></span><span class="tok-blank-line"></span></span></div>
+<div class="hl-line"><span class="hl-ln">86</span><span class="tok-document"><span class="tok-blank-line"></span><span class="tok-paragraph"><span class="tok-raw-text">A paragraph with a hard line break:</span><span class="tok-line-break"><span class="tok-syntax">  </span></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">87</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-raw-text">and a soft line break</span><span class="tok-line-break"></span></span></span></div>
+<div class="hl-line"><span class="hl-ln">88</span><span class="tok-document"><span class="tok-paragraph"><span class="tok-line-break"></span><span class="tok-raw-text">right here.</span><span class="tok-syntax"></span></span></span></div>
+</div>
+<details class="legend">
+<summary>Legend</summary>
+<div class="legend-grid"><span><span class="swatch tok-heading tok-level-1"># H1 heading</span></span><span><span class="swatch tok-heading tok-level-2">## H2 heading</span></span><span><span class="swatch tok-setext-heading tok-level-1">Setext heading</span></span><span><span class="swatch tok-emphasis">*emphasis*</span></span><span><span class="swatch tok-strong-emphasis">**strong**</span></span><span><span class="swatch tok-strikethrough">~~strike~~</span></span><span><span class="swatch tok-code-span">`code span`</span></span><span><span class="swatch tok-fenced-code">``` code block</span></span><span><span class="swatch tok-link">[link](dest)</span></span><span><span class="swatch tok-dest">dest / url</span></span><span><span class="swatch tok-title">"title"</span></span><span><span class="swatch tok-image">![alt](img)</span></span><span><span class="swatch tok-auto-link"><autolink></span></span><span><span class="swatch tok-literal">\escape</span></span><span><span class="swatch tok-quote">> quote</span></span><span><span class="swatch tok-table">| table |</span></span><span><span class="swatch tok-html-block"><html></span></span><span><span class="swatch tok-thematic-break">---- rule</span></span><span><span class="swatch tok-link-ref-def">[ref]: url</span></span><span><span class="swatch tok-syntax">` # * > | markers</span></span></div>
+</details>
+</main>
+</body>
+</html>

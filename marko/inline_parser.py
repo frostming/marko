@@ -5,9 +5,12 @@ Parse inline elements
 from __future__ import annotations
 
 import re
-from typing import TYPE_CHECKING, Match, NamedTuple, Union
+from collections.abc import Sequence
+from re import Match
+from typing import TYPE_CHECKING, NamedTuple, Union
 
 from . import patterns
+from .element import _translate_span
 from .helpers import find_next, is_paired, normalize_label
 from .inline import InlineElement
 
@@ -27,7 +30,7 @@ class Group(NamedTuple):
 
 _EMPTY_GROUP = Group(-1, -1, None)
 WHITESPACE = " \n\t"
-ASCII_CONTROL = "".join(chr(i) for i in range(0, 32)) + chr(127)
+ASCII_CONTROL = "".join(chr(i) for i in range(32)) + chr(127)
 
 
 class ParseError(ValueError):
@@ -35,13 +38,22 @@ class ParseError(ValueError):
 
 
 def parse(
-    text: str, elements: list[ElementType], fallback: ElementType, source: Source
+    text: str,
+    elements: list[ElementType],
+    fallback: ElementType,
+    source: Source,
+    positions: Sequence[int] | None = None,
 ) -> list[InlineElement]:
     """Parse given text and produce a list of inline elements.
 
     :param text: the text to be parsed.
     :param elements: the element types to be included in parsing
     :param fallback: fallback class when no other element type is matched.
+    :param positions: an optional parallel mapping of the indices in ``text``
+        to the positions in the source text. When provided, the produced
+        elements will have their :attr:`~marko.element.Element.source_span`
+        (and :attr:`~marko.element.Element.syntax_spans` when applicable)
+        filled with source positions.
     """
 
     class LinkOrEmph(InlineElement):
@@ -54,14 +66,14 @@ def parse(
     # A raw list of elements that may contain overlaps.
     tokens: list[Token] = []
     for m in find_links_or_emphs(text, source.root.link_ref_defs):
-        tokens.append(Token(LinkOrEmph, m, text, fallback))
+        tokens.append(Token(LinkOrEmph, m, text, fallback, positions))
 
     for etype in elements:
         for match in etype.find(text, source=source):
-            tokens.append(Token(etype, match, text, fallback))
+            tokens.append(Token(etype, match, text, fallback, positions))
     tokens.sort()
     tokens = _resolve_overlap(tokens)
-    return make_elements(tokens, text, fallback=fallback)
+    return make_elements(tokens, text, fallback=fallback, positions=positions)
 
 
 def _resolve_overlap(tokens: list[Token]) -> list[Token]:
@@ -88,6 +100,7 @@ def make_elements(
     start: int = 0,
     end: int | None = None,
     fallback: ElementType | None = None,
+    positions: Sequence[int] | None = None,
 ) -> list[InlineElement]:
     """Make elements from a list of parsed tokens.
     It will turn all unmatched holes into fallback elements.
@@ -97,6 +110,8 @@ def make_elements(
     :param start: the offset of where parsing starts. Defaults to the start of text.
     :param end: the offset of where parsing ends. Defauls to the end of text.
     :param fallback: fallback element type.
+    :param positions: an optional parallel mapping of the indices in ``text``
+        to the positions in the source text.
     :returns: a list of inline elements.
     """
     result: list[InlineElement] = []
@@ -104,11 +119,15 @@ def make_elements(
     prev_end = start
     for token in tokens:
         if prev_end < token.start:
-            result.append(fallback(text[prev_end : token.start]))  # type: ignore
+            rv = fallback(text[prev_end : token.start])  # type: ignore
+            rv.source_span = _translate_span(positions, prev_end, token.start)
+            result.append(rv)
         result.append(token.as_element())
         prev_end = token.end
     if prev_end < end:
-        result.append(fallback(text[prev_end:end]))  # type: ignore
+        rv = fallback(text[prev_end:end])  # type: ignore
+        rv.source_span = _translate_span(positions, prev_end, end)
+        result.append(rv)
     return result
 
 
@@ -123,7 +142,12 @@ class Token:
     SHADE = 3
 
     def __init__(
-        self, etype: ElementType, match: _Match, text: str, fallback: ElementType
+        self,
+        etype: ElementType,
+        match: _Match,
+        text: str,
+        fallback: ElementType,
+        positions: Sequence[int] | None = None,
     ) -> None:
         self.etype = etype
         self.match = match
@@ -133,6 +157,7 @@ class Token:
         self.inner_end = match.end(etype.parse_group)
         self.text = text
         self.fallback = fallback
+        self.positions = positions
         self.children: list[Token] = []
 
     def relation(self, other: Token) -> int:
@@ -156,6 +181,16 @@ class Token:
 
     def as_element(self) -> InlineElement:
         e = self.etype(self.match)
+        e.source_span = _translate_span(self.positions, self.start, self.end)
+        syntax_spans = e._syntax_spans(self.match)
+        if self.positions is not None and syntax_spans:
+            translated = []
+            for start, end in syntax_spans:
+                span = _translate_span(self.positions, start, end)
+                if span is not None:
+                    translated.append(span)
+            e.syntax_spans = translated
+        e._set_extra_source_spans(self.match, self.positions)
         if e.parse_children:
             self.children = _resolve_overlap(self.children)
             e.children = make_elements(
@@ -164,13 +199,12 @@ class Token:
                 self.inner_start,
                 self.inner_end,
                 self.fallback,
+                self.positions,
             )
         return e
 
     def __repr__(self) -> str:
-        return "<{}: {} start={} end={}>".format(
-            self.__class__.__name__, self.etype.__name__, self.start, self.end
-        )
+        return f"<{self.__class__.__name__}: {self.etype.__name__} start={self.start} end={self.end}>"
 
     def __lt__(self, o: Token) -> bool:
         return self.start < o.start
@@ -542,9 +576,7 @@ class Delimiter:
         return False
 
     def __repr__(self) -> str:
-        return "<Delimiter {!r} start={} end={}>".format(
-            self.content, self.start, self.end
-        )
+        return f"<Delimiter {self.content!r} start={self.start} end={self.end}>"
 
 
 class MatchObj:
