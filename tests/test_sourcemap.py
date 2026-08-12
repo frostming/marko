@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from marko import Markdown, block, inline
+import re
+
+from marko import Markdown, MarkoExtension, block, inline
 from marko.element import _SourceMap
 from marko.ext.gfm import gfm
 from marko.parser import Parser
+from marko.source import Source
 
 
 def _span_text(text: str, span) -> str:
@@ -265,6 +268,29 @@ class TestGFMSpans:
 
 
 class TestEdgeCases:
+    def test_extension_inline_syntax_spans_are_none_without_positions(self):
+        class CustomBlock(block.BlockElement):
+            pattern = re.compile(r"@(.*)$", re.M)
+
+            def __init__(self, match: re.Match[str]) -> None:
+                self.inline_body = match.group(1)
+
+            @classmethod
+            def match(cls, source: Source) -> re.Match[str] | None:
+                return source.expect_re(cls.pattern)
+
+            @classmethod
+            def parse(cls, source: Source) -> re.Match[str] | None:
+                match = source.match
+                source.consume()
+                return match
+
+        markdown = Markdown(extensions=[MarkoExtension(elements=[CustomBlock])])
+        emphasis = markdown.parse("@**text**\n").children[0].children[0]
+        assert isinstance(emphasis, inline.StrongEmphasis)
+        assert emphasis.source_span is None
+        assert emphasis.syntax_spans is None
+
     def test_unicode_leading_whitespace(self):
         text = "\u00a0hello\n"
         child = Markdown().parse(text).children[0].children[0]

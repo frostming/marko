@@ -183,7 +183,7 @@ class Token:
         e = self.etype(self.match)
         e.source_span = _translate_span(self.positions, self.start, self.end)
         syntax_spans = e._syntax_spans(self.match)
-        if syntax_spans:
+        if self.positions is not None and syntax_spans:
             translated = []
             for start, end in syntax_spans:
                 span = _translate_span(self.positions, start, end)
