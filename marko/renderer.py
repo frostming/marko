@@ -95,8 +95,7 @@ class Renderer:
         return "".join(rendered)
 
 
-_FT = TypeVar("_FT")
-_F = TypeVar("_F", bound=Callable[..., _FT])
+_F = TypeVar("_F", bound=Callable[..., Any])
 
 
 def force_delegate(func: _F) -> _F:

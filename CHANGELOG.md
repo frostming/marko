@@ -1,3 +1,15 @@
+## v2.2.4(2026-08-12)
+
+### Added
+
+- Add source mapping for AST elements. Every element now carries a `source_span` attribute (a `(start, end)` tuple of indices into the source text) plus the `start_pos`/`end_pos` convenience properties, and inline elements expose their pure-syntax parts (e.g. emphasis markers, code span backticks, link brackets) via `syntax_spans`. This enables features like syntax highlighting. [#273](https://github.com/frostming/marko/issues/273)
+
+### Fixed
+
+- Fix a quadratic-time linebreak parsing issue when the input contains no newline character. [#219](https://github.com/frostming/marko/issues/219)
+- Preserve loose list spacing when re-rendering Markdown with `MarkdownRenderer`. [#272](https://github.com/frostming/marko/pull/272)
+- Fix the broken tests badge link in the docs index page. [#207](https://github.com/frostming/marko/issues/207)
+
 ## v2.2.3(2026-05-28)
 
 ### Changed

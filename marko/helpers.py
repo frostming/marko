@@ -8,12 +8,13 @@ import dataclasses
 import re
 from functools import partial
 from importlib import import_module
-from typing import TYPE_CHECKING, Callable, Generic, TypeVar, overload
+from typing import TYPE_CHECKING, Callable, Generic, TypeVar, cast, overload
 
 from marko.renderer import Renderer
 
 if TYPE_CHECKING:
-    from typing import Any, Container, Iterable
+    from collections.abc import Container, Iterable
+    from typing import Any
 
     from marko.element import Element
 
@@ -22,6 +23,7 @@ T = TypeVar("T")
 U = TypeVar("U")
 ElementT = TypeVar("ElementT", bound="Element")
 RendererFunc = Callable[[T, ElementT], U]
+
 
 def camel_to_snake_case(name: str) -> str:
     """Takes a camelCased string and converts to snake_case."""
@@ -110,7 +112,7 @@ def partition_by_spaces(text: str, spaces: str = " \t") -> tuple[str, str, str]:
 class MarkoExtension:
     parser_mixins: list[type] = dataclasses.field(default_factory=list)
     renderer_mixins: list[type] = dataclasses.field(default_factory=list)
-    elements: list[type["Element"]] = dataclasses.field(default_factory=list)
+    elements: list[type[Element]] = dataclasses.field(default_factory=list)
 
 
 def load_extension(name: str, **kwargs: Any) -> MarkoExtension:
@@ -154,7 +156,9 @@ class _RendererDispatcher(Generic[T, ElementT, U]):
         self: _RendererDispatcher[T, ElementT, U],
         types: type[Renderer] | tuple[type[Renderer], ...],
     ) -> Callable[[RendererFunc[T, ElementT, U]], _RendererDispatcher[T, ElementT, U]]:
-        def decorator(func: RendererFunc[T, ElementT, U]) -> _RendererDispatcher[T, ElementT, U]:
+        def decorator(
+            func: RendererFunc[T, ElementT, U],
+        ) -> _RendererDispatcher[T, ElementT, U]:
             self._mapping[types] = func
             return self
 
@@ -164,10 +168,10 @@ class _RendererDispatcher(Generic[T, ElementT, U]):
         self.name = name
 
     @staticmethod
-    def render_ast(self, element: "Element") -> Any:
+    def render_ast(self, element: Element) -> Any:
         return self.render_children(element)
 
-    def super_render(self, r: Any, element: "Element") -> Any:
+    def super_render(self, r: Any, element: Element) -> Any:
         """Call on the next class in the MRO which has the same method."""
         klasses = (c for c in type(r).mro() if self.name in c.__dict__)
         try:
@@ -194,20 +198,23 @@ class _RendererDispatcher(Generic[T, ElementT, U]):
 
     def __get__(
         self: _RendererDispatcher[T, ElementT, U],
-        obj: Renderer | None, owner: type,
+        obj: Renderer | None,
+        owner: type,
     ) -> RendererFunc[T, ElementT, U] | _RendererDispatcher[T, ElementT, U]:
         if obj is None:
             return self
         for types, func in self._mapping.items():
             if isinstance(obj, types):
-                return partial(func, obj)
+                return partial(func, cast(T, obj))
         return partial(self.super_render, obj)
 
 
 def render_dispatch(
     types: type[Renderer] | tuple[type[Renderer], ...],
 ) -> Callable[[RendererFunc[T, ElementT, U]], _RendererDispatcher[T, ElementT, U]]:
-    def decorator(func: RendererFunc[T, ElementT, U]) -> _RendererDispatcher[T, ElementT, U]:
+    def decorator(
+        func: RendererFunc[T, ElementT, U],
+    ) -> _RendererDispatcher[T, ElementT, U]:
         return _RendererDispatcher(types, func)
 
     return decorator

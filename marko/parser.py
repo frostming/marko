@@ -150,7 +150,7 @@ class Parser:
         return [e for e in self.inline_elements.values() if not e.virtual]
 
 
-from . import block, element, inline, inline_parser
+from . import block, element, inline, inline_parser  # noqa: E402
 
 if TYPE_CHECKING:
     BlockElementType = type[block.BlockElement]

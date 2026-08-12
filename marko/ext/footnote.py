@@ -14,6 +14,7 @@ Usage::
     print(markdown(text))
 
 """
+
 from __future__ import annotations
 
 import re
@@ -76,10 +77,8 @@ class FootnoteRendererMixin:
             self.footnotes.append(element.label)
         idx = self.footnotes.index(element.label) + 1
         return (
-            '<sup class="footnote-ref" id="fnref-{lab}">'
-            '<a href="#fn-{lab}">{id}</a></sup>'.format(
-                lab=self.escape_url(element.label), id=idx
-            )
+            f'<sup class="footnote-ref" id="fnref-{self.escape_url(element.label)}">'
+            f'<a href="#fn-{self.escape_url(element.label)}">{idx}</a></sup>'
         )
 
     @render_footnote_ref.dispatch(MarkdownRenderer)
@@ -101,9 +100,7 @@ class FootnoteRendererMixin:
             children = re.sub(r"</p>$", f"{back}</p>", children)
         else:
             children = f"{children}<p>{back}</p>\n"
-        return '<li id="fn-{}">\n{}</li>\n'.format(
-            self.escape_url(element.label), children
-        )
+        return f'<li id="fn-{self.escape_url(element.label)}">\n{children}</li>\n'
 
     @helpers.render_dispatch((HTMLRenderer, MarkdownRenderer))
     def render_document(self, element):
