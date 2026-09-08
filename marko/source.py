@@ -62,8 +62,10 @@ class Source:
     def under_state(self, element: BlockElement) -> Generator[Source, None, None]:
         """A context manager to enable a new state temporarily."""
         self.push_state(element)
-        yield self
-        self.pop_state()
+        try:
+            yield self
+        finally:
+            self.pop_state()
 
     @property
     def exhausted(self) -> bool:
