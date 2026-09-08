@@ -13,7 +13,6 @@ if TYPE_CHECKING:
     from .element import Element
 
 _T = TypeVar("_T", bound="Renderer")
-_charref_bak = html._charref  # type: ignore[attr-defined]
 
 
 class Renderer:
@@ -44,15 +43,16 @@ class Renderer:
 
     def __init__(self) -> None:
         self.root_node: Document | None = None
+        self._context_stack: list[tuple[re.Pattern[str], Document | None]] = []
 
     def __enter__(self: _T) -> _T:
         """Provide a context so that root_node can be reset after render."""
+        self._context_stack.append((html._charref, self.root_node))  # type: ignore[attr-defined]
         html._charref = self._charref  # type: ignore[attr-defined]
         return self
 
     def __exit__(self, *args: Any) -> None:
-        html._charref = _charref_bak  # type: ignore[attr-defined]
-        self.root_node = None
+        html._charref, self.root_node = self._context_stack.pop()  # type: ignore[attr-defined]
 
     def render(self, element: Element) -> Any:
         """Renders the given element to string.
