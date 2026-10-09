@@ -95,7 +95,7 @@ class FootnoteRendererMixin:
 
     def _render_footnote_def(self, element):
         children = self.render_children(element).rstrip()
-        back = f'<a href="#fnref-{element.label}" class="footnote">&#8617;</a>'
+        back = f'<a href="#fnref-{self.escape_url(element.label)}" class="footnote">&#8617;</a>'
         if children.endswith("</p>"):
             children = re.sub(r"</p>$", f"{back}</p>", children)
         else:

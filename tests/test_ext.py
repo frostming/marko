@@ -13,6 +13,20 @@ class TestFootnote:
         assert '<sup class="footnote-ref"' in result
         assert 'foo<a href="#fnref-1" class="footnote">&#8617;</a>' in result
 
+    @pytest.mark.parametrize("body", ["Detail.", "- Detail."])
+    @pytest.mark.parametrize(
+        "label, escaped",
+        [
+            ("chapter one", "chapter%20one"),
+            (r"section\g", "section%5Cg"),
+            ('double"quote', "double%22quote"),
+        ],
+    )
+    def test_footnote_backlink_escapes_label(self, body, label, escaped):
+        result = self.markdown(f"Example[^{label}]\n\n[^{label}]: {body}\n")
+        assert f'id="fnref-{escaped}"' in result
+        assert f'<a href="#fnref-{escaped}" class="footnote">' in result
+
     def test_non_footnote(self):
         result = self.markdown("foo[^1]")
         assert result.rstrip() == "<p>foo[^1]</p>"
