@@ -70,6 +70,28 @@ class TestBasic:
                 marko.convert(text)
             )
 
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "`code`",
+            "``a`b``",
+            "``` ``x`` ```",
+            "````a`b``c```d````",
+            "`` ` ``",
+            "```` ``` ````",
+            "`` `a` ``",
+            "`  a  `",
+            "` a`",
+            "`a `",
+            "`   `",
+        ],
+    )
+    def test_markdown_renderer_code_span_roundtrip(self, text):
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text + "\n"
+        assert marko.convert(rerendered) == marko.convert(text)
+
     def test_markdown_renderer_preserve_link_refs(self):
         text = textwrap.dedent("""\
             This is a [link ref][1], [1] and a [link](abc "title").

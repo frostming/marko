@@ -190,7 +190,14 @@ class MarkdownRenderer(Renderer):
         return "\n" if element.soft else "\\\n"
 
     def render_code_span(self, element: inline.CodeSpan) -> str:
-        text = element.children
-        if text and text[0] == "`" or text[-1] == "`":
-            return f"`` {text} ``"
-        return f"`{element.children}`"
+        text = cast(str, element.children)
+        delimiter = "`" * (
+            max((len(m.group()) for m in re.finditer(r"`+", text)), default=0) + 1
+        )
+        if (
+            text.startswith("`")
+            or text.endswith("`")
+            or (text.startswith(" ") and text.endswith(" ") and text.strip())
+        ):
+            text = f" {text} "
+        return f"{delimiter}{text}{delimiter}"
