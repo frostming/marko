@@ -136,6 +136,13 @@ class MarkdownRenderer(Renderer):
     def render_inline_html(self, element: inline.InlineHTML) -> str:
         return cast(str, element.children)
 
+    @staticmethod
+    def _render_link_destination(dest: str) -> str:
+        escaped = re.sub(r"([\\<>])", r"\\\1", dest)
+        if not dest or re.search(r"\s|[()<>]", dest):
+            return f"<{escaped}>"
+        return escaped
+
     def render_link(self, element: inline.Link) -> str:
         link_text = self.render_children(element)
         link_title = (
@@ -155,7 +162,7 @@ class MarkdownRenderer(Renderer):
                 return f"[{label}]"
             return f"[{link_text}][{label}]"
         title = f" {link_title}" if link_title is not None else ""
-        return f"[{link_text}]({element.dest}{title})"
+        return f"[{link_text}]({self._render_link_destination(element.dest)}{title})"
 
     def render_auto_link(self, element: inline.AutoLink) -> str:
         return f"<{element.dest}>"
@@ -165,7 +172,11 @@ class MarkdownRenderer(Renderer):
         title = (
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
-        return template.format(self.render_children(element), element.dest, title)
+        return template.format(
+            self.render_children(element),
+            self._render_link_destination(element.dest),
+            title,
+        )
 
     def render_literal(self, element: inline.Literal) -> str:
         return f"\\{element.children}"

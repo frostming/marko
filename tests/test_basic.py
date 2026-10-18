@@ -82,6 +82,35 @@ class TestBasic:
         rerendered = markdown.convert(text)
         assert rerendered == text
 
+    @pytest.mark.parametrize("image", [False, True])
+    @pytest.mark.parametrize("title", ["", ' "A title"'])
+    @pytest.mark.parametrize(
+        "destination",
+        [
+            "plain.pdf",
+            "<my file.pdf>",
+            "<my\tfile.pdf>",
+            r"foo\)bar",
+            r"foo\(bar",
+            "foo(bar)",
+            r"foo\\*bar",
+            r"foo\\bar",
+            r"foo\<bar\>",
+            r"<my file\>name.pdf>",
+            "<>",
+            "file&amp;name.pdf",
+        ],
+    )
+    def test_markdown_renderer_link_destinations(self, image, title, destination):
+        text = f"{'!' if image else ''}[doc]({destination}{title})"
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        expected = marko.convert(text)
+        assert ("<img " if image else "<a ") in expected
+
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == expected
+        assert markdown(rerendered) == rerendered
+
 
 class TestExtension:
     def test_extension_use(self):
