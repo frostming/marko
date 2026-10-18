@@ -90,6 +90,28 @@ class TestBasic:
         rerendered = markdown(text)
         assert marko.convert(rerendered) == marko.convert(text)
 
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "`code`",
+            "``a`b``",
+            "``` ``x`` ```",
+            "````a`b``c```d````",
+            "`` ` ``",
+            "```` ``` ````",
+            "`` `a` ``",
+            "`  a  `",
+            "` a`",
+            "`a `",
+            "`   `",
+        ],
+    )
+    def test_markdown_renderer_code_span_roundtrip(self, text):
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text + "\n"
+        assert marko.convert(rerendered) == marko.convert(text)
+
     def test_markdown_renderer_preserve_link_refs(self):
         text = textwrap.dedent("""\
             This is a [link ref][1], [1] and a [link](abc "title").
@@ -101,6 +123,35 @@ class TestBasic:
         markdown = marko.Markdown(renderer=MarkdownRenderer, extensions=["footnote"])
         rerendered = markdown.convert(text)
         assert rerendered == text
+
+    @pytest.mark.parametrize("image", [False, True])
+    @pytest.mark.parametrize("title", ["", ' "A title"'])
+    @pytest.mark.parametrize(
+        "destination",
+        [
+            "plain.pdf",
+            "<my file.pdf>",
+            "<my\tfile.pdf>",
+            r"foo\)bar",
+            r"foo\(bar",
+            "foo(bar)",
+            r"foo\\*bar",
+            r"foo\\bar",
+            r"foo\<bar\>",
+            r"<my file\>name.pdf>",
+            "<>",
+            "file&amp;name.pdf",
+        ],
+    )
+    def test_markdown_renderer_link_destinations(self, image, title, destination):
+        text = f"{'!' if image else ''}[doc]({destination}{title})"
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        expected = marko.convert(text)
+        assert ("<img " if image else "<a ") in expected
+
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == expected
+        assert markdown(rerendered) == rerendered
 
 
 class TestExtension:

@@ -141,6 +141,13 @@ class MarkdownRenderer(Renderer):
     def render_inline_html(self, element: inline.InlineHTML) -> str:
         return cast(str, element.children)
 
+    @staticmethod
+    def _render_link_destination(dest: str) -> str:
+        escaped = re.sub(r"([\\<>])", r"\\\1", dest)
+        if not dest or re.search(r"\s|[()<>]", dest):
+            return f"<{escaped}>"
+        return escaped
+
     def render_link(self, element: inline.Link) -> str:
         link_text = self.render_children(element)
         link_title = (
@@ -160,7 +167,7 @@ class MarkdownRenderer(Renderer):
                 return f"[{label}]"
             return f"[{link_text}][{label}]"
         title = f" {link_title}" if link_title is not None else ""
-        return f"[{link_text}]({element.dest}{title})"
+        return f"[{link_text}]({self._render_link_destination(element.dest)}{title})"
 
     def render_auto_link(self, element: inline.AutoLink) -> str:
         return f"<{element.dest}>"
@@ -170,7 +177,11 @@ class MarkdownRenderer(Renderer):
         title = (
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
-        return template.format(self.render_children(element), element.dest, title)
+        return template.format(
+            self.render_children(element),
+            self._render_link_destination(element.dest),
+            title,
+        )
 
     def render_literal(self, element: inline.Literal) -> str:
         return f"\\{element.children}"
@@ -184,7 +195,14 @@ class MarkdownRenderer(Renderer):
         return "\n" if element.soft else "\\\n"
 
     def render_code_span(self, element: inline.CodeSpan) -> str:
-        text = element.children
-        if text and text[0] == "`" or text[-1] == "`":
-            return f"`` {text} ``"
-        return f"`{element.children}`"
+        text = cast(str, element.children)
+        delimiter = "`" * (
+            max((len(m.group()) for m in re.finditer(r"`+", text)), default=0) + 1
+        )
+        if (
+            text.startswith("`")
+            or text.endswith("`")
+            or (text.startswith(" ") and text.endswith(" ") and text.strip())
+        ):
+            text = f" {text} "
+        return f"{delimiter}{text}{delimiter}"
