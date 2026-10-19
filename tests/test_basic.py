@@ -73,6 +73,26 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "```python\ncode\n```\n",
+            "````python\nbefore\n```\nafter\n````\n",
+            "~~~\nbefore\n```\nafter\n~~~\n",
+            "~~~\n``````\n```\n~~~\n",
+            "~~~\n  ```\t\n~~~\n",
+            "~~~c`lang\ncode\n~~~\n",
+            "~~~python extra`info\ncode\n~~~\n",
+            "~~~ ~`lang\ncode\n~~~\n",
+            "> ~~~\n> ```\n> ~~~\n",
+            "- ~~~\n  ```\n  ~~~\n",
+        ],
+    )
+    def test_markdown_renderer_code_fence_roundtrip(self, text):
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "`code`",
             "``a`b``",
             "``` ``x`` ```",

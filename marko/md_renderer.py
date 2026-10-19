@@ -75,12 +75,17 @@ class MarkdownRenderer(Renderer):
 
     def render_fenced_code(self, element: block.FencedCode) -> str:
         extra = f" {element.extra}" if element.extra else ""
-        lines = [self._prefix + f"```{element.lang}{extra}"]
-        lines.extend(
-            self._second_prefix + line
-            for line in self.render_children(element).splitlines()
+        info = f"{element.lang}{extra}"
+        code = self.render_children(element)
+        marker = "~" if "`" in info else "`"
+        fence = marker * max(
+            3, max(map(len, re.findall(marker + "+", code)), default=0) + 1
         )
-        lines.append(self._second_prefix + "```")
+        if info.startswith(marker):
+            info = " " + info
+        lines = [self._prefix + fence + info]
+        lines.extend(self._second_prefix + line for line in code.splitlines())
+        lines.append(self._second_prefix + fence)
         self._prefix = self._second_prefix
         return "\n".join(lines) + "\n"
 
