@@ -84,14 +84,15 @@ class MarkdownRenderer(Renderer):
         if info.startswith(marker):
             info = " " + info
         lines = [self._prefix + fence + info]
-        lines.extend(self._second_prefix + line for line in code.splitlines())
+        code_lines = code.removesuffix("\n").split("\n") if code else []
+        lines.extend(self._second_prefix + line for line in code_lines)
         lines.append(self._second_prefix + fence)
         self._prefix = self._second_prefix
         return "\n".join(lines) + "\n"
 
     def render_code_block(self, element: block.CodeBlock) -> str:
         indent = " " * 4
-        lines = self.render_children(element).splitlines()
+        lines = self.render_children(element).removesuffix("\n").split("\n")
         lines = [self._prefix + indent + lines[0]] + [
             self._second_prefix + indent + line for line in lines[1:]
         ]

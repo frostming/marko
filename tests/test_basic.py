@@ -73,6 +73,9 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "```\n```\n",
+            "```\n\n```\n",
+            "```\ncode\n\n```\n",
             "```python\ncode\n```\n",
             "````python\nbefore\n```\nafter\n````\n",
             "~~~\nbefore\n```\nafter\n~~~\n",
@@ -89,6 +92,30 @@ class TestBasic:
         markdown = marko.Markdown(renderer=MarkdownRenderer)
         rerendered = markdown(text)
         assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize("separator", ["\v", "\x85", "\u2028", "\u2029"])
+    @pytest.mark.parametrize(
+        "template",
+        [
+            "```\na{}b\n```\n",
+            "    a{}b\n",
+            "> ```\n> a{}b\n> ```\n",
+            ">     a{}b\n",
+            "- ```\n  a{}b\n  ```\n",
+            "- item\n\n      a{}b\n",
+        ],
+    )
+    def test_markdown_renderer_preserves_code_block_separators(
+        self, separator, template
+    ):
+        text = template.format(separator)
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+
+        rerendered = markdown(text)
+
+        assert separator in rerendered
+        assert marko.convert(rerendered) == marko.convert(text)
+        assert markdown(rerendered) == rerendered
 
     @pytest.mark.parametrize(
         "text",
