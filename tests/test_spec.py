@@ -110,6 +110,11 @@ CMARK_CASES = [
         "```\na\x00b\n```",
         "<pre><code>a�b\n</code></pre>",
     ),
+    (
+        "indented_code_trailing_whitespace_lines",
+        "    code\n        \n     \nparagraph",
+        "<pre><code>code\n</code></pre>\n<p>paragraph</p>",
+    ),
 ]
 
 
