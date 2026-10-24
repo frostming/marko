@@ -78,6 +78,8 @@ COMMON_CASES = [
 ]
 
 CMARK_CASES = [
+    ("empty_list_item_at_end_of_input", "- a\n-", "<ul><li>a</li><li></li></ul>"),
+    ("empty_ordered_list_item_at_end_of_input", "1.", "<ol><li></li></ol>"),
     (
         "greedy_consume_prefix",
         "> 1. Item 1\n>    ```code\n>       indented code\n>    ```",
