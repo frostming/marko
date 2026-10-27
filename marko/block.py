@@ -647,7 +647,7 @@ class LinkRefDef(BlockElement):
     [label]: destination "title"
     """
 
-    pattern = re.compile(r" {,3}(\[[\s\S]*?)(?=\n\n|\Z)", flags=re.MULTILINE)
+    pattern = re.compile(r" {,3}(\[)", flags=re.MULTILINE)
 
     class ParseInfo(NamedTuple):
         link_label: inline_parser.Group

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import textwrap
+import time
 
 import pytest
 
@@ -14,6 +15,29 @@ from tests.normalize import normalize_html
 
 
 class TestBasic:
+    @pytest.mark.parametrize(
+        "line", ["[l{i}]: /u{i}\n", "- [l{i}]: /u{i}\n", "> [l{i}]: /u{i}\n"]
+    )
+    def test_link_ref_def_run_scales_linearly(self, line):
+        def best_of_three(text):
+            best = float("inf")
+            for _ in range(3):
+                start = time.perf_counter()
+                marko.convert(text)
+                best = min(best, time.perf_counter() - start)
+            return best
+
+        small = "".join(line.format(i=i) for i in range(1000))
+        large = "".join(line.format(i=i) for i in range(4000))
+        ratio = best_of_three(large) / best_of_three(small)
+        assert ratio < 8, f"4x the lines took {ratio:.1f}x the time"
+
+    def test_link_ref_defs_in_list_items_still_resolve(self):
+        text = "".join(f"- [l{i}]: /u{i}\n" for i in range(50)) + "\n[l0] [l49]\n"
+        html = marko.convert(text)
+        assert '<a href="/u0">l0</a>' in html
+        assert '<a href="/u49">l49</a>' in html
+
     @pytest.mark.parametrize("text", ["-\r-", "-\f-"])
     def test_non_lf_line_terminators_no_infinite_loop(self, text):
         assert marko.convert(text) == marko.convert("-\n-")
