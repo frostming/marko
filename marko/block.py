@@ -512,7 +512,7 @@ class List(BlockElement):
 
     priority = 6
     _prefix = ""
-    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])(?:[ \t\n\r\f]|$)")
 
     class ParseInfo(NamedTuple):
         bullet: str
@@ -581,7 +581,7 @@ class ListItem(BlockElement):
 
     virtual = True
     _tight = False
-    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])[ \t\n\r\f]")
+    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])(?:[ \t\n\r\f]|$)")
 
     class ParseInfo(NamedTuple):
         indent: int
