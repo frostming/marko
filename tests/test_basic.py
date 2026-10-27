@@ -56,6 +56,12 @@ class TestBasic:
         assert res.startswith(paragraph + "\n")
         assert '<p><a href="/url">foo</a></p>' in res
 
+    @pytest.mark.parametrize(
+        "html", ["<!doctype html>", "<!X>", "<!ELEMENT br EMPTY>", "<!x\ny>"]
+    )
+    def test_inline_declaration(self, html):
+        assert marko.convert(f"a {html} b") == f"<p>a {html} b</p>\n"
+
     def test_xml_renderer(self):
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)

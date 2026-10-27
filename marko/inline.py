@@ -138,7 +138,7 @@ class InlineHTML(InlineElement):
         r"|</%s *>"  # closing tag
         r"|<!--(?:>|->|[\s\S]*?-->)"  # HTML comment
         r"|<\?[\s\S]*?\?>"  # processing instruction
-        r"|<![A-Z]+ +[\s\S]*?>"  # declaration
+        r"|<![a-zA-Z][^>]*>"  # declaration
         r"|<!\[CDATA\[[\s\S]*?\]\]>)"  # CDATA section
         % (patterns.tag_name, patterns.attribute, patterns.tag_name)
     )
