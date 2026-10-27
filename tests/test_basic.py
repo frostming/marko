@@ -18,6 +18,20 @@ class TestBasic:
     def test_non_lf_line_terminators_no_infinite_loop(self, text):
         assert marko.convert(text) == marko.convert("-\n-")
 
+    @pytest.mark.parametrize(
+        "text, paragraph",
+        [
+            ('[foo]: /url\n"title\n\n[foo]', "<p>&quot;title</p>"),
+            ("[foo]: /url\n'title\n\n[foo]", "<p>'title</p>"),
+            ("[foo]: /url\n(title\n\n[foo]", "<p>(title</p>"),
+            ('[foo]: /url\n"title\n\nmore"\n\n[foo]', "<p>&quot;title</p>"),
+        ],
+    )
+    def test_link_ref_def_with_invalid_title_on_next_line(self, text, paragraph):
+        res = marko.convert(text)
+        assert res.startswith(paragraph + "\n")
+        assert '<p><a href="/url">foo</a></p>' in res
+
     def test_xml_renderer(self):
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)

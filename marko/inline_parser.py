@@ -380,9 +380,10 @@ def _parse_link_dest_title(
         raise ParseError()
     if 0 < i < len(link_text) and link_text[i - 1] not in WHITESPACE:
         raise ParseError()
-    if end < 0:
-        raise ParseError()
-    if "\n\n" in link_text[i:end]:
+    if end < 0 or "\n\n" in link_text[i:end]:
+        if "\n" in link_text[prev:i]:
+            # The title on the next line is invalid, end the definition before it
+            return link_dest, _EMPTY_GROUP
         raise ParseError()
     link_title = Group(i, end + 1, link_text[i : end + 1])
     return link_dest, link_title
