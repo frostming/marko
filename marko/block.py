@@ -344,7 +344,7 @@ class HTMLBlock(BlockElement):
         if source.expect_re(r" {,3}<\?"):
             source.context.html_end = re.compile(r"\?>")
             return 3
-        if source.expect_re(r" {,3}<!"):
+        if source.expect_re(r" {,3}<![a-zA-Z]"):
             source.context.html_end = re.compile(r">")
             return 4
         if source.expect_re(r" {,3}<!\[CDATA\["):
