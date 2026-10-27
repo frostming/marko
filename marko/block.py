@@ -227,6 +227,10 @@ class CodeBlock(BlockElement):
             else:
                 source.reset()
                 break
+        # Blank lines following the code block are not part of it, even if they
+        # carry more indentation than the code block prefix.
+        while len(lines) > 1 and not lines[-1].strip():
+            lines.pop()
         return "".join(lines).rstrip("\n") + "\n"
 
     @staticmethod
