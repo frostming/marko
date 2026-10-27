@@ -1,3 +1,19 @@
+## v2.2.5(2026-10-27)
+
+### Fixed
+
+- Fix quadratic-time link reference definition matching on consecutive lines starting with `[`. [#290](https://github.com/frostming/marko/pull/290)
+- Recognize empty list items at the end of input without a trailing newline. [#287](https://github.com/frostming/marko/pull/287)
+- Exclude trailing whitespace-only lines from indented code blocks, even when indented by more than four spaces. [#286](https://github.com/frostming/marko/pull/286)
+- Preserve link reference definitions when the next line starts an invalid title. [#285](https://github.com/frostming/marko/pull/285)
+- Preserve Unicode separators in code blocks when re-rendering Markdown with `MarkdownRenderer`. [#284](https://github.com/frostming/marko/pull/284)
+- Preserve link and image destinations containing special characters when re-rendering Markdown with `MarkdownRenderer`. [#283](https://github.com/frostming/marko/pull/283)
+- Use safe code fences when re-rendering Markdown with `MarkdownRenderer`, preserving code containing backticks and trailing blank lines. [#282](https://github.com/frostming/marko/pull/282)
+- Preserve backticks and leading and trailing spaces in code spans when re-rendering Markdown with `MarkdownRenderer`. [#281](https://github.com/frostming/marko/pull/281)
+- Escape footnote backlink labels correctly. [#280](https://github.com/frostming/marko/pull/280)
+- Restore the enclosing renderer context after nested rendering. [#279](https://github.com/frostming/marko/pull/279)
+- Restore parser source state when a context raises an exception. [#278](https://github.com/frostming/marko/pull/278)
+
 ## v2.2.4(2026-08-12)
 
 ### Added
