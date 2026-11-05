@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import re
 import textwrap
 import time
@@ -38,9 +39,17 @@ class TestBasic:
         assert '<a href="/u0">l0</a>' in html
         assert '<a href="/u49">l49</a>' in html
 
-    @pytest.mark.parametrize("text", ["-\r-", "-\f-"])
-    def test_non_lf_line_terminators_no_infinite_loop(self, text):
-        assert marko.convert(text) == marko.convert("-\n-")
+    def test_cr_line_terminator_no_infinite_loop(self):
+        assert marko.convert("-\r-") == marko.convert("-\n-")
+
+    @pytest.mark.parametrize(
+        "text",
+        ["-\f-", "a\f# b", "a\f- b", "a\f> b", "1.\fx", "a\f```\nb"],
+    )
+    def test_form_feed_is_not_a_line_ending(self, text):
+        # A form feed is whitespace inside a line, not a line ending, so it must
+        # not start a new block. It used to send list parsing into a loop.
+        assert marko.convert(text) == f"<p>{html.escape(text, quote=False)}</p>\n"
 
     @pytest.mark.parametrize(
         "text, paragraph",
