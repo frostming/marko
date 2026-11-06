@@ -56,6 +56,14 @@ class TestBasic:
         assert res.startswith(paragraph + "\n")
         assert '<p><a href="/url">foo</a></p>' in res
 
+    def test_cdata_html_block_ends_at_cdata_end(self):
+        res = marko.convert("<![CDATA[\na > b\nc\n]]>\nfoo\n")
+        assert res == "<![CDATA[\na > b\nc\n]]>\n<p>foo</p>\n"
+
+    @pytest.mark.parametrize("text", ["<! x\n", "<!1\n", "<![x\n"])
+    def test_declaration_html_block_needs_a_letter(self, text):
+        assert marko.convert(text).startswith("<p>&lt;!")
+
     def test_xml_renderer(self):
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)
