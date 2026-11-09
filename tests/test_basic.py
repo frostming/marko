@@ -181,6 +181,23 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "- foo\n-\n- bar\n",
+            "1. foo\n2.\n3. bar\n",
+            "*\n",
+            "> - a\n> -\n",
+            "- a\n\n-\n\n- b\n",
+        ],
+    )
+    def test_markdown_renderer_empty_list_item(self, text):
+        # An empty list item keeps its marker.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "```\n```\n",
             "```\n\n```\n",
             "```\ncode\n\n```\n",
