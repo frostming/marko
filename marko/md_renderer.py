@@ -100,9 +100,13 @@ class MarkdownRenderer(Renderer):
         return "\n".join(lines) + "\n"
 
     def render_html_block(self, element: block.HTMLBlock) -> str:
-        result = self._prefix + element.body + "\n"
+        lines = element.body.removesuffix("\n").split("\n")
+        lines = [self._prefix + lines[0]] + [
+            (self._second_prefix + line) if line else self._second_prefix.rstrip()
+            for line in lines[1:]
+        ]
         self._prefix = self._second_prefix
-        return result
+        return "\n".join(lines) + "\n"
 
     def render_thematic_break(self, element: block.ThematicBreak) -> str:
         result = self._prefix + "* * *\n"
