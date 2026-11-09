@@ -61,7 +61,7 @@ class MarkdownRenderer(Renderer):
                 with self.container(f"{element.bullet} ", "  "):
                     result.append(self.render(child))
         self._prefix = self._second_prefix
-        sep = "\n" if not element.tight else ""
+        sep = self._second_prefix.rstrip() + "\n" if not element.tight else ""
         return sep.join(result)
 
     def render_list_item(self, element: block.ListItem) -> str:
@@ -125,7 +125,8 @@ class MarkdownRenderer(Renderer):
 
     def render_blank_line(self, element: block.BlankLine) -> str:
         self._prefix = self._second_prefix
-        return "\n"
+        # Keep the quote markers, or the blank line would end the block quote
+        return self._second_prefix.rstrip() + "\n"
 
     def render_link_ref_def(self, element: block.LinkRefDef) -> str:
         link_text = element.dest

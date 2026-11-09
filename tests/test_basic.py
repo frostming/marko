@@ -130,6 +130,23 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "> foo\n>\n> bar\n",
+            "> # Title\n>\n> text\n",
+            "> - a\n>\n> - b\n",
+            "> > foo\n> >\n> > bar\n",
+            "- a\n\n  > q1\n  >\n  > q2\n",
+        ],
+    )
+    def test_markdown_renderer_quote_with_blank_lines(self, text):
+        # A blank line inside a block quote keeps its ">", so the quote isn't split.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "```\n```\n",
             "```\n\n```\n",
             "```\ncode\n\n```\n",
