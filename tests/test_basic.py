@@ -147,6 +147,23 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "> <details>\n> <summary>More</summary>\n> Hidden text\n> </details>\n",
+            "> <!--\n> a comment\n>\n> more\n> -->\n",
+            "- <div>\n  <p>inside</p>\n  </div>\n",
+            "1. <table>\n   <tr><td>x</td></tr>\n   </table>\n",
+            "<div>\nplain\n</div>\n",
+        ],
+    )
+    def test_markdown_renderer_html_block_in_container(self, text):
+        # Every line of an HTML block keeps the quote markers or list indentation.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "```\n```\n",
             "```\n\n```\n",
             "```\ncode\n\n```\n",
