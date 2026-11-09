@@ -164,6 +164,23 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "Foo\nBar\n---\n",
+            "Foo *bar\nbaz*\n===\n",
+            "> Foo\n> Bar\n> ===\n",
+            "- Foo\n  Bar\n  ---\n",
+        ],
+    )
+    def test_markdown_renderer_multiline_setext_heading(self, text):
+        # A heading on several lines stays a setext heading; an ATX one would
+        # keep only the first line.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "```\n```\n",
             "```\n\n```\n",
             "```\ncode\n\n```\n",
