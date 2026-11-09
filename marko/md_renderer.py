@@ -125,7 +125,23 @@ class MarkdownRenderer(Renderer):
         return result
 
     def render_setext_heading(self, element: block.SetextHeading) -> str:
-        return self.render_heading(cast("block.Heading", element))
+        children = self.render_children(element)
+        if "\n" not in children:
+            return self.render_heading(cast("block.Heading", element))
+        # An ATX heading holds one line only, so keep a multi-line heading setext
+        lines = children.split("\n")
+        underline = "===" if element.level == 1 else "---"
+        result = (
+            self._prefix
+            + lines[0]
+            + "\n"
+            + "".join(self._second_prefix + line + "\n" for line in lines[1:])
+            + self._second_prefix
+            + underline
+            + "\n"
+        )
+        self._prefix = self._second_prefix
+        return result
 
     def render_blank_line(self, element: block.BlankLine) -> str:
         self._prefix = self._second_prefix
