@@ -64,6 +64,17 @@ class TestBasic:
     def test_declaration_html_block_needs_a_letter(self, text):
         assert marko.convert(text).startswith("<p>&lt;!")
 
+    @pytest.mark.parametrize(
+        "text, html",
+        [
+            ("[foo]: /url(\n\n[foo]", "<p>[foo]: /url(</p>\n<p>[foo]</p>\n"),
+            ("[foo]: /url(bar\n\n[foo]", "<p>[foo]: /url(bar</p>\n<p>[foo]</p>\n"),
+            ('[foo](/url( "title")', "<p>[foo](/url( &quot;title&quot;)</p>\n"),
+        ],
+    )
+    def test_link_dest_with_unbalanced_parenthesis(self, text, html):
+        assert marko.convert(text) == html
+
     def test_xml_renderer(self):
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)

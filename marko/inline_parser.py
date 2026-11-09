@@ -361,6 +361,8 @@ def _parse_link_dest_title(
         else:
             if is_inline:
                 raise ParseError("No right parenthesis is found")
+        if pairs > 0:
+            raise ParseError("unmatched parenthesis")
         link_dest = Group(start, i, link_text[start:i])
         if not link_dest.text:
             raise ParseError("Empty link destination")
