@@ -335,3 +335,75 @@ def test_render_html(caplog):
 def _assert_latex(markdown: str, latex: str):
     md = Markdown(renderer=LatexRenderer)
     assert md.convert(dedent(markdown)) == dedent(latex)
+
+
+def test_render_strikethrough():
+    markdown = "This is ~~removed~~ text."
+    latex = """\
+        \\documentclass{article}
+        \\usepackage{soul}
+        \\begin{document}
+        This is \\st{removed} text.
+        \\end{document}
+        """
+
+    _assert_latex_gfm(markdown, latex)
+
+
+def test_render_table():
+    markdown = """\
+        | left | center | right |
+        |:-----|:------:|------:|
+        | a | b | c |
+        | 1 & x | 2 | 3 |
+        """
+    latex = """\
+        \\documentclass{article}
+        \\begin{document}
+        \\begin{tabular}{|l|c|r|}
+        \\hline
+        left & center & right \\\\
+        \\hline
+        a & b & c \\\\
+        1 \\& x & 2 & 3 \\\\
+        \\hline
+        \\end{tabular}
+        \\end{document}
+        """
+
+    _assert_latex_gfm(markdown, latex)
+
+
+def test_render_alert():
+    markdown = """\
+        > [!WARNING]
+        > Be careful *here*.
+        """
+    latex = """\
+        \\documentclass{article}
+        \\usepackage{csquotes}
+        \\begin{document}
+        \\begin{displayquote}
+        \\textbf{Warning.} Be careful \\textit{here}.
+        \\end{displayquote}
+        \\end{document}
+        """
+
+    _assert_latex_gfm(markdown, latex)
+
+
+def test_render_bare_autolink():
+    markdown = "Visit http://example.com/x_y today."
+    latex = """\
+        \\documentclass{article}
+        \\begin{document}
+        Visit \\url{http://example.com/x_y} today.
+        \\end{document}
+        """
+
+    _assert_latex_gfm(markdown, latex)
+
+
+def _assert_latex_gfm(markdown: str, latex: str):
+    md = Markdown(renderer=LatexRenderer, extensions=["gfm"])
+    assert md.convert(dedent(markdown)) == dedent(latex)
