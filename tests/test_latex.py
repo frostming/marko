@@ -335,3 +335,43 @@ def test_render_html(caplog):
 def _assert_latex(markdown: str, latex: str):
     md = Markdown(renderer=LatexRenderer)
     assert md.convert(dedent(markdown)) == dedent(latex)
+
+
+def test_render_footnotes():
+    markdown = """\
+        Text with a note[^1].
+
+        More text[^note] here.
+
+        [^1]: The first note.
+
+        [^note]: The second *note*.
+        """
+    latex = """\
+        \\documentclass{article}
+        \\begin{document}
+        Text with a note\\footnote{The first note.}.
+
+        More text\\footnote{The second \\textit{note}.} here.
+
+        \\end{document}
+        """
+
+    _assert_latex_footnotes(markdown, latex)
+
+
+def test_render_unmatched_footnote_ref():
+    markdown = "Dangling[^zz] ref."
+    latex = """\
+        \\documentclass{article}
+        \\begin{document}
+        Dangling[\\^{}zz] ref.
+        \\end{document}
+        """
+
+    _assert_latex_footnotes(markdown, latex)
+
+
+def _assert_latex_footnotes(markdown: str, latex: str):
+    md = Markdown(renderer=LatexRenderer, extensions=["footnote"])
+    assert md.convert(dedent(markdown)) == dedent(latex)
