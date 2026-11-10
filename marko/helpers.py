@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import dataclasses
 import re
-from functools import partial
+from functools import lru_cache, partial
 from importlib import import_module
 from typing import TYPE_CHECKING, Callable, Generic, TypeVar, cast, overload
 
@@ -25,6 +25,7 @@ ElementT = TypeVar("ElementT", bound="Element")
 RendererFunc = Callable[[T, ElementT], U]
 
 
+@lru_cache(maxsize=None)
 def camel_to_snake_case(name: str) -> str:
     """Takes a camelCased string and converts to snake_case."""
     pattern = r"[A-Z][a-z]+|[A-Z]+(?![a-z])"
