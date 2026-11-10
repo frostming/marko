@@ -190,6 +190,22 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "1) one\n2) two\n",
+            "1. foo\n2. bar\n3) baz\n",
+            "3) start at three\n",
+            "> 1) quoted\n",
+        ],
+    )
+    def test_markdown_renderer_ordered_list_delimiter(self, text):
+        # "1." and "1)" are different list markers; a change of marker starts a new list.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "- foo\n-\n- bar\n",
             "1. foo\n2.\n3. bar\n",
             "*\n",

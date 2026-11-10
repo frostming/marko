@@ -53,8 +53,10 @@ class MarkdownRenderer(Renderer):
     def render_list(self, element: block.List) -> str:
         result = []
         if element.ordered:
+            # Keep the delimiter: "1." and "1)" lists are different lists
+            delimiter = element.bullet[-1]
             for num, child in enumerate(element.children, element.start):
-                with self.container(f"{num}. ", " " * (len(str(num)) + 2)):
+                with self.container(f"{num}{delimiter} ", " " * (len(str(num)) + 2)):
                     result.append(self.render(child))
         else:
             for child in element.children:
