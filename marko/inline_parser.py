@@ -56,17 +56,11 @@ def parse(
         filled with source positions.
     """
 
-    class LinkOrEmph(InlineElement):
-        parse_children = True
-
-        def __new__(cls, match: _Match) -> InlineElement:  # type: ignore
-            assert isinstance(match, MatchObj)
-            return source.parser.inline_elements[match.etype](match)
-
     # A raw list of elements that may contain overlaps.
     tokens: list[Token] = []
     for m in find_links_or_emphs(text, source.root.link_ref_defs):
-        tokens.append(Token(LinkOrEmph, m, text, fallback, positions))
+        m.element_type = source.parser.inline_elements[m.etype]
+        tokens.append(Token(_LinkOrEmph, m, text, fallback, positions))
 
     for etype in elements:
         for match in etype.find(text, source=source):
@@ -74,6 +68,16 @@ def parse(
     tokens.sort()
     tokens = _resolve_overlap(tokens)
     return make_elements(tokens, text, fallback=fallback, positions=positions)
+
+
+class _LinkOrEmph(InlineElement):
+    """Placeholder for the links and emphasis found by find_links_or_emphs()."""
+
+    parse_children = True
+
+    def __new__(cls, match: _Match) -> InlineElement:  # type: ignore
+        assert isinstance(match, MatchObj)
+        return match.element_type(match)
 
 
 def _resolve_overlap(tokens: list[Token]) -> list[Token]:
@@ -220,6 +224,7 @@ def find_links_or_emphs(
     :returns: an iterable of match object.
     """
     delimiters_re = re.compile(r"(?:!?\[|\*+|_+)")
+    special_re = re.compile(r"[\\`\]!\[*_]")
     i = 0
     delimiters: list[Delimiter] = []
     escape = False
@@ -248,7 +253,9 @@ def find_links_or_emphs(
                 delimiters.append(Delimiter(m, text))
                 i = m.end()
             else:
-                i += 1
+                # Jump to the next character that can start a token.
+                m = special_re.search(text, i + 1)
+                i = m.start() if m else len(text)
     process_emphasis(text, delimiters, None, matches)
     return matches
 
@@ -260,7 +267,8 @@ def look_for_image_or_link(
     link_ref_defs: dict[str, tuple[str, str]],
     matches: list[MatchObj],
 ) -> MatchObj | None:
-    for i, d in list(enumerate(delimiters))[::-1]:
+    for i in range(len(delimiters) - 1, -1, -1):
+        d = delimiters[i]
         if d.content not in ("[", "!["):
             continue
         if not d.active:
@@ -593,6 +601,7 @@ class MatchObj:
         self._end = end
         self._groups = groups
         self.etype = etype
+        self.element_type: type[InlineElement] = InlineElement
 
     def group(self, n: int = 0) -> str:
         if n == 0:
