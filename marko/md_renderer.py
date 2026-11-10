@@ -162,10 +162,27 @@ class MarkdownRenderer(Renderer):
         return f"[{element.label}]: {link_text}\n"
 
     def render_emphasis(self, element: inline.Emphasis) -> str:
-        return f"*{self.render_children(element)}*"
+        return self._render_emphasis(element, "*")
 
     def render_strong_emphasis(self, element: inline.StrongEmphasis) -> str:
-        return f"**{self.render_children(element)}**"
+        return self._render_emphasis(element, "*")
+
+    def _render_emphasis(
+        self, element: inline.Emphasis | inline.StrongEmphasis, char: str
+    ) -> str:
+        delimiter = char * (2 if element.get_type() == "StrongEmphasis" else 1)
+        children = element.children
+        if (
+            len(children) == 1
+            and not isinstance(children[0], str)
+            and children[0].get_type() == "Emphasis"
+        ):
+            # `*` around it would join its `*` into one run of delimiters, so
+            # `**_foo_**` would come back as `***foo***`, which is <em><strong>
+            other = "_" if char == "*" else "*"
+            inner = self._render_emphasis(cast("inline.Emphasis", children[0]), other)
+            return delimiter + inner + delimiter
+        return delimiter + self.render_children(element) + delimiter
 
     def render_inline_html(self, element: inline.InlineHTML) -> str:
         return cast(str, element.children)
