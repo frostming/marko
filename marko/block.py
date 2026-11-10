@@ -334,6 +334,8 @@ class HTMLBlock(BlockElement):
     @classmethod
     def match(cls, source: Source) -> int | bool:
         source.context.html_end = None
+        if not source.expect_re(r" {,3}<"):
+            return False
         if source.expect_re(r"(?i) {,3}<(script|pre|style|textarea)[>\s]"):
             assert source.match
             source.context.html_end = re.compile(rf"(?i)</{source.match.group(1)}>")
