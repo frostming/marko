@@ -65,6 +65,11 @@ class MarkdownRenderer(Renderer):
         return sep.join(result)
 
     def render_list_item(self, element: block.ListItem) -> str:
+        if all(child.get_type() == "BlankLine" for child in element.children):
+            # An empty item has nothing to carry its marker, so write it here
+            marker = self._prefix.rstrip() + "\n"
+            self._prefix = self._second_prefix
+            return marker + self.render_children(element)
         return self.render_children(element)
 
     def render_quote(self, element: block.Quote) -> str:
