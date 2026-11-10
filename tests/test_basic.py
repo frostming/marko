@@ -32,6 +32,13 @@ class TestBasic:
         ratio = best_of_three(large) / best_of_three(small)
         assert ratio < 8, f"4x the lines took {ratio:.1f}x the time"
 
+    def test_nested_containers_with_lazy_continuation(self):
+        text = "> - a\n>   - b\nlazy\n> - c\n>\n>   para\n"
+        assert marko.convert(text) == (
+            "<blockquote>\n<ul>\n<li>\n<p>a</p>\n<ul>\n<li>b\nlazy</li>\n</ul>\n"
+            "</li>\n<li>\n<p>c</p>\n<p>para</p>\n</li>\n</ul>\n</blockquote>\n"
+        )
+
     def test_link_ref_defs_in_list_items_still_resolve(self):
         text = "".join(f"- [l{i}]: /u{i}\n" for i in range(50)) + "\n[l0] [l49]\n"
         html = marko.convert(text)

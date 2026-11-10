@@ -484,7 +484,8 @@ class Paragraph(BlockElement):
                             )
                             source.consume()
                         break
-                source._states = states
+                for state in states[len(source._states) :]:
+                    source.push_state(state)
         return lines
 
 
