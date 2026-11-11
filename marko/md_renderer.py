@@ -63,6 +63,11 @@ class MarkdownRenderer(Renderer):
         self._second_prefix = old_second_prefix
 
     def render_paragraph(self, element: block.Paragraph) -> str:
+        line = self._prefix + self._render_paragraph_children(element) + "\n"
+        self._prefix = self._second_prefix
+        return line
+
+    def _render_paragraph_children(self, element: block.Paragraph) -> str:
         parts = []
         line_start = False
         for child in element.children:
@@ -73,10 +78,7 @@ class MarkdownRenderer(Renderer):
                 text = _escape_block_start(text)
             line_start = child.get_type() == "LineBreak"
             parts.append(text)
-        children = "".join(parts)
-        line = self._prefix + children + "\n"
-        self._prefix = self._second_prefix
-        return line
+        return "".join(parts)
 
     def render_list(self, element: block.List) -> str:
         result = []
