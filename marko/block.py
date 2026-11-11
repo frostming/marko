@@ -200,7 +200,7 @@ class CodeBlock(BlockElement):
         prefix = source.prefix + " {4}"
         if isinstance(source.state, Quote):
             # requires five spaces to prefix
-            prefix = source.prefix[:-1] + " {4}"
+            prefix = source.prefix[: -len(Quote._prefix)] + r" {,3}>[^\n\S] {4}"
         line = cls.strip_prefix(line, prefix)
         source.context.code_line = line
         return line
@@ -496,7 +496,9 @@ class Quote(BlockElement):
 
     priority = 6
     breaks_paragraph = True
-    _prefix = r" {,3}>[^\n\S]?"
+    # The space after ">" is taken whenever there is one, so that a line with fewer
+    # ">" than the nesting depth fails at once instead of in 2 ** depth attempts
+    _prefix = r" {,3}>(?:[^\n\S]|(?![^\n\S]))"
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
