@@ -256,6 +256,25 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("**_foo_**\n", "**_foo_**\n"),
+            ("__*foo*__\n", "**_foo_**\n"),
+            ("*_foo_*\n", "*_foo_*\n"),
+            ("**_*foo*_**\n", "**_*foo*_**\n"),
+            ("- **_Note:_** bar\n", "- **_Note:_** bar\n"),
+            ("***foo***\n", "***foo***\n"),
+            ("foo***bar***baz\n", "foo***bar***baz\n"),
+        ],
+    )
+    def test_markdown_renderer_nested_emphasis(self, text, expected):
+        # Emphasis directly in emphasis keeps its delimiters apart from the outer ones.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text",
         [
             "```\n```\n",
