@@ -165,3 +165,18 @@ class TestGFMTableLlistElement:
         text = "- Item.\n\n  |foo|bar|\n  |---|---|\n  |foo|bar|"
         md = self.md_md(text)
         assert md == "- Item.\n\n  | foo | bar |\n  | --- | --- |\n  | foo | bar |\n"
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("foo\n    # bar\n", "foo\n\\# bar\n"),
+            ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
+            ("- [ ] foo\n      ***\n", "- [ ] foo\n\\***\n"),
+        ],
+    )
+    def test_render_paragraph_continuation_block_start(self, text, expected):
+        # The GFM paragraph escapes a block marker on a continuation line too.
+        md = self.md_md(text)
+        assert md == expected
+        html = Markdown(extensions=["gfm"])
+        assert html(md) == html(text)
