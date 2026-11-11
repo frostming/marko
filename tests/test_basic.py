@@ -277,6 +277,22 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "- foo [x]\n\n  [x]: /url\n",
+            '- foo [x]\n\n  [x]: /url "Title"\n\n- bar\n',
+            "> [foo]: /url\n\n[foo]\n",
+            "> foo\n>\n> [r]: /url\n> bar [r]\n",
+        ],
+    )
+    def test_markdown_renderer_link_ref_def_in_container(self, text):
+        # A link reference definition in a list item or a quote stays in it.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "```\n```\n",
             "```\n\n```\n",
             "```\ncode\n\n```\n",
