@@ -110,6 +110,15 @@ class TestBasic:
     def test_link_dest_with_unbalanced_parenthesis(self, text, html):
         assert marko.convert(text) == html
 
+    def test_long_paragraph_with_many_links_and_emphasis(self):
+        text = " ".join(f"*e{i}* [l{i}](/u{i}) `c` \\* x" for i in range(200))
+        html = marko.convert(text)
+        assert html.count("<a href=") == 200
+        assert html.count("<em>") == 200
+        assert html.count("<code>c</code>") == 200
+        assert html.count(" * x") == 200
+        assert '<a href="/u199">l199</a>' in html
+
     def test_xml_renderer(self):
         text = "[Overview](#overview)\n\n* * *"
         markdown = marko.Markdown(renderer=XMLRenderer)
