@@ -46,11 +46,31 @@ class TestBasic:
         ratio = best_of_three(opener * 8000) / best_of_three(opener * 2000)
         assert ratio < 8, f"4x the openers took {ratio:.1f}x the time"
 
+    def test_nested_quotes_scale_linearly(self):
+        def best_of_three(text):
+            best = float("inf")
+            for _ in range(3):
+                start = time.perf_counter()
+                marko.convert(text)
+                best = min(best, time.perf_counter() - start)
+            return best
+
+        ratio = best_of_three("> " * 24 + "a") / best_of_three("> " * 12 + "a")
+        assert ratio < 8, f"2x the depth took {ratio:.1f}x the time"
+
     def test_link_destination_paren_nesting_limit(self):
         nested = "(" * 32 + ")" * 32
         assert f'href="{nested}"' in marko.convert(f"[a]({nested})")
         too_deep = "(" * 33 + ")" * 33
         assert "<a" not in marko.convert(f"[a]({too_deep})")
+
+    def test_quote_marker_takes_the_following_space(self):
+        # The space after ">" belongs to the marker, so "  > b" is not indented
+        # enough to continue the list item and starts a quote after the list.
+        assert marko.convert("> - a\n>\n>  > b\n") == (
+            "<blockquote>\n<ul>\n<li>a</li>\n</ul>\n"
+            "<blockquote>\n<p>b</p>\n</blockquote>\n</blockquote>\n"
+        )
 
     def test_nested_containers_with_lazy_continuation(self):
         text = "> - a\n>   - b\nlazy\n> - c\n>\n>   para\n"
