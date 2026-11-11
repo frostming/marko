@@ -31,6 +31,9 @@ class Group(NamedTuple):
 _EMPTY_GROUP = Group(-1, -1, None)
 WHITESPACE = " \n\t"
 ASCII_CONTROL = "".join(chr(i) for i in range(32)) + chr(127)
+# CommonMark allows limiting parenthesis nesting in link destinations;
+# cmark and markdown-it use 32.
+MAX_LINK_DEST_PAREN_DEPTH = 32
 
 
 class ParseError(ValueError):
@@ -260,7 +263,8 @@ def look_for_image_or_link(
     link_ref_defs: dict[str, tuple[str, str]],
     matches: list[MatchObj],
 ) -> MatchObj | None:
-    for i, d in list(enumerate(delimiters))[::-1]:
+    for i in range(len(delimiters) - 1, -1, -1):
+        d = delimiters[i]
         if d.content not in ("[", "!["):
             continue
         if not d.active:
@@ -349,6 +353,10 @@ def _parse_link_dest_title(
                 raise ParseError("Invalid character in link destination")
             elif c == "(":
                 pairs += 1
+                if pairs > MAX_LINK_DEST_PAREN_DEPTH:
+                    # Bound the scan so that many unclosed `[a](` openers
+                    # don't each rescan the rest of the input.
+                    raise ParseError("Too deeply nested parentheses")
             elif c == ")":
                 if pairs > 0:
                     pairs -= 1

@@ -33,6 +33,25 @@ class TestBasic:
         ratio = best_of_three(large) / best_of_three(small)
         assert ratio < 8, f"4x the lines took {ratio:.1f}x the time"
 
+    @pytest.mark.parametrize("opener", ["[a](", "![alt](", "[a]["])
+    def test_unclosed_inline_link_openers_scale_linearly(self, opener):
+        def best_of_three(text):
+            best = float("inf")
+            for _ in range(3):
+                start = time.perf_counter()
+                marko.convert(text)
+                best = min(best, time.perf_counter() - start)
+            return best
+
+        ratio = best_of_three(opener * 8000) / best_of_three(opener * 2000)
+        assert ratio < 8, f"4x the openers took {ratio:.1f}x the time"
+
+    def test_link_destination_paren_nesting_limit(self):
+        nested = "(" * 32 + ")" * 32
+        assert f'href="{nested}"' in marko.convert(f"[a]({nested})")
+        too_deep = "(" * 33 + ")" * 33
+        assert "<a" not in marko.convert(f"[a]({too_deep})")
+
     def test_nested_containers_with_lazy_continuation(self):
         text = "> - a\n>   - b\nlazy\n> - c\n>\n>   para\n"
         assert marko.convert(text) == (
