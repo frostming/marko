@@ -275,6 +275,31 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("Foo\n    ***\n", "Foo\n\\***\n"),
+            ("foo\n    # bar\n", "foo\n\\# bar\n"),
+            ("Foo\n    ---\n", "Foo\n\\---\n"),
+            ("Foo\n    =\n", "Foo\n\\=\n"),
+            ("foo\n    - bar\n", "foo\n\\- bar\n"),
+            ("foo\n    1. bar\n", "foo\n1\\. bar\n"),
+            ("foo\n    > bar\n", "foo\n\\> bar\n"),
+            ("foo\n    ```\n", "foo\n\\```\n"),
+            ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
+            ("- a\n - b\n  - c\n   - d\n    - e\n", "- a\n- b\n- c\n- d\n\\- e\n"),
+            # lines that cannot start a block are left alone
+            ("foo\n    2. bar\n    -bar\n    #5\n", "foo\n2. bar\n-bar\n#5\n"),
+        ],
+    )
+    def test_markdown_renderer_paragraph_continuation_block_start(self, text, expected):
+        # A continuation line loses its indentation, so a leading block marker
+        # is escaped to keep it in the paragraph.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text",
         [
             "- foo [x]\n\n  [x]: /url\n",

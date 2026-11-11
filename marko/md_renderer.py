@@ -14,6 +14,24 @@ if TYPE_CHECKING:
     from . import block, inline
 
 
+# Line starts that would begin a block instead of continuing a paragraph: an ATX
+# heading, a bullet list item, a thematic break, a setext underline, a block quote,
+# a code fence, and a list item numbered 1.
+_BLOCK_START_RE = re.compile(
+    r"#{1,6}(?=[ \t]|$)|[-+*](?=[ \t]|$)|[-*_](?=[ \t]*[-*_])|[>=]|`{3}|~{3}"
+)
+_ORDERED_START_RE = re.compile(r"1(?=[.)](?:[ \t]|$))")
+
+
+def _escape_block_start(text: str) -> str:
+    """Backslash-escape a block marker at the start of a paragraph line."""
+    if _ORDERED_START_RE.match(text):
+        return text[:1] + "\\" + text[1:]
+    if _BLOCK_START_RE.match(text):
+        return "\\" + text
+    return text
+
+
 class MarkdownRenderer(Renderer):
     """Render the AST back to markdown document.
 
@@ -45,7 +63,17 @@ class MarkdownRenderer(Renderer):
         self._second_prefix = old_second_prefix
 
     def render_paragraph(self, element: block.Paragraph) -> str:
-        children = self.render_children(element)
+        parts = []
+        line_start = False
+        for child in element.children:
+            text = self.render(child)
+            if line_start and child.get_type() == "RawText":
+                # A continuation line loses its indentation, so a leading block
+                # marker would start a list, heading, etc. instead of continuing
+                text = _escape_block_start(text)
+            line_start = child.get_type() == "LineBreak"
+            parts.append(text)
+        children = "".join(parts)
         line = self._prefix + children + "\n"
         self._prefix = self._second_prefix
         return line
