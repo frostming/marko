@@ -159,7 +159,9 @@ class MarkdownRenderer(Renderer):
         link_text = element.dest
         if element.title:
             link_text += f" {element.title}"
-        return f"[{element.label}]: {link_text}\n"
+        result = f"{self._prefix}[{element.label}]: {link_text}\n"
+        self._prefix = self._second_prefix
+        return result
 
     def render_emphasis(self, element: inline.Emphasis) -> str:
         return self._render_emphasis(element, "*")
