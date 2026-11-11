@@ -78,9 +78,12 @@ def main():
                 file=sys.stderr,
             )
         content = sys.stdin.read()
-    markdown = marko.Markdown(
-        namespace.parser, namespace.renderer, extensions=namespace.extension
-    )
+    try:
+        markdown = marko.Markdown(
+            namespace.parser, namespace.renderer, extensions=namespace.extension
+        )
+    except ImportError as e:
+        sys.exit(f"marko: error: {e}")
     result = markdown(content)
     if namespace.output:
         with codecs.open(namespace.output, "w", encoding="utf-8") as f:
