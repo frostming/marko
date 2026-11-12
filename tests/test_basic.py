@@ -58,6 +58,20 @@ class TestBasic:
         ratio = best_of_three("> " * 24 + "a") / best_of_three("> " * 12 + "a")
         assert ratio < 8, f"2x the depth took {ratio:.1f}x the time"
 
+    @pytest.mark.parametrize("opener", ["[", "!["])
+    @pytest.mark.parametrize("definition", ["", "\n\n[a]: /url\n"])
+    def test_bracket_runs_scale_linearly(self, opener, definition):
+        def best_of_three(n):
+            best = float("inf")
+            for _ in range(3):
+                start = time.perf_counter()
+                marko.convert(opener * n + "]" * n + definition)
+                best = min(best, time.perf_counter() - start)
+            return best
+
+        ratio = best_of_three(8000) / best_of_three(2000)
+        assert ratio < 8, f"4x the brackets took {ratio:.1f}x the time"
+
     def test_link_destination_paren_nesting_limit(self):
         nested = "(" * 32 + ")" * 32
         assert f'href="{nested}"' in marko.convert(f"[a]({nested})")

@@ -34,6 +34,8 @@ ASCII_CONTROL = "".join(chr(i) for i in range(32)) + chr(127)
 # CommonMark allows limiting parenthesis nesting in link destinations;
 # cmark and markdown-it use 32.
 MAX_LINK_DEST_PAREN_DEPTH = 32
+# A bracket that is not escaped by a backslash
+_UNESCAPED_BRACKET = re.compile(r"(?<!\\)(?:\\\\)*[\[\]]")
 
 
 class ParseError(ValueError):
@@ -276,15 +278,15 @@ def look_for_image_or_link(
             continue
         if not d.active:
             break  # break to remove the delimiter and return None
-        if not _is_legal_link_text(text[d.end : close]):
-            break
         link_text = Group(d.end, close, text[d.end : close])
         assert link_text.text is not None
         etype = "Image" if d.content == "![" else "Link"
         match = _expect_inline_link(text, close + 1) or _expect_reference_link(
             text, close + 1, link_text.text, link_ref_defs
         )
-        if not match:  # not a link
+        # Checked after the cheaper test above: in a long run of brackets, the
+        # link text grows with each closing bracket.
+        if not match or not _is_legal_link_text(link_text.text):  # not a link
             break
         rv = MatchObj(etype, text, d.start, match[2], link_text, match[0], match[1])
         process_emphasis(text, delimiters, i, matches)
@@ -433,6 +435,9 @@ def _expect_reference_link(
         label = link_label.text[1:-1] or link_text
     elif text[start : start + 2] == "[]":
         link_label = Group(start, start + 2, "[]")
+    if not link_ref_defs or _UNESCAPED_BRACKET.search(label):
+        # A link label, like that of every definition, has no unescaped bracket
+        return None
     result = _get_reference_link(label, link_ref_defs)
     if not result:
         return None
