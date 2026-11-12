@@ -105,7 +105,7 @@ class GFMRendererMixin:
 
     @render_url.dispatch(MarkdownRenderer)
     def render_url(self, element):
-        return element.dest
+        return self.render_children(element)
 
     @render_dispatch(HTMLRenderer)
     def render_alert(self, element):
