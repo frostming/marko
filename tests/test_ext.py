@@ -180,3 +180,30 @@ class TestGFMTableLlistElement:
         assert md == expected
         html = Markdown(extensions=["gfm"])
         assert html(md) == html(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "www.commonmark.org\n",
+            "Visit www.commonmark.org/help for more information.\n",
+            "Visit www.commonmark.org.\n",
+            "www.google.com/search?q=Markup+(business)))\n",
+            "(www.google.com/search?q=Markup+(business))\n",
+            "www.google.com/search?q=commonmark&hl;\n",
+            "www.commonmark.org/he<lp\n",
+            "foo@bar.baz\n",
+            "a.b-c_d@a.b\n\na.b-c_d@a.b.\n\na.b-c_d@a.b-\n\na.b-c_d@a.b_\n",
+            "hello@mail+xyz.example isn't valid, but hello+xyz@mail.example is.\n",
+            "http://commonmark.org\n",
+            "**www.commonmark.org is great**\n",
+        ],
+    )
+    def test_render_url_keeps_original_text(self, text):
+        # A GFM bare autolink must re-render as the matched text, not as the
+        # normalized destination, or the link text changes (and email
+        # addresses get mangled) on the next parse. See #325.
+        rerendered = self.md_md(text)
+        assert rerendered == text
+        html = Markdown(extensions=["gfm"])
+        assert html(rerendered) == html(text)
+        assert self.md_md(rerendered) == rerendered
