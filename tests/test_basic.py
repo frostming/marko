@@ -298,6 +298,23 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "   - foo\n\n    code\n",
+            "  2. foo\n\n\tcode\n",
+            "  1. foo\n  2. bar\n\n    code\n",
+            "- foo\n\n     - bar\n\n      code\n",
+            ">   1) foo\n>\n>     code\n",
+        ],
+    )
+    def test_markdown_renderer_list_before_indented_code(self, text):
+        # The code block stays after the list instead of joining its last item.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == marko.convert(text)
+        assert "<pre><code>" in marko.convert(rerendered)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "Contact <foo@bar.example.com>.\n",
             "<foo+special@Bar.baz-bar0.com>\n",
             "<mailto:foo@bar.example.com>\n",
