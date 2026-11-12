@@ -248,7 +248,8 @@ class MarkdownRenderer(Renderer):
         return f"[{link_text}]({self._render_link_destination(element.dest)}{title})"
 
     def render_auto_link(self, element: inline.AutoLink) -> str:
-        return f"<{element.dest}>"
+        # The text: the destination of an email address starts with "mailto:"
+        return f"<{self.render_children(element)}>"
 
     def render_image(self, element: inline.Image) -> str:
         template = "![{}]({}{})"

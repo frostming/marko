@@ -276,6 +276,22 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text",
+        [
+            "Contact <foo@bar.example.com>.\n",
+            "<foo+special@Bar.baz-bar0.com>\n",
+            "<mailto:foo@bar.example.com>\n",
+            "<https://example.com/a_b>\n",
+        ],
+    )
+    def test_markdown_renderer_auto_link(self, text):
+        # An email address is not written with the "mailto:" of its destination.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == text
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text, expected",
         [
             ("**_foo_**\n", "**_foo_**\n"),
