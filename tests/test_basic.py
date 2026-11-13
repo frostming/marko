@@ -16,6 +16,24 @@ from tests.normalize import normalize_html
 
 
 class TestBasic:
+    @pytest.mark.parametrize("whitespace", ["\xa0", "\u3000", "\v", "\f", "\u2028"])
+    @pytest.mark.parametrize("prefix", ["", "> ", "  "])
+    def test_unicode_whitespace_line_is_paragraph_content(self, whitespace, prefix):
+        text = f"{prefix}a\n{prefix}{whitespace}\n{prefix}b\n"
+        paragraph = f"<p>a\n{whitespace}\nb</p>\n"
+        expected = (
+            f"<blockquote>\n{paragraph}</blockquote>\n" if prefix == "> " else paragraph
+        )
+        assert marko.convert(text) == expected
+
+    @pytest.mark.parametrize("whitespace", ["", " ", "\t", " \t "])
+    def test_ascii_blank_line_still_separates_paragraphs(self, whitespace):
+        assert marko.convert(f"a\n{whitespace}\nb\n") == "<p>a</p>\n<p>b</p>\n"
+
+    @pytest.mark.parametrize("whitespace", ["\xa0", "\u3000", "\v", "\f", "\u2028"])
+    def test_unicode_whitespace_at_paragraph_edges_stays_trimmed(self, whitespace):
+        assert marko.convert(f"{whitespace}\na\n{whitespace}\n") == "<p>a</p>\n"
+
     @pytest.mark.parametrize(
         "line", ["[l{i}]: /u{i}\n", "- [l{i}]: /u{i}\n", "> [l{i}]: /u{i}\n"]
     )

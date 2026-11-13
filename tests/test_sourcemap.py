@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import re
 
+import pytest
+
 from marko import Markdown, MarkoExtension, block, inline
 from marko.element import _SourceMap
 from marko.ext.gfm import gfm
@@ -96,6 +98,21 @@ class TestBlockSpans:
 
 
 class TestInlineSpans:
+    @pytest.mark.parametrize("whitespace", ["\xa0", "\u3000"])
+    def test_unicode_whitespace_keeps_following_inline_spans(self, whitespace):
+        text = f"a\n{whitespace}\n  *b*\n"
+        doc = Markdown().parse(text)
+        assert len(doc.children) == 1
+        para = doc.children[0]
+        assert isinstance(para, block.Paragraph)
+        space = para.children[2]
+        assert isinstance(space, inline.RawText)
+        assert _span_text(text, space.source_span) == whitespace
+        emphasis = para.children[-1]
+        assert isinstance(emphasis, inline.Emphasis)
+        assert _span_text(text, emphasis.source_span) == "*b*"
+        assert _span_text(text, emphasis.children[0].source_span) == "b"
+
     def test_link_issue_example(self):
         """The exact example from issue #273."""
         text = "[Google](https://google.com)\n"
