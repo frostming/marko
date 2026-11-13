@@ -200,7 +200,7 @@ class CodeBlock(BlockElement):
         prefix = source.prefix + " {4}"
         if isinstance(source.state, Quote):
             # requires five spaces to prefix
-            prefix = source.prefix[:-1] + " {4}"
+            prefix = source.prefix[: -len(Quote._prefix)] + r" {,3}>[^\n\S] {4}"
         line = cls.strip_prefix(line, prefix)
         source.context.code_line = line
         return line
@@ -334,6 +334,8 @@ class HTMLBlock(BlockElement):
     @classmethod
     def match(cls, source: Source) -> int | bool:
         source.context.html_end = None
+        if not source.expect_re(r" {,3}<"):
+            return False
         if source.expect_re(r"(?i) {,3}<(script|pre|style|textarea)[>\s]"):
             assert source.match
             source.context.html_end = re.compile(rf"(?i)</{source.match.group(1)}>")
@@ -484,7 +486,8 @@ class Paragraph(BlockElement):
                             )
                             source.consume()
                         break
-                source._states = states
+                for state in states[len(source._states) :]:
+                    source.push_state(state)
         return lines
 
 
@@ -493,7 +496,9 @@ class Quote(BlockElement):
 
     priority = 6
     breaks_paragraph = True
-    _prefix = r" {,3}>[^\n\S]?"
+    # The space after ">" is taken whenever there is one, so that a line with fewer
+    # ">" than the nesting depth fails at once instead of in 2 ** depth attempts
+    _prefix = r" {,3}>(?:[^\n\S]|(?![^\n\S]))"
 
     @classmethod
     def match(cls, source: Source) -> Match[str] | None:
@@ -512,7 +517,7 @@ class List(BlockElement):
 
     priority = 6
     _prefix = ""
-    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])(?:[ \t\n\r\f]|$)")
+    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])(?:[ \t\n]|$)")
 
     class ParseInfo(NamedTuple):
         bullet: str
@@ -581,7 +586,7 @@ class ListItem(BlockElement):
 
     virtual = True
     _tight = False
-    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])(?:[ \t\n\r\f]|$)")
+    pattern = re.compile(r" {,3}(\d{1,9}[.)]|[*\-+])(?:[ \t\n]|$)")
 
     class ParseInfo(NamedTuple):
         indent: int

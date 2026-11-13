@@ -33,7 +33,7 @@ class GFMRendererMixin:
 
     @render_paragraph.dispatch(MarkdownRenderer)
     def render_paragraph(self, element):
-        para = self.render_children(element)
+        para = self._render_paragraph_children(element)
         if hasattr(element, "checked"):
             para = f"[{'x' if element.checked else ' '}]{para}"
         line = self._prefix + para + "\n"
@@ -105,7 +105,7 @@ class GFMRendererMixin:
 
     @render_url.dispatch(MarkdownRenderer)
     def render_url(self, element):
-        return element.dest
+        return self.render_children(element)
 
     @render_dispatch(HTMLRenderer)
     def render_alert(self, element):

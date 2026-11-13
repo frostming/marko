@@ -171,6 +171,18 @@ class LatexRendererMixin:
         _logger.warning("Rendering HTML is not supported!")
         return ""
 
+    def render_footnote_ref(self, element):
+        definition = getattr(self.root_node, "footnotes", {}).get(element.label)
+        if definition is None:
+            # unmatched footnote reference, keep the marker as-is
+            return f"[^{element.label}]"
+        content = " ".join(self.render_children(definition).split())
+        return f"\\footnote{{{content}}}"
+
+    def render_footnote_def(self, element):
+        # the footnote text is rendered at the reference point instead
+        return ""
+
     def render_literal(self, element):
         return self.render_raw_text(element)
 

@@ -14,6 +14,24 @@ if TYPE_CHECKING:
     from . import block, inline
 
 
+# Line starts that would begin a block instead of continuing a paragraph: an ATX
+# heading, a bullet list item, a thematic break, a setext underline, a block quote,
+# a code fence, and a list item numbered 1.
+_BLOCK_START_RE = re.compile(
+    r"#{1,6}(?=[ \t]|$)|[-+*](?=[ \t]|$)|[-*_](?=[ \t]*[-*_])|[>=]|`{3}|~{3}"
+)
+_ORDERED_START_RE = re.compile(r"1(?=[.)](?:[ \t]|$))")
+
+
+def _escape_block_start(text: str) -> str:
+    """Backslash-escape a block marker at the start of a paragraph line."""
+    if _ORDERED_START_RE.match(text):
+        return text[:1] + "\\" + text[1:]
+    if _BLOCK_START_RE.match(text):
+        return "\\" + text
+    return text
+
+
 class MarkdownRenderer(Renderer):
     """Render the AST back to markdown document.
 
@@ -45,26 +63,45 @@ class MarkdownRenderer(Renderer):
         self._second_prefix = old_second_prefix
 
     def render_paragraph(self, element: block.Paragraph) -> str:
-        children = self.render_children(element)
-        line = self._prefix + children + "\n"
+        line = self._prefix + self._render_paragraph_children(element) + "\n"
         self._prefix = self._second_prefix
         return line
+
+    def _render_paragraph_children(self, element: block.Paragraph) -> str:
+        parts = []
+        line_start = False
+        for child in element.children:
+            text = self.render(child)
+            if line_start and child.get_type() == "RawText":
+                # A continuation line loses its indentation, so a leading block
+                # marker would start a list, heading, etc. instead of continuing
+                text = _escape_block_start(text)
+            line_start = child.get_type() == "LineBreak"
+            parts.append(text)
+        return "".join(parts)
 
     def render_list(self, element: block.List) -> str:
         result = []
         if element.ordered:
+            # Keep the delimiter: "1." and "1)" lists are different lists
+            delimiter = element.bullet[-1]
             for num, child in enumerate(element.children, element.start):
-                with self.container(f"{num}. ", " " * (len(str(num)) + 2)):
+                with self.container(f"{num}{delimiter} ", " " * (len(str(num)) + 2)):
                     result.append(self.render(child))
         else:
             for child in element.children:
                 with self.container(f"{element.bullet} ", "  "):
                     result.append(self.render(child))
         self._prefix = self._second_prefix
-        sep = "\n" if not element.tight else ""
+        sep = self._second_prefix.rstrip() + "\n" if not element.tight else ""
         return sep.join(result)
 
     def render_list_item(self, element: block.ListItem) -> str:
+        if all(child.get_type() == "BlankLine" for child in element.children):
+            # An empty item has nothing to carry its marker, so write it here
+            marker = self._prefix.rstrip() + "\n"
+            self._prefix = self._second_prefix
+            return marker + self.render_children(element)
         return self.render_children(element)
 
     def render_quote(self, element: block.Quote) -> str:
@@ -76,7 +113,8 @@ class MarkdownRenderer(Renderer):
     def render_fenced_code(self, element: block.FencedCode) -> str:
         extra = f" {element.extra}" if element.extra else ""
         info = f"{element.lang}{extra}"
-        code = self.render_children(element)
+        # The code as written: render_raw_text() would space CJK and latin letters
+        code = element.children[0].children  # type: ignore
         marker = "~" if "`" in info else "`"
         fence = marker * max(
             3, max(map(len, re.findall(marker + "+", code)), default=0) + 1
@@ -92,7 +130,8 @@ class MarkdownRenderer(Renderer):
 
     def render_code_block(self, element: block.CodeBlock) -> str:
         indent = " " * 4
-        lines = self.render_children(element).removesuffix("\n").split("\n")
+        code = element.children[0].children  # type: ignore
+        lines = code.removesuffix("\n").split("\n")
         lines = [self._prefix + indent + lines[0]] + [
             self._second_prefix + indent + line for line in lines[1:]
         ]
@@ -100,9 +139,13 @@ class MarkdownRenderer(Renderer):
         return "\n".join(lines) + "\n"
 
     def render_html_block(self, element: block.HTMLBlock) -> str:
-        result = self._prefix + element.body + "\n"
+        lines = element.body.removesuffix("\n").split("\n")
+        lines = [self._prefix + lines[0]] + [
+            (self._second_prefix + line) if line else self._second_prefix.rstrip()
+            for line in lines[1:]
+        ]
         self._prefix = self._second_prefix
-        return result
+        return "\n".join(lines) + "\n"
 
     def render_thematic_break(self, element: block.ThematicBreak) -> str:
         result = self._prefix + "* * *\n"
@@ -121,23 +164,59 @@ class MarkdownRenderer(Renderer):
         return result
 
     def render_setext_heading(self, element: block.SetextHeading) -> str:
-        return self.render_heading(cast("block.Heading", element))
+        children = self.render_children(element)
+        if "\n" not in children:
+            return self.render_heading(cast("block.Heading", element))
+        # An ATX heading holds one line only, so keep a multi-line heading setext
+        lines = children.split("\n")
+        underline = "===" if element.level == 1 else "---"
+        result = (
+            self._prefix
+            + lines[0]
+            + "\n"
+            + "".join(self._second_prefix + line + "\n" for line in lines[1:])
+            + self._second_prefix
+            + underline
+            + "\n"
+        )
+        self._prefix = self._second_prefix
+        return result
 
     def render_blank_line(self, element: block.BlankLine) -> str:
         self._prefix = self._second_prefix
-        return "\n"
+        # Keep the quote markers, or the blank line would end the block quote
+        return self._second_prefix.rstrip() + "\n"
 
     def render_link_ref_def(self, element: block.LinkRefDef) -> str:
         link_text = element.dest
         if element.title:
             link_text += f" {element.title}"
-        return f"[{element.label}]: {link_text}\n"
+        result = f"{self._prefix}[{element.label}]: {link_text}\n"
+        self._prefix = self._second_prefix
+        return result
 
     def render_emphasis(self, element: inline.Emphasis) -> str:
-        return f"*{self.render_children(element)}*"
+        return self._render_emphasis(element, "*")
 
     def render_strong_emphasis(self, element: inline.StrongEmphasis) -> str:
-        return f"**{self.render_children(element)}**"
+        return self._render_emphasis(element, "*")
+
+    def _render_emphasis(
+        self, element: inline.Emphasis | inline.StrongEmphasis, char: str
+    ) -> str:
+        delimiter = char * (2 if element.get_type() == "StrongEmphasis" else 1)
+        children = element.children
+        if (
+            len(children) == 1
+            and not isinstance(children[0], str)
+            and children[0].get_type() == "Emphasis"
+        ):
+            # `*` around it would join its `*` into one run of delimiters, so
+            # `**_foo_**` would come back as `***foo***`, which is <em><strong>
+            other = "_" if char == "*" else "*"
+            inner = self._render_emphasis(cast("inline.Emphasis", children[0]), other)
+            return delimiter + inner + delimiter
+        return delimiter + self.render_children(element) + delimiter
 
     def render_inline_html(self, element: inline.InlineHTML) -> str:
         return cast(str, element.children)
@@ -171,7 +250,8 @@ class MarkdownRenderer(Renderer):
         return f"[{link_text}]({self._render_link_destination(element.dest)}{title})"
 
     def render_auto_link(self, element: inline.AutoLink) -> str:
-        return f"<{element.dest}>"
+        # The text: the destination of an email address starts with "mailto:"
+        return f"<{self.render_children(element)}>"
 
     def render_image(self, element: inline.Image) -> str:
         template = "![{}]({}{})"

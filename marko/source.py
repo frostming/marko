@@ -16,9 +16,13 @@ if TYPE_CHECKING:
     from marko.parser import Parser
 
 
+_LINE_RE = re.compile(r"(?m)[^\n]*$\n?")
+_LAZY_LINE_RE = re.compile(r"(?m)[^\n]*?$\n?")
+
+
 def _preprocess_text(text: str) -> str:
     # Normalize line terminators so block parsers can always advance on line reads.
-    text = text.replace("\r\n", "\n").replace("\r", "\n").replace("\f", "\n")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
     return text.replace("\x00", "�")
 
 
@@ -32,7 +36,11 @@ class Source:
         self.pos = 0
         self._anchor = 0
         self._states: list[BlockElement] = []
+        self._prefix_cache: str | None = None
         self.match: Match[str] | None = None
+        #: (pos, prefix, prefix length, line match) of the last prefix check, since
+        #: every block element tried on a line checks the same prefix again.
+        self._line_prefix: tuple[int, str, int, Match[str] | None] = (-1, "", 0, None)
         #: Store temporary data during parsing.
         self.context = types.SimpleNamespace()
 
@@ -53,9 +61,11 @@ class Source:
     def push_state(self, element: BlockElement) -> None:
         """Push a new state to the state stack."""
         self._states.append(element)
+        self._prefix_cache = None
 
     def pop_state(self) -> BlockElement:
         """Pop the top most state."""
+        self._prefix_cache = None
         return self._states.pop()
 
     @contextmanager
@@ -75,12 +85,14 @@ class Source:
     @property
     def prefix(self) -> str:
         """The prefix of each line when parsing."""
-        return "".join(s._prefix for s in self._states)
+        if self._prefix_cache is None:
+            self._prefix_cache = "".join(s._prefix for s in self._states)
+        return self._prefix_cache
 
     @property
     def _current_pos(self) -> int:
         """Return the current source offset after the active block prefixes."""
-        match = self._expect_re(r"(?m)[^\n]*$\n?", self.pos)
+        match = self._expect_re(_LINE_RE, self.pos)
         if match is None:
             return self.pos
         prefix_len = self.match_prefix(self.prefix, match.group())
@@ -116,10 +128,18 @@ class Source:
         :param regexp: the expression to be tested.
         :returns: the match object.
         """
-        prefix_len = self.match_prefix(
-            self.prefix,
-            self.next_line(require_prefix=False),
-        )
+        prefix = self.prefix
+        # An empty prefix always matches, so skip reading the whole line.
+        if not prefix:
+            prefix_len = 0
+        else:
+            pos, last_prefix, prefix_len, line_match = self._line_prefix
+            if pos == self.pos and last_prefix == prefix:
+                self.match = line_match
+            else:
+                line = self.next_line(require_prefix=False)
+                prefix_len = self.match_prefix(prefix, line)
+                self._line_prefix = (self.pos, prefix, prefix_len, self.match)
         if prefix_len >= 0:
             match = self._expect_re(regexp, self.pos + prefix_len)
             self.match = match
@@ -141,9 +161,9 @@ class Source:
             is not matched.
         """
         if require_prefix:
-            m = self.expect_re(r"(?m)[^\n]*?$\n?")
+            m = self.expect_re(_LAZY_LINE_RE)
         else:
-            m = self._expect_re(r"(?m)[^\n]*$\n?", self.pos)
+            m = self._expect_re(_LINE_RE, self.pos)
         self.match = m
         if m:
             return m.group()
@@ -166,6 +186,7 @@ class Source:
         self.pos = self._anchor
 
     def _update_prefix(self) -> None:
+        self._prefix_cache = None
         for s in self._states:
             if hasattr(s, "_second_prefix"):
                 s._prefix = s._second_prefix
