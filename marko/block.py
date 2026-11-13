@@ -391,10 +391,6 @@ class Paragraph(BlockElement):
     pattern = re.compile(r"[^\n]+$\n?", flags=re.MULTILINE)
 
     def __init__(self, lines: list[str]) -> None:
-        # Leading spaces or tabs are stripped from each line, and final spaces,
-        # tabs and line endings from the result, as CommonMark requires for a
-        # paragraph's raw content (spec 4.8) — trailing whitespace at the end
-        # of a paragraph is not content and doesn't make a hard line break.
         str_lines = "".join(line.lstrip() for line in lines).rstrip(" \t\n")
         self.inline_body = str_lines
         self._tight = False
