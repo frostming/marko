@@ -113,7 +113,8 @@ class MarkdownRenderer(Renderer):
     def render_fenced_code(self, element: block.FencedCode) -> str:
         extra = f" {element.extra}" if element.extra else ""
         info = f"{element.lang}{extra}"
-        code = self.render_children(element)
+        # The code as written: render_raw_text() would space CJK and latin letters
+        code = element.children[0].children  # type: ignore
         marker = "~" if "`" in info else "`"
         fence = marker * max(
             3, max(map(len, re.findall(marker + "+", code)), default=0) + 1
@@ -129,7 +130,8 @@ class MarkdownRenderer(Renderer):
 
     def render_code_block(self, element: block.CodeBlock) -> str:
         indent = " " * 4
-        lines = self.render_children(element).removesuffix("\n").split("\n")
+        code = element.children[0].children  # type: ignore
+        lines = code.removesuffix("\n").split("\n")
         lines = [self._prefix + indent + lines[0]] + [
             self._second_prefix + indent + line for line in lines[1:]
         ]

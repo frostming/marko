@@ -394,6 +394,20 @@ class TestBasic:
         rerendered = markdown(text)
         assert marko.convert(rerendered) == marko.convert(text)
 
+    @pytest.mark.parametrize(
+        "text",
+        [
+            '```python\nprint("opensearch\u4ea7\u54c1\u6587\u6863")\n```\n',
+            "    \u4e2d\u56fd2018\u5e74\n",
+            "> ```\n> \u751f\u6210\u3055\u308c\u308bPDF\n> ```\n",
+        ],
+    )
+    def test_markdown_renderer_keeps_cjk_in_code_blocks(self, text):
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        assert markdown(text) == text
+        # paragraphs still get a space between CJK characters and latin letters
+        assert markdown("\u4e2d\u56fd2018\u5e74\n") == "\u4e2d\u56fd 2018 \u5e74\n"
+
     @pytest.mark.parametrize("separator", ["\v", "\x85", "\u2028", "\u2029"])
     @pytest.mark.parametrize(
         "template",
