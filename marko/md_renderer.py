@@ -88,11 +88,13 @@ class MarkdownRenderer(Renderer):
             for num, child in enumerate(element.children, element.start):
                 with self.container(f"{num}{delimiter} ", " " * (len(str(num)) + 2)):
                     result.append(self.render(child))
+                # The first item wrote the marker of the item holding this list
+                self._prefix = self._second_prefix
         else:
             for child in element.children:
                 with self.container(f"{element.bullet} ", "  "):
                     result.append(self.render(child))
-        self._prefix = self._second_prefix
+                self._prefix = self._second_prefix
         sep = self._second_prefix.rstrip() + "\n" if not element.tight else ""
         return sep.join(result)
 

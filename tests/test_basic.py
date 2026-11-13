@@ -408,6 +408,21 @@ class TestBasic:
         # paragraphs still get a space between CJK characters and latin letters
         assert markdown("\u4e2d\u56fd2018\u5e74\n") == "\u4e2d\u56fd 2018 \u5e74\n"
 
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "* - ``--optimize 3``\n  - ``-O3``\n",
+            "- - a\n  - b\n- c\n",
+            "1. - a\n   - b\n",
+            "- 1. a\n  2. b\n",
+            "- - - a\n    - b\n",
+        ],
+    )
+    def test_markdown_renderer_list_first_in_list_item(self, text):
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == marko.convert(text)
+
     @pytest.mark.parametrize("separator", ["\v", "\x85", "\u2028", "\u2029"])
     @pytest.mark.parametrize(
         "template",
