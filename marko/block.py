@@ -95,15 +95,17 @@ class _ParsedLines(list[str]):
 
 
 def _build_inline_positions(
-    lines: Sequence[str], line_starts: Sequence[int]
+    lines: Sequence[str],
+    line_starts: Sequence[int],
+    continuation_strip_chars: str | None = None,
 ) -> _SourceMap:
     """Build a parallel mapping from the indices of the inline body
     (i.e. the lines with leading whitespace stripped and joined) to the
     positions in the source text.
     """
     runs: list[tuple[int, int]] = []
-    for line, base in zip(lines, line_starts):
-        stripped = line.lstrip()
+    for index, (line, base) in enumerate(zip(lines, line_starts)):
+        stripped = line.lstrip(None if index == 0 else continuation_strip_chars)
         leading = len(line) - len(stripped)
         runs.append((base + leading, len(stripped)))
     return _SourceMap(runs)
@@ -121,7 +123,7 @@ class BlankLine(BlockElement):
     @classmethod
     def match(cls, source: Source) -> bool:
         line = source.next_line()
-        return line is not None and not line.strip()
+        return line is not None and not line.strip(" \t\n")
 
     @classmethod
     def parse(cls, source: Source) -> int:
@@ -391,14 +393,22 @@ class Paragraph(BlockElement):
     pattern = re.compile(r"[^\n]+$\n?", flags=re.MULTILINE)
 
     def __init__(self, lines: list[str]) -> None:
-        str_lines = "".join(line.lstrip() for line in lines).rstrip("\n")
+        # Retain the existing trimming at paragraph boundaries, but keep
+        # Unicode whitespace on interior continuation lines as content.
+        content_end = len(lines)
+        while content_end > 1 and not lines[content_end - 1].strip():
+            content_end -= 1
+        str_lines = "".join(
+            line.lstrip(None if index == 0 else " \t")
+            for index, line in enumerate(lines[:content_end])
+        ).rstrip("\n")
         self.inline_body = str_lines
         self._tight = False
         line_starts = getattr(lines, "line_starts", None)
         if line_starts is not None:
-            self._inline_positions = _build_inline_positions(lines, line_starts)[
-                : len(str_lines)
-            ]
+            self._inline_positions = _build_inline_positions(
+                lines, line_starts, continuation_strip_chars=" \t"
+            )[: len(str_lines)]
 
     @classmethod
     def match(cls, source: Source) -> bool:
