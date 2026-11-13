@@ -627,3 +627,13 @@ class TestExtension:
         assert isinstance(res.children[1], block.Paragraph)
         assert isinstance(res.children[2], CustomElement)
         assert isinstance(res.children[3], block.BlankLine)
+
+
+def test_block_children_are_not_shared_between_elements():
+    from marko.inline import RawText
+
+    first = block.Paragraph([])
+    first.children.append(RawText("Some Text"))
+    second = block.Paragraph([])
+    assert len(first.children) == 1
+    assert len(second.children) == 0
