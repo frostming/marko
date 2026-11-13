@@ -391,7 +391,7 @@ class Paragraph(BlockElement):
     pattern = re.compile(r"[^\n]+$\n?", flags=re.MULTILINE)
 
     def __init__(self, lines: list[str]) -> None:
-        str_lines = "".join(line.lstrip() for line in lines).rstrip("\n")
+        str_lines = "".join(line.lstrip() for line in lines).rstrip(" \t\n")
         self.inline_body = str_lines
         self._tight = False
         line_starts = getattr(lines, "line_starts", None)
