@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Generator, cast
+from typing import TYPE_CHECKING, Any, Generator, cast
 
 from .renderer import Renderer
 
@@ -44,11 +44,30 @@ class MarkdownRenderer(Renderer):
         super().__init__()
         self._prefix = ""
         self._second_prefix = ""
+        self._before_code_block = False
 
     def __enter__(self) -> MarkdownRenderer:
         self._prefix = ""
         self._second_prefix = ""
         return super().__enter__()
+
+    def render_children(self, element: Any) -> Any:
+        rendered = []
+        for index, child in enumerate(element.children):
+            if child.get_type() == "List":
+                following = next(
+                    (
+                        sibling
+                        for sibling in element.children[index + 1 :]
+                        if sibling.get_type() != "BlankLine"
+                    ),
+                    None,
+                )
+                self._before_code_block = (
+                    following is not None and following.get_type() == "CodeBlock"
+                )
+            rendered.append(self.render(child))
+        return "".join(rendered)
 
     @contextmanager
     def container(
@@ -82,15 +101,22 @@ class MarkdownRenderer(Renderer):
 
     def render_list(self, element: block.List) -> str:
         result = []
+        # An indented code block after the list was outside it, so the content of
+        # the items started past column 4: indent the markers, or the code would
+        # continue the last item
+        before_code_block, self._before_code_block = self._before_code_block, False
         if element.ordered:
             # Keep the delimiter: "1." and "1)" lists are different lists
             delimiter = element.bullet[-1]
             for num, child in enumerate(element.children, element.start):
-                with self.container(f"{num}{delimiter} ", " " * (len(str(num)) + 2)):
+                width = len(str(num)) + 2
+                lead = " " * max(0, 5 - width) if before_code_block else ""
+                with self.container(f"{lead}{num}{delimiter} ", lead + " " * width):
                     result.append(self.render(child))
         else:
+            lead = "   " if before_code_block else ""
             for child in element.children:
-                with self.container(f"{element.bullet} ", "  "):
+                with self.container(f"{lead}{element.bullet} ", lead + "  "):
                     result.append(self.render(child))
         self._prefix = self._second_prefix
         sep = self._second_prefix.rstrip() + "\n" if not element.tight else ""
