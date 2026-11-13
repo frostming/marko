@@ -37,7 +37,7 @@ class BlockElement(Element):
     """Any block element should inherit this class"""
 
     #: An attribute to hold the children
-    children: Sequence[Element] = []
+    children: Sequence[Element]
     #: Use to denote the precedence in parsing
     priority = 5
     #: if True, it won't be included in parsing process but produced by other elements
@@ -50,6 +50,13 @@ class BlockElement(Element):
     #: If true, the element can break (end) a Paragraph block.
     breaks_paragraph = False
     _prefix = ""
+
+    def __new__(cls, *args: Any, **kwargs: Any) -> BlockElement:
+        # Give each element its own list so that mutating one element's
+        # children can't leak into the others.
+        self = super().__new__(cls)
+        self.children = []
+        return self
 
     @classmethod
     def match(cls, source: Source) -> Any:
