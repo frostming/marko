@@ -315,12 +315,15 @@ class TestBasic:
         "text, expected",
         [
             ("**_foo_**\n", "**_foo_**\n"),
-            ("__*foo*__\n", "**_foo_**\n"),
+            ("__*foo*__\n", "__*foo*__\n"),
             ("*_foo_*\n", "*_foo_*\n"),
             ("**_*foo*_**\n", "**_*foo*_**\n"),
             ("- **_Note:_** bar\n", "- **_Note:_** bar\n"),
             ("***foo***\n", "***foo***\n"),
             ("foo***bar***baz\n", "foo***bar***baz\n"),
+            ("foo _*_\n", "foo _*_\n"),
+            ("foo __*__\n", "foo __*__\n"),
+            ("*foo __bar *baz bim__ bam*\n", "*foo __bar *baz bim__ bam*\n"),
         ],
     )
     def test_markdown_renderer_nested_emphasis(self, text, expected):
