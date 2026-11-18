@@ -277,8 +277,9 @@ class MarkdownRenderer(Renderer):
 
     def render_code_span(self, element: inline.CodeSpan) -> str:
         text = cast(str, element.children)
-        delimiter = "`" * (
-            max((len(m.group()) for m in re.finditer(r"`+", text)), default=0) + 1
+        delimiter = "`" * max(
+            element.backticks,
+            max((len(m.group()) for m in re.finditer(r"`+", text)), default=0) + 1,
         )
         if (
             text.startswith("`")
