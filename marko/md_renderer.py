@@ -196,10 +196,10 @@ class MarkdownRenderer(Renderer):
         return result
 
     def render_emphasis(self, element: inline.Emphasis) -> str:
-        return self._render_emphasis(element, "*")
+        return self._render_emphasis(element, element.delimiter)
 
     def render_strong_emphasis(self, element: inline.StrongEmphasis) -> str:
-        return self._render_emphasis(element, "*")
+        return self._render_emphasis(element, element.delimiter)
 
     def _render_emphasis(
         self, element: inline.Emphasis | inline.StrongEmphasis, char: str

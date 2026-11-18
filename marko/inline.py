@@ -149,6 +149,11 @@ class StrongEmphasis(InlineElement):
 
     virtual = True
     parse_children = True
+    delimiter = "*"
+
+    def __init__(self, match: _Match) -> None:
+        super().__init__(match)
+        self.delimiter = match.group()[0]
 
 
 class Emphasis(InlineElement):
@@ -156,6 +161,11 @@ class Emphasis(InlineElement):
 
     virtual = True
     parse_children = True
+    delimiter = "*"
+
+    def __init__(self, match: _Match) -> None:
+        super().__init__(match)
+        self.delimiter = match.group()[0]
 
 
 class Link(InlineElement):
