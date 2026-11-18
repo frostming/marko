@@ -446,6 +446,9 @@ class TestBasic:
             "` a`",
             "`a `",
             "`   `",
+            "`foo``bar``",
+            "``a``",
+            "``bar``baz`",
         ],
     )
     def test_markdown_renderer_code_span_roundtrip(self, text):

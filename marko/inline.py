@@ -213,8 +213,10 @@ class CodeSpan(InlineElement):
 
     priority = 7
     pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
+    backticks = 1
 
     def __init__(self, match: _Match) -> None:
+        self.backticks = len(match.group(1))
         self.children = match.group(2).replace("\n", " ")
         if self.children.strip() and self.children[0] == self.children[-1] == " ":
             self.children = self.children[1:-1]
