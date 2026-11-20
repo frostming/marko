@@ -144,6 +144,35 @@ class TestBasic:
     def test_link_dest_with_unbalanced_parenthesis(self, text, html):
         assert marko.convert(text) == html
 
+    @pytest.mark.parametrize(
+        "text, html",
+        [
+            (
+                '[x](/u\\&amp; "t\\&ouml;")',
+                '<p><a href="/u&amp;amp%3B" title="t&amp;ouml;">x</a></p>\n',
+            ),
+            ("[x](</u\\&#35;>)", '<p><a href="/u&amp;#35%3B">x</a></p>\n'),
+            (
+                '![x](/i\\&amp; "t\\&amp;")',
+                '<p><img src="/i&amp;amp%3B" alt="x" title="t&amp;amp;" /></p>\n',
+            ),
+            (
+                '[x]\n\n[x]: /u\\&amp; "t\\&amp;"',
+                '<p><a href="/u&amp;amp%3B" title="t&amp;amp;">x</a></p>\n',
+            ),
+            (
+                "``` a\\&ouml;b\n```",
+                '<pre><code class="language-a&amp;ouml;b"></code></pre>\n',
+            ),
+            (
+                "``` a\\\\&ouml;\n```",
+                '<pre><code class="language-a\\ö"></code></pre>\n',
+            ),
+        ],
+    )
+    def test_escaped_ampersand_is_not_an_entity(self, text, html):
+        assert marko.convert(text) == html
+
     def test_long_paragraph_with_many_links_and_emphasis(self):
         text = " ".join(f"*e{i}* [l{i}](/u{i}) `c` \\* x" for i in range(200))
         html = marko.convert(text)
@@ -483,6 +512,7 @@ class TestBasic:
             r"<my file\>name.pdf>",
             "<>",
             "file&amp;name.pdf",
+            r"file\&amp;name.pdf",
         ],
     )
     def test_markdown_renderer_link_destinations(self, image, title, destination):

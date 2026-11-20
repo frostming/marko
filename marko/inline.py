@@ -95,7 +95,11 @@ class Literal(InlineElement):
 
     @classmethod
     def strip_backslash(cls, text: str) -> str:
-        return cls.pattern.sub(r"\1", text)
+        # Renderers decode entities in destinations, titles and info strings
+        # later, so an escaped "&" is kept as "&amp;" to stay a literal "&".
+        return cls.pattern.sub(
+            lambda m: "&amp;" if m.group(1) == "&" else m.group(1), text
+        )
 
     def _syntax_spans(self, match: _Match) -> list[tuple[int, int]]:
         # The backslash.
