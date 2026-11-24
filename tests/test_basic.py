@@ -498,6 +498,30 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text, expected",
+        [
+            # a backslash that is not an escape, before a soft line break
+            ("foo\\ \nbar\n", "foo\\\\\nbar\n"),
+            ("C:\\dir\\ \nnext\n", "C:\\dir\\\\\nnext\n"),
+            # the same before a hard line break
+            ("foo\\  \nbar\n", "foo\\\\\\\nbar\n"),
+            ("- foo\\ \n  bar\n", "- foo\\\\\nbar\n"),
+            # an escaped backslash and a hard line break are left alone
+            ("foo\\\\\nbar\n", "foo\\\\\nbar\n"),
+            ("foo\\\nbar\n", "foo\\\nbar\n"),
+            # a backslash at the end of the paragraph is not before a line break
+            ("foo\\ \n", "foo\\\n"),
+        ],
+    )
+    def test_markdown_renderer_backslash_before_line_break(self, text, expected):
+        # The backslash of the text must not pair with a line break: "foo\\"
+        # followed by a newline is a hard line break, not a backslash.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text",
         [
             "- foo [x]\n\n  [x]: /url\n",
