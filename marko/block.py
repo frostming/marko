@@ -719,4 +719,7 @@ class LinkRefDef(BlockElement):
         if normalized_label not in link_ref_defs:
             link_ref_defs[normalized_label] = (dest.text, title.text)
         source.pos = pos
+        # The definition took the first line of a list item: the lines that come
+        # next have the prefix of the following lines, as after consume()
+        source._update_prefix()
         return cls(normalized_label, dest.text, title.text)

@@ -66,6 +66,27 @@ class TestBasic:
         assert '<a href="/u0">l0</a>' in html
         assert '<a href="/u49">l49</a>' in html
 
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("- [x]: /u\n- a\n", "<ul>\n<li>\n</li>\n<li>a</li>\n</ul>\n"),
+            ("1. [x]: /u\n2. a\n", "<ol>\n<li>\n</li>\n<li>a</li>\n</ol>\n"),
+            (
+                '- [x]: /u\n  "t"\n- [y]: /v\n- a\n',
+                "<ul>\n<li>\n</li>\n<li>\n</li>\n<li>a</li>\n</ul>\n",
+            ),
+            (
+                "> - [x]: /u\n> - a\n",
+                "<blockquote>\n<ul>\n<li>\n</li>\n<li>a</li>\n</ul>\n</blockquote>\n",
+            ),
+            ("- [x]: /u\n  a\n", "<ul>\n<li>\na</li>\n</ul>\n"),
+        ],
+    )
+    def test_link_ref_def_first_in_list_item(self, text, expected):
+        # The definition takes the first line of the item, so the next line is
+        # not the line of the item, and its marker starts the next item.
+        assert marko.convert(text) == expected
+
     def test_cr_line_terminator_no_infinite_loop(self):
         assert marko.convert("-\r-") == marko.convert("-\n-")
 
