@@ -282,10 +282,16 @@ class TestBasic:
             "*\n",
             "> - a\n> -\n",
             "- a\n\n-\n\n- b\n",
+            "- >\n- a\n",
+            "1. >\n",
+            "- - >\n",
+            "> - >\n",
+            "- >\n\n  b\n",
         ],
     )
     def test_markdown_renderer_empty_list_item(self, text):
-        # An empty list item keeps its marker.
+        # An empty list item, or one that starts with an empty quote, keeps its
+        # marker.
         markdown = marko.Markdown(renderer=MarkdownRenderer)
         rerendered = markdown(text)
         assert rerendered == text
