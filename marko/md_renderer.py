@@ -8,6 +8,7 @@ import re
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Any, Generator, cast
 
+from . import patterns
 from .renderer import Renderer
 
 if TYPE_CHECKING:
@@ -21,6 +22,11 @@ _BLOCK_START_RE = re.compile(
     r"#{1,6}(?=[ \t]|$)|[-+*](?=[ \t]|$)|[-*_](?=[ \t]*[-*_])|[>=]|`{3}|~{3}"
 )
 _ORDERED_START_RE = re.compile(r"\d{1,9}(?=[.)](?:[ \t]|$))")
+# The HTML blocks that can interrupt a paragraph (types 1 to 6 of the spec)
+_HTML_BLOCK_START_RE = re.compile(
+    r"(?i)<(?:(?:script|pre|style|textarea)[>\s]|!--|\?|![a-z]|!\[CDATA\["
+    r"|/?(?:%s)(?: +|/?>|$))" % "|".join(patterns.tags)
+)
 
 
 def _escape_block_start(text: str, in_container: bool = False) -> str:
@@ -32,7 +38,7 @@ def _escape_block_start(text: str, in_container: bool = False) -> str:
     ordered = _ORDERED_START_RE.match(text)
     if ordered and (in_container or ordered.group() == "1"):
         return text[: ordered.end()] + "\\" + text[ordered.end() :]
-    if _BLOCK_START_RE.match(text):
+    if _BLOCK_START_RE.match(text) or _HTML_BLOCK_START_RE.match(text):
         return "\\" + text
     return text
 
@@ -100,6 +106,14 @@ class MarkdownRenderer(Renderer):
                 # A continuation line loses its indentation, so a leading block
                 # marker would start a list, heading, etc. instead of continuing
                 text = _escape_block_start(text, bool(self._second_prefix))
+            elif (
+                line_start
+                and child.get_type() == "InlineHTML"
+                and _HTML_BLOCK_START_RE.match(text)
+            ):
+                # An HTML tag cannot be escaped, but four spaces of indentation
+                # keep it from starting an HTML block that ends the paragraph
+                text = self._second_prefix + "    " + text
             line_start = child.get_type() == "LineBreak"
             parts.append(text)
         return "".join(parts)
