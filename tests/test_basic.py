@@ -3,7 +3,6 @@ from __future__ import annotations
 import html
 import re
 import textwrap
-import time
 
 import pytest
 
@@ -13,6 +12,7 @@ from marko.ast_renderer import ASTRenderer, XMLRenderer
 from marko.md_renderer import MarkdownRenderer
 from marko.source import Source
 from tests.normalize import normalize_html
+from tests.timing import assert_scales_linearly
 
 
 class TestBasic:
@@ -20,57 +20,24 @@ class TestBasic:
         "line", ["[l{i}]: /u{i}\n", "- [l{i}]: /u{i}\n", "> [l{i}]: /u{i}\n"]
     )
     def test_link_ref_def_run_scales_linearly(self, line):
-        def best_of_three(text):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(text)
-                best = min(best, time.perf_counter() - start)
-            return best
-
         small = "".join(line.format(i=i) for i in range(1000))
         large = "".join(line.format(i=i) for i in range(4000))
-        ratio = best_of_three(large) / best_of_three(small)
-        assert ratio < 8, f"4x the lines took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, small, large)
 
     @pytest.mark.parametrize("opener", ["[a](", "![alt](", "[a]["])
     def test_unclosed_inline_link_openers_scale_linearly(self, opener):
-        def best_of_three(text):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(text)
-                best = min(best, time.perf_counter() - start)
-            return best
-
-        ratio = best_of_three(opener * 8000) / best_of_three(opener * 2000)
-        assert ratio < 8, f"4x the openers took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, opener * 2000, opener * 8000)
 
     def test_nested_quotes_scale_linearly(self):
-        def best_of_three(text):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(text)
-                best = min(best, time.perf_counter() - start)
-            return best
-
-        ratio = best_of_three("> " * 24 + "a") / best_of_three("> " * 12 + "a")
-        assert ratio < 8, f"2x the depth took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, "> " * 12 + "a", "> " * 24 + "a")
 
     @pytest.mark.parametrize("opener", ["[", "!["])
     @pytest.mark.parametrize("definition", ["", "\n\n[a]: /url\n"])
     def test_bracket_runs_scale_linearly(self, opener, definition):
-        def best_of_three(n):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(opener * n + "]" * n + definition)
-                best = min(best, time.perf_counter() - start)
-            return best
+        def make(n):
+            return opener * n + "]" * n + definition
 
-        ratio = best_of_three(8000) / best_of_three(2000)
-        assert ratio < 8, f"4x the brackets took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, make(2000), make(8000))
 
     def test_link_destination_paren_nesting_limit(self):
         nested = "(" * 32 + ")" * 32
