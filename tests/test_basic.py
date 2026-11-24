@@ -397,6 +397,30 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("- foo\n  2. bar\n", "- foo\n2\\. bar\n"),
+            ("- foo\n  2026. bar\n", "- foo\n2026\\. bar\n"),
+            ("1. foo\n   10) bar\n", "1. foo\n10\\) bar\n"),
+            ("> foo\n> 2. bar\n", "> foo\n2\\. bar\n"),
+            ("- a\n  - foo\n    3. bar\n", "- a\n  - foo\n3\\. bar\n"),
+            # a number that does not start a list item is left alone
+            ("- foo\n  2.bar\n  2 . baz\n", "- foo\n2.bar\n2 . baz\n"),
+            # outside a container the line is a continuation without an escape
+            ("foo\n2026. bar\n", "foo\n2026. bar\n"),
+        ],
+    )
+    def test_markdown_renderer_numbered_continuation_line_in_container(
+        self, text, expected
+    ):
+        # A numbered line that is not indented ends a list item or a quote, so
+        # its marker is escaped to keep the line in the paragraph.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text",
         [
             "- foo [x]\n\n  [x]: /url\n",

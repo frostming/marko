@@ -16,17 +16,22 @@ if TYPE_CHECKING:
 
 # Line starts that would begin a block instead of continuing a paragraph: an ATX
 # heading, a bullet list item, a thematic break, a setext underline, a block quote,
-# a code fence, and a list item numbered 1.
+# a code fence, and a list item numbered 1 (or any number inside a container).
 _BLOCK_START_RE = re.compile(
     r"#{1,6}(?=[ \t]|$)|[-+*](?=[ \t]|$)|[-*_](?=[ \t]*[-*_])|[>=]|`{3}|~{3}"
 )
-_ORDERED_START_RE = re.compile(r"1(?=[.)](?:[ \t]|$))")
+_ORDERED_START_RE = re.compile(r"\d{1,9}(?=[.)](?:[ \t]|$))")
 
 
-def _escape_block_start(text: str) -> str:
-    """Backslash-escape a block marker at the start of a paragraph line."""
-    if _ORDERED_START_RE.match(text):
-        return text[:1] + "\\" + text[1:]
+def _escape_block_start(text: str, in_container: bool = False) -> str:
+    """Backslash-escape a block marker at the start of a paragraph line.
+
+    A list item numbered other than 1 cannot interrupt a paragraph, but it can
+    end the paragraph of a list item or a quote when the line is not indented.
+    """
+    ordered = _ORDERED_START_RE.match(text)
+    if ordered and (in_container or ordered.group() == "1"):
+        return text[: ordered.end()] + "\\" + text[ordered.end() :]
     if _BLOCK_START_RE.match(text):
         return "\\" + text
     return text
@@ -94,7 +99,7 @@ class MarkdownRenderer(Renderer):
             if line_start and child.get_type() == "RawText":
                 # A continuation line loses its indentation, so a leading block
                 # marker would start a list, heading, etc. instead of continuing
-                text = _escape_block_start(text)
+                text = _escape_block_start(text, bool(self._second_prefix))
             line_start = child.get_type() == "LineBreak"
             parts.append(text)
         return "".join(parts)
