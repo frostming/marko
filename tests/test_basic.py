@@ -350,6 +350,30 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text, expected",
         [
+            ("foo _*_\n", "foo *\\**\n"),
+            ("foo __*__\n", "foo **\\***\n"),
+            ("__*nix__ (Linux)\n", "**\\*nix** (Linux)\n"),
+            ("_*foo_\n", "*\\*foo*\n"),
+            ("_foo*_\n", "*foo\\**\n"),
+            ("_a*b_\n", "*a\\*b*\n"),
+            ("*foo __bar *baz bim__ bam*\n", "*foo **bar \\*baz bim** bam*\n"),
+            # a `*` that is already escaped stays as it is
+            ("*\\*foo*\n", "*\\*foo*\n"),
+            # a `*` outside emphasis is left alone
+            ("foo * bar\n", "foo * bar\n"),
+        ],
+    )
+    def test_markdown_renderer_asterisk_in_emphasis(self, text, expected):
+        # The emphasis is written with `*`, so a `*` in its text is escaped, or it
+        # would join the delimiter.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
             ("Foo\n    ***\n", "Foo\n\\***\n"),
             ("foo\n    # bar\n", "foo\n\\# bar\n"),
             ("Foo\n    ---\n", "Foo\n\\---\n"),

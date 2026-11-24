@@ -244,7 +244,17 @@ class MarkdownRenderer(Renderer):
             other = "_" if char == "*" else "*"
             inner = self._render_emphasis(cast("inline.Emphasis", children[0]), other)
             return delimiter + inner + delimiter
-        return delimiter + self.render_children(element) + delimiter
+        # A `*` in the text was not a delimiter, but next to the `*` of the emphasis
+        # it would be one, so `_*_` would come back as `***`
+        inner = "".join(
+            (
+                self.render(child).replace("*", "\\*")
+                if child.get_type() == "RawText"
+                else self.render(child)
+            )
+            for child in children
+        )
+        return delimiter + inner + delimiter
 
     def render_inline_html(self, element: inline.InlineHTML) -> str:
         return cast(str, element.children)
