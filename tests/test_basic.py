@@ -421,6 +421,32 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("foo\n    <!-- x -->\nbar\n", "foo\n    <!-- x -->\nbar\n"),
+            ("foo\n    <div>x</div>\n", "foo\n    <div>x</div>\n"),
+            ("foo\n    <pre>x</pre> y\n", "foo\n    <pre>x</pre> y\n"),
+            ("foo\n    <?php x ?> y\n", "foo\n    <?php x ?> y\n"),
+            ("> foo\n>     <div>x</div>\n", "> foo\n>     <div>x</div>\n"),
+            (
+                "- a\n  - foo\n      <div>x</div>\n",
+                "- a\n  - foo\n      <div>x</div>\n",
+            ),
+            # text that is not a tag cannot be indented, so it is escaped
+            ("foo\n    <div\n", "foo\n\\<div\n"),
+            # a tag that cannot interrupt a paragraph is left alone
+            ("foo\n<span>x</span>\n", "foo\n<span>x</span>\n"),
+        ],
+    )
+    def test_markdown_renderer_html_start_on_continuation_line(self, text, expected):
+        # A line that starts with a tag of an HTML block ends the paragraph, so
+        # a continuation line like that is indented (or escaped) to stay in it.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text",
         [
             "- foo [x]\n\n  [x]: /url\n",
