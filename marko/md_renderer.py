@@ -104,8 +104,18 @@ class MarkdownRenderer(Renderer):
     ) -> str:
         parts = []
         line_start = False
-        for child in element.children:
+        children = element.children
+        for index, child in enumerate(children):
             text = self.render(child)
+            if (
+                child.get_type() == "RawText"
+                and text.endswith("\\")
+                and index + 1 < len(children)
+                and children[index + 1].get_type() == "LineBreak"
+            ):
+                # A backslash before the end of a line is a hard line break,
+                # and it would pair with the backslash of a hard line break
+                text += "\\"
             if line_start and child.get_type() == "RawText":
                 # A continuation line loses its indentation, so a leading block
                 # marker would start a list, heading, etc. instead of continuing
