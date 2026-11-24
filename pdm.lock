@@ -965,7 +965,7 @@ files = [
 
 [[package]]
 name = "python-slugify"
-version = "9.1.3"
+version = "9.2.0"
 requires_python = ">=3.10"
 summary = "A Python slugify application that also handles Unicode"
 groups = ["doc", "toc"]
@@ -973,8 +973,8 @@ dependencies = [
     "text-unidecode>=1.3",
 ]
 files = [
-    {file = "python_slugify-9.1.3-py3-none-any.whl", hash = "sha256:9aced0670e54c5603e2335c0fa9a4011ad4bc41ecb3c46e8097294c46fd60ed4"},
-    {file = "python_slugify-9.1.3.tar.gz", hash = "sha256:90e997f2e0987239ce95e12f700086eb18e1d1d3ee22624fbbdbd095afca42b6"},
+    {file = "python_slugify-9.2.0-py3-none-any.whl", hash = "sha256:7298dcfc65e9ccdf834b3c398f163af0d09a9a8fc1ee6a7b2dffd8d38bfb756e"},
+    {file = "python_slugify-9.2.0.tar.gz", hash = "sha256:cee32948083476013804de1667724fb1362dacb71e47b1d5d92adf8db6ee3298"},
 ]
 
 [[package]]
@@ -1179,13 +1179,13 @@ files = [
 
 [[package]]
 name = "types-pygments"
-version = "2.21.0.20260819"
+version = "2.21.0.20261122"
 requires_python = ">=3.10"
 summary = "Typing stubs for Pygments"
 groups = ["dev"]
 files = [
-    {file = "types_pygments-2.21.0.20260819-py3-none-any.whl", hash = "sha256:85e216770d616db6a7e96fb70c2de9d9f283b746c37edb7768ce645bdbcaddb2"},
-    {file = "types_pygments-2.21.0.20260819.tar.gz", hash = "sha256:68e0cb27115b08b681c843e30a153b5d9850c048e1158623ada36ccd4cf7e89b"},
+    {file = "types_pygments-2.21.0.20261122-py3-none-any.whl", hash = "sha256:2f1a2ee6db3c464d344bd5bb591a2faf7e433f1aa8adc7cd3ae8e529f3f2a5f2"},
+    {file = "types_pygments-2.21.0.20261122.tar.gz", hash = "sha256:05cf2c546f607c89a6ea93b939939a40fe8af277da9084b2d0774e4926002f84"},
 ]
 
 [[package]]

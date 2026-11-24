@@ -3,7 +3,6 @@ from __future__ import annotations
 import html
 import re
 import textwrap
-import time
 
 import pytest
 
@@ -13,6 +12,7 @@ from marko.ast_renderer import ASTRenderer, XMLRenderer
 from marko.md_renderer import MarkdownRenderer
 from marko.source import Source
 from tests.normalize import normalize_html
+from tests.timing import assert_scales_linearly
 
 
 class TestBasic:
@@ -26,6 +26,14 @@ class TestBasic:
         )
         assert marko.convert(text) == expected
 
+    @pytest.mark.parametrize("whitespace", ["\xa0", "\u3000", "\v", "\f", "\u2028"])
+    @pytest.mark.parametrize("trailing", [" ", "\t", " \t "])
+    def test_unicode_continuation_preserves_final_ascii_trimming(
+        self, whitespace, trailing
+    ):
+        text = f"a\n{whitespace}\nb{trailing}\n"
+        assert marko.convert(text) == f"<p>a\n{whitespace}\nb</p>\n"
+
     @pytest.mark.parametrize("whitespace", ["", " ", "\t", " \t "])
     def test_ascii_blank_line_still_separates_paragraphs(self, whitespace):
         assert marko.convert(f"a\n{whitespace}\nb\n") == "<p>a</p>\n<p>b</p>\n"
@@ -38,57 +46,24 @@ class TestBasic:
         "line", ["[l{i}]: /u{i}\n", "- [l{i}]: /u{i}\n", "> [l{i}]: /u{i}\n"]
     )
     def test_link_ref_def_run_scales_linearly(self, line):
-        def best_of_three(text):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(text)
-                best = min(best, time.perf_counter() - start)
-            return best
-
         small = "".join(line.format(i=i) for i in range(1000))
         large = "".join(line.format(i=i) for i in range(4000))
-        ratio = best_of_three(large) / best_of_three(small)
-        assert ratio < 8, f"4x the lines took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, small, large)
 
     @pytest.mark.parametrize("opener", ["[a](", "![alt](", "[a]["])
     def test_unclosed_inline_link_openers_scale_linearly(self, opener):
-        def best_of_three(text):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(text)
-                best = min(best, time.perf_counter() - start)
-            return best
-
-        ratio = best_of_three(opener * 8000) / best_of_three(opener * 2000)
-        assert ratio < 8, f"4x the openers took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, opener * 2000, opener * 8000)
 
     def test_nested_quotes_scale_linearly(self):
-        def best_of_three(text):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(text)
-                best = min(best, time.perf_counter() - start)
-            return best
-
-        ratio = best_of_three("> " * 24 + "a") / best_of_three("> " * 12 + "a")
-        assert ratio < 8, f"2x the depth took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, "> " * 12 + "a", "> " * 24 + "a")
 
     @pytest.mark.parametrize("opener", ["[", "!["])
     @pytest.mark.parametrize("definition", ["", "\n\n[a]: /url\n"])
     def test_bracket_runs_scale_linearly(self, opener, definition):
-        def best_of_three(n):
-            best = float("inf")
-            for _ in range(3):
-                start = time.perf_counter()
-                marko.convert(opener * n + "]" * n + definition)
-                best = min(best, time.perf_counter() - start)
-            return best
+        def make(n):
+            return opener * n + "]" * n + definition
 
-        ratio = best_of_three(8000) / best_of_three(2000)
-        assert ratio < 8, f"4x the brackets took {ratio:.1f}x the time"
+        assert_scales_linearly(marko.convert, make(2000), make(8000))
 
     def test_link_destination_paren_nesting_limit(self):
         nested = "(" * 32 + ")" * 32
@@ -160,6 +135,35 @@ class TestBasic:
         ],
     )
     def test_link_dest_with_unbalanced_parenthesis(self, text, html):
+        assert marko.convert(text) == html
+
+    @pytest.mark.parametrize(
+        "text, html",
+        [
+            (
+                '[x](/u\\&amp; "t\\&ouml;")',
+                '<p><a href="/u&amp;amp%3B" title="t&amp;ouml;">x</a></p>\n',
+            ),
+            ("[x](</u\\&#35;>)", '<p><a href="/u&amp;#35%3B">x</a></p>\n'),
+            (
+                '![x](/i\\&amp; "t\\&amp;")',
+                '<p><img src="/i&amp;amp%3B" alt="x" title="t&amp;amp;" /></p>\n',
+            ),
+            (
+                '[x]\n\n[x]: /u\\&amp; "t\\&amp;"',
+                '<p><a href="/u&amp;amp%3B" title="t&amp;amp;">x</a></p>\n',
+            ),
+            (
+                "``` a\\&ouml;b\n```",
+                '<pre><code class="language-a&amp;ouml;b"></code></pre>\n',
+            ),
+            (
+                "``` a\\\\&ouml;\n```",
+                '<pre><code class="language-a\\ö"></code></pre>\n',
+            ),
+        ],
+    )
+    def test_escaped_ampersand_is_not_an_entity(self, text, html):
         assert marko.convert(text) == html
 
     def test_long_paragraph_with_many_links_and_emphasis(self):
@@ -316,6 +320,26 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "   - foo\n\n    code\n",
+            "  2. foo\n\n\tcode\n",
+            "  1. foo\n  2. bar\n\n    code\n",
+            "- foo\n\n     - bar\n\n      code\n",
+            ">   1) foo\n>\n>     code\n",
+            "- foo\n*\n\n    code\n",
+            "  - foo\n  1. bar\n\n    code\n",
+        ],
+    )
+    def test_markdown_renderer_list_before_indented_code(self, text):
+        # The code block stays after the list instead of joining its last item,
+        # and the lists next to it are not nested in each other.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == marko.convert(text)
+        assert "<pre><code>" in marko.convert(rerendered)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "Contact <foo@bar.example.com>.\n",
             "<foo+special@Bar.baz-bar0.com>\n",
             "<mailto:foo@bar.example.com>\n",
@@ -351,6 +375,30 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text, expected",
         [
+            ("foo _*_\n", "foo *\\**\n"),
+            ("foo __*__\n", "foo **\\***\n"),
+            ("__*nix__ (Linux)\n", "**\\*nix** (Linux)\n"),
+            ("_*foo_\n", "*\\*foo*\n"),
+            ("_foo*_\n", "*foo\\**\n"),
+            ("_a*b_\n", "*a\\*b*\n"),
+            ("*foo __bar *baz bim__ bam*\n", "*foo **bar \\*baz bim** bam*\n"),
+            # a `*` that is already escaped stays as it is
+            ("*\\*foo*\n", "*\\*foo*\n"),
+            # a `*` outside emphasis is left alone
+            ("foo * bar\n", "foo * bar\n"),
+        ],
+    )
+    def test_markdown_renderer_asterisk_in_emphasis(self, text, expected):
+        # The emphasis is written with `*`, so a `*` in its text is escaped, or it
+        # would join the delimiter.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
             ("Foo\n    ***\n", "Foo\n\\***\n"),
             ("foo\n    # bar\n", "foo\n\\# bar\n"),
             ("Foo\n    ---\n", "Foo\n\\---\n"),
@@ -368,6 +416,102 @@ class TestBasic:
     def test_markdown_renderer_paragraph_continuation_block_start(self, text, expected):
         # A continuation line loses its indentation, so a leading block marker
         # is escaped to keep it in the paragraph.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("- foo\n  2. bar\n", "- foo\n2\\. bar\n"),
+            ("- foo\n  2026. bar\n", "- foo\n2026\\. bar\n"),
+            ("1. foo\n   10) bar\n", "1. foo\n10\\) bar\n"),
+            ("> foo\n> 2. bar\n", "> foo\n2\\. bar\n"),
+            ("- a\n  - foo\n    3. bar\n", "- a\n  - foo\n3\\. bar\n"),
+            # a number that does not start a list item is left alone
+            ("- foo\n  2.bar\n  2 . baz\n", "- foo\n2.bar\n2 . baz\n"),
+            # outside a container the line is a continuation without an escape
+            ("foo\n2026. bar\n", "foo\n2026. bar\n"),
+        ],
+    )
+    def test_markdown_renderer_numbered_continuation_line_in_container(
+        self, text, expected
+    ):
+        # A numbered line that is not indented ends a list item or a quote, so
+        # its marker is escaped to keep the line in the paragraph.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("foo\n    <!-- x -->\nbar\n", "foo\n    <!-- x -->\nbar\n"),
+            ("foo\n    <div>x</div>\n", "foo\n    <div>x</div>\n"),
+            ("foo\n    <pre>x</pre> y\n", "foo\n    <pre>x</pre> y\n"),
+            ("foo\n    <?php x ?> y\n", "foo\n    <?php x ?> y\n"),
+            ("> foo\n>     <div>x</div>\n", "> foo\n>     <div>x</div>\n"),
+            (
+                "- a\n  - foo\n      <div>x</div>\n",
+                "- a\n  - foo\n      <div>x</div>\n",
+            ),
+            # text that is not a tag cannot be indented, so it is escaped
+            ("foo\n    <div\n", "foo\n\\<div\n"),
+            # a tag that cannot interrupt a paragraph is left alone
+            ("foo\n<span>x</span>\n", "foo\n<span>x</span>\n"),
+        ],
+    )
+    def test_markdown_renderer_html_start_on_continuation_line(self, text, expected):
+        # A line that starts with a tag of an HTML block ends the paragraph, so
+        # a continuation line like that is indented (or escaped) to stay in it.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("foo\n    - m\n===\n", "foo\n\\- m\n===\n"),
+            ("foo\n    # h\nbar\n---\n", "foo\n\\# h\nbar\n---\n"),
+            ("foo\n    > q\n===\n", "foo\n\\> q\n===\n"),
+            ("foo\n    1. x\n===\n", "foo\n1\\. x\n===\n"),
+            ("foo\n    ```\n---\n", "foo\n\\```\n---\n"),
+            ("foo\n    <div>\n===\n", "foo\n    <div>\n===\n"),
+            ("- foo\n  2. x\n  ===\n", "- foo\n  2\\. x\n  ===\n"),
+            # a line that starts no block is left alone
+            ("foo\nbar\n===\n", "foo\nbar\n===\n"),
+        ],
+    )
+    def test_markdown_renderer_setext_heading_continuation_line(self, text, expected):
+        # A continuation line of a multi-line setext heading loses its indentation
+        # like one of a paragraph, so a block marker at its start is escaped.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text, expected",
+        [
+            # a backslash that is not an escape, before a soft line break
+            ("foo\\ \nbar\n", "foo\\\\\nbar\n"),
+            ("C:\\dir\\ \nnext\n", "C:\\dir\\\\\nnext\n"),
+            # the same before a hard line break
+            ("foo\\  \nbar\n", "foo\\\\\\\nbar\n"),
+            ("- foo\\ \n  bar\n", "- foo\\\\\nbar\n"),
+            # an escaped backslash and a hard line break are left alone
+            ("foo\\\\\nbar\n", "foo\\\\\nbar\n"),
+            ("foo\\\nbar\n", "foo\\\nbar\n"),
+            # a backslash at the end of the paragraph is not before a line break
+            ("foo\\ \n", "foo\\\n"),
+        ],
+    )
+    def test_markdown_renderer_backslash_before_line_break(self, text, expected):
+        # The backslash of the text must not pair with a line break: "foo\\"
+        # followed by a newline is a hard line break, not a backslash.
         markdown = marko.Markdown(renderer=MarkdownRenderer)
         rerendered = markdown(text)
         assert rerendered == expected
@@ -425,6 +569,21 @@ class TestBasic:
         assert markdown(text) == text
         # paragraphs still get a space between CJK characters and latin letters
         assert markdown("\u4e2d\u56fd2018\u5e74\n") == "\u4e2d\u56fd 2018 \u5e74\n"
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "* - ``--optimize 3``\n  - ``-O3``\n",
+            "- - a\n  - b\n- c\n",
+            "1. - a\n   - b\n",
+            "- 1. a\n  2. b\n",
+            "- - - a\n    - b\n",
+        ],
+    )
+    def test_markdown_renderer_list_first_in_list_item(self, text):
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize("separator", ["\v", "\x85", "\u2028", "\u2029"])
     @pytest.mark.parametrize(
@@ -501,6 +660,7 @@ class TestBasic:
             r"<my file\>name.pdf>",
             "<>",
             "file&amp;name.pdf",
+            r"file\&amp;name.pdf",
         ],
     )
     def test_markdown_renderer_link_destinations(self, image, title, destination):
@@ -645,3 +805,13 @@ class TestExtension:
         assert isinstance(res.children[1], block.Paragraph)
         assert isinstance(res.children[2], CustomElement)
         assert isinstance(res.children[3], block.BlankLine)
+
+
+def test_block_children_are_not_shared_between_elements():
+    from marko.inline import RawText
+
+    first = block.Paragraph([])
+    first.children.append(RawText("Some Text"))
+    second = block.Paragraph([])
+    assert len(first.children) == 1
+    assert len(second.children) == 0
