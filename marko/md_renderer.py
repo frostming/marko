@@ -97,7 +97,9 @@ class MarkdownRenderer(Renderer):
         self._prefix = self._second_prefix
         return line
 
-    def _render_paragraph_children(self, element: block.Paragraph) -> str:
+    def _render_paragraph_children(
+        self, element: block.Paragraph | block.SetextHeading
+    ) -> str:
         parts = []
         line_start = False
         for child in element.children:
@@ -211,7 +213,7 @@ class MarkdownRenderer(Renderer):
         return result
 
     def render_setext_heading(self, element: block.SetextHeading) -> str:
-        children = self.render_children(element)
+        children = self._render_paragraph_children(element)
         if "\n" not in children:
             return self.render_heading(cast("block.Heading", element))
         # An ATX heading holds one line only, so keep a multi-line heading setext

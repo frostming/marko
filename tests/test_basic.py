@@ -476,6 +476,28 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("foo\n    - m\n===\n", "foo\n\\- m\n===\n"),
+            ("foo\n    # h\nbar\n---\n", "foo\n\\# h\nbar\n---\n"),
+            ("foo\n    > q\n===\n", "foo\n\\> q\n===\n"),
+            ("foo\n    1. x\n===\n", "foo\n1\\. x\n===\n"),
+            ("foo\n    ```\n---\n", "foo\n\\```\n---\n"),
+            ("foo\n    <div>\n===\n", "foo\n    <div>\n===\n"),
+            ("- foo\n  2. x\n  ===\n", "- foo\n  2\\. x\n  ===\n"),
+            # a line that starts no block is left alone
+            ("foo\nbar\n===\n", "foo\nbar\n===\n"),
+        ],
+    )
+    def test_markdown_renderer_setext_heading_continuation_line(self, text, expected):
+        # A continuation line of a multi-line setext heading loses its indentation
+        # like one of a paragraph, so a block marker at its start is escaped.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text",
         [
             "- foo [x]\n\n  [x]: /url\n",
