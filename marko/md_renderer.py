@@ -66,11 +66,13 @@ class MarkdownRenderer(Renderer):
         rendered = []
         for index, child in enumerate(element.children):
             if child.get_type() == "List":
+                # Lists of other kinds can be next to each other: all of them are
+                # indented, or the indented one would be nested in the one before
                 following = next(
                     (
                         sibling
                         for sibling in element.children[index + 1 :]
-                        if sibling.get_type() != "BlankLine"
+                        if sibling.get_type() not in ("BlankLine", "List")
                     ),
                     None,
                 )

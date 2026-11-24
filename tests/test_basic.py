@@ -332,10 +332,13 @@ class TestBasic:
             "  1. foo\n  2. bar\n\n    code\n",
             "- foo\n\n     - bar\n\n      code\n",
             ">   1) foo\n>\n>     code\n",
+            "- foo\n*\n\n    code\n",
+            "  - foo\n  1. bar\n\n    code\n",
         ],
     )
     def test_markdown_renderer_list_before_indented_code(self, text):
-        # The code block stays after the list instead of joining its last item.
+        # The code block stays after the list instead of joining its last item,
+        # and the lists next to it are not nested in each other.
         markdown = marko.Markdown(renderer=MarkdownRenderer)
         rerendered = markdown(text)
         assert marko.convert(rerendered) == marko.convert(text)
