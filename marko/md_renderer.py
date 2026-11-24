@@ -113,12 +113,14 @@ class MarkdownRenderer(Renderer):
                 lead = " " * max(0, 5 - width) if before_code_block else ""
                 with self.container(f"{lead}{num}{delimiter} ", lead + " " * width):
                     result.append(self.render(child))
+                # The first item wrote the marker of the item holding this list
+                self._prefix = self._second_prefix
         else:
             lead = "   " if before_code_block else ""
             for child in element.children:
                 with self.container(f"{lead}{element.bullet} ", lead + "  "):
                     result.append(self.render(child))
-        self._prefix = self._second_prefix
+                self._prefix = self._second_prefix
         sep = self._second_prefix.rstrip() + "\n" if not element.tight else ""
         return sep.join(result)
 
