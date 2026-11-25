@@ -126,6 +126,43 @@ class LatexRendererMixin:
         # TODO: check how alt (element.children) and element.title could be used!
         return f"\\includegraphics{{{element.dest}}}"
 
+    def render_strikethrough(self, element):
+        self._packages.add("soul")
+        children = self.render_children(element)
+        return f"\\st{{{children}}}"
+
+    def render_table(self, element):
+        head, *body = element.children
+        colspec = "|" + "|".join(
+            {"center": "c", "right": "r"}.get(cell.align, "l") for cell in head.children
+        ) + "|"
+        lines = [
+            f"\\begin{{tabular}}{{{colspec}}}",
+            "\\hline",
+            self.render(head).rstrip(),
+            "\\hline",
+        ]
+        for row in body:
+            lines.append(self.render(row).rstrip())
+        lines.append("\\hline")
+        lines.append("\\end{tabular}")
+        return "\n".join(lines) + "\n"
+
+    def render_table_row(self, element):
+        return " & ".join(self.render(cell) for cell in element.children) + " \\\\\n"
+
+    def render_table_cell(self, element):
+        return self.render_children(element)
+
+    def render_url(self, element):
+        return f"\\url{{{element.dest}}}"
+
+    def render_alert(self, element):
+        self._packages.add("csquotes")
+        children = self.render_children(element)
+        label = element.alert_type.capitalize()
+        return self._environment("displayquote", f"\\textbf{{{label}.}} {children}")
+
     def render_html_block(self, element):
         _logger.warning("Rendering HTML is not supported!")
         return ""
