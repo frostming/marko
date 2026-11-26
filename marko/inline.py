@@ -115,6 +115,7 @@ class LineBreak(InlineElement):
 
     priority = 2
     pattern = r"( *|\\)\n(?!\Z)"
+    _SOFT = re.compile(r"()\n(?!\Z)")
 
     def __init__(self, match: _Match) -> None:
         self.soft = not match.group(1).startswith(("  ", "\\"))
@@ -132,7 +133,19 @@ class LineBreak(InlineElement):
         # see issue #219
         if "\n" not in text:
             return iter(())
-        return super().find(text, source=source)
+        return cls._find_breaks(text, source)
+
+    @classmethod
+    def _find_breaks(cls, text: str, source: Source) -> Iterator[_Match]:
+        for match in super().find(text, source=source):
+            if match.group(1) == "\\":
+                body = text[: match.start(1)]
+                if (len(body) - len(body.rstrip("\\"))) % 2:
+                    # The backslash is itself escaped, so only the newline
+                    # remains and it is a soft line break.
+                    yield cls._SOFT.match(text, match.end() - 1)  # type: ignore
+                    continue
+            yield match
 
 
 class InlineHTML(InlineElement):
