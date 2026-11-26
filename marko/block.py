@@ -101,6 +101,10 @@ class _ParsedLines(list[str]):
         self.line_starts = list(line_starts)
 
 
+def _is_blank_line(line: str) -> bool:
+    return not line.strip(" \t\n")
+
+
 def _build_inline_positions(
     lines: Sequence[str], line_starts: Sequence[int]
 ) -> _SourceMap:
@@ -109,8 +113,8 @@ def _build_inline_positions(
     positions in the source text.
     """
     runs: list[tuple[int, int]] = []
-    for line, base in zip(lines, line_starts):
-        stripped = line.lstrip()
+    for i, (line, base) in enumerate(zip(lines, line_starts)):
+        stripped = line.lstrip() if i == 0 else line.lstrip(" \t")
         leading = len(line) - len(stripped)
         runs.append((base + leading, len(stripped)))
     return _SourceMap(runs)
@@ -128,7 +132,7 @@ class BlankLine(BlockElement):
     @classmethod
     def match(cls, source: Source) -> bool:
         line = source.next_line()
-        return line is not None and not line.strip()
+        return line is not None and _is_blank_line(line)
 
     @classmethod
     def parse(cls, source: Source) -> int:
@@ -220,7 +224,7 @@ class CodeBlock(BlockElement):
         source.anchor()
         while not source.exhausted:
             line = source.next_line()
-            if line is not None and not line.strip():
+            if line is not None and _is_blank_line(line):
                 source.consume()
                 stripped_line = cls.strip_prefix(line, prefix)
                 if stripped_line:
@@ -236,7 +240,7 @@ class CodeBlock(BlockElement):
                 break
         # Blank lines following the code block are not part of it, even if they
         # carry more indentation than the code block prefix.
-        while len(lines) > 1 and not lines[-1].strip():
+        while len(lines) > 1 and _is_blank_line(lines[-1]):
             lines.pop()
         return "".join(lines).rstrip("\n") + "\n"
 
@@ -384,7 +388,7 @@ class HTMLBlock(BlockElement):
                 if source.context.html_end.search(line):
                     source.consume()
                     break
-            elif line.strip() == "":
+            elif _is_blank_line(line):
                 lines.pop()
                 break
             source.consume()
@@ -398,7 +402,10 @@ class Paragraph(BlockElement):
     pattern = re.compile(r"[^\n]+$\n?", flags=re.MULTILINE)
 
     def __init__(self, lines: list[str]) -> None:
-        str_lines = "".join(line.lstrip() for line in lines).rstrip(" \t\n")
+        str_lines = "".join(
+            line.lstrip() if i == 0 else line.lstrip(" \t")
+            for i, line in enumerate(lines)
+        ).rstrip(" \t\n")
         self.inline_body = str_lines
         self._tight = False
         line_starts = getattr(lines, "line_starts", None)
@@ -645,9 +652,9 @@ class ListItem(BlockElement):
         state = cls(source.context.list_item_info)
         state.children = []
         with source.under_state(state):
-            if not source.next_line().strip():
+            if _is_blank_line(source.next_line()):
                 source.consume()
-                if not source.next_line() or not source.next_line().strip():
+                if not source.next_line() or _is_blank_line(source.next_line()):
                     return state
             state.children = source.parser.parse_source(source)
         if isinstance(state.children[-1], BlankLine):

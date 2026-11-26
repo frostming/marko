@@ -99,6 +99,11 @@ class TestBasic:
         # not start a new block. It used to send list parsing into a loop.
         assert marko.convert(text) == f"<p>{html.escape(text, quote=False)}</p>\n"
 
+    @pytest.mark.parametrize("whitespace", ["\u00a0", "\u3000"])
+    def test_unicode_whitespace_only_line_does_not_split_paragraph(self, whitespace):
+        text = f"a\n{whitespace}\nb"
+        assert marko.convert(text) == f"<p>a\n{whitespace}\nb</p>\n"
+
     @pytest.mark.parametrize(
         "text, paragraph",
         [
@@ -400,7 +405,7 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text, expected",
         [
-            ("Foo\n    ***\n", "Foo\n\\***\n"),
+            ("Foo\n    ***\n", "Foo\n\\*\\*\\*\n"),
             ("foo\n    # bar\n", "foo\n\\# bar\n"),
             ("Foo\n    ---\n", "Foo\n\\---\n"),
             ("Foo\n    =\n", "Foo\n\\=\n"),
@@ -412,6 +417,12 @@ class TestBasic:
             ("foo\\\\\n    - bar\n", "foo\\\\\n\\- bar\n"),
             ("foo\\\\\n    # bar\n", "foo\\\\\n\\# bar\n"),
             ("foo\\\\\n    > bar\n    1. baz\n", "foo\\\\\n\\> bar\n1\\. baz\n"),
+            # the rest of a run of delimiters must not close an emphasis before it
+            ("*a\n    **\n", "*a\n\\*\\*\n"),
+            ("*a\n    ** b\n", "*a\n\\*\\* b\n"),
+            ("_a\n    __\n", "_a\n\\_\\_\n"),
+            ("**a\n    **\n", "**a\n\\*\\*\n"),
+            ("foo\n    **bar**\n", "foo\n**bar**\n"),
             ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
             ("- a\n - b\n  - c\n   - d\n    - e\n", "- a\n- b\n- c\n- d\n\\- e\n"),
             # lines that cannot start a block are left alone
