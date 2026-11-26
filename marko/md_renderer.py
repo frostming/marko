@@ -244,9 +244,12 @@ class MarkdownRenderer(Renderer):
         return result
 
     def render_blank_line(self, element: block.BlankLine) -> str:
+        # Keep the quote markers, or the blank line would end the block quote. It is
+        # the first line of an item that starts with an empty quote, so it has the
+        # marker of the item
+        line = self._prefix.rstrip() + "\n"
         self._prefix = self._second_prefix
-        # Keep the quote markers, or the blank line would end the block quote
-        return self._second_prefix.rstrip() + "\n"
+        return line
 
     def render_link_ref_def(self, element: block.LinkRefDef) -> str:
         link_text = element.dest
