@@ -99,6 +99,11 @@ class TestBasic:
         # not start a new block. It used to send list parsing into a loop.
         assert marko.convert(text) == f"<p>{html.escape(text, quote=False)}</p>\n"
 
+    @pytest.mark.parametrize("whitespace", ["\u00a0", "\u3000"])
+    def test_unicode_whitespace_only_line_does_not_split_paragraph(self, whitespace):
+        text = f"a\n{whitespace}\nb"
+        assert marko.convert(text) == f"<p>a\n{whitespace}\nb</p>\n"
+
     @pytest.mark.parametrize(
         "text, paragraph",
         [
