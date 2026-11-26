@@ -419,6 +419,13 @@ class TestBasic:
             ("_a\n    __\n", "_a\n\\_\\_\n"),
             ("**a\n    **\n", "**a\n\\*\\*\n"),
             ("foo\n    **bar**\n", "foo\n**bar**\n"),
+            # the same inside an emphasis, a link and an image
+            ("*a\n    - m\na*\n", "*a\n\\- m\na*\n"),
+            ("**a\n    # m\nb**\n", "**a\n\\# m\nb**\n"),
+            ("_a\n    > m\nb_\n", "*a\n\\> m\nb*\n"),
+            ("[a\n    1. m\nb](u)\n", "[a\n1\\. m\nb](u)\n"),
+            ("![a\n    ```\nb](u)\n", "![a\n\\```\nb](u)\n"),
+            ("*[a\n    - m\nb](u)*\n", "*[a\n\\- m\nb](u)*\n"),
             ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
             ("- a\n - b\n  - c\n   - d\n    - e\n", "- a\n- b\n- c\n- d\n\\- e\n"),
             # lines that cannot start a block are left alone
