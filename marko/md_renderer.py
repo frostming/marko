@@ -22,6 +22,8 @@ _BLOCK_START_RE = re.compile(
     r"#{1,6}(?=[ \t]|$)|[-+*](?=[ \t]|$)|[-*_](?=[ \t]*[-*_])|[>=]|`{3}|~{3}"
 )
 _ORDERED_START_RE = re.compile(r"\d{1,9}(?=[.)](?:[ \t]|$))")
+# A run of two or more of the same emphasis delimiter
+_DELIMITER_RUN_RE = re.compile(r"\*{2,}|_{2,}")
 # The HTML blocks that can interrupt a paragraph (types 1 to 6 of the spec)
 _HTML_BLOCK_START_RE = re.compile(
     r"(?i)<(?:(?:script|pre|style|textarea)[>\s]|!--|\?|![a-z]|!\[CDATA\["
@@ -38,6 +40,11 @@ def _escape_block_start(text: str, in_container: bool = False) -> str:
     ordered = _ORDERED_START_RE.match(text)
     if ordered and (in_container or ordered.group() == "1"):
         return text[: ordered.end()] + "\\" + text[ordered.end() :]
+    run = _DELIMITER_RUN_RE.match(text)
+    if run:
+        # Escaping only the first delimiter of a run would leave the others free
+        # to close an emphasis that the line before opened
+        return "".join("\\" + char for char in run.group()) + text[run.end() :]
     if _BLOCK_START_RE.match(text) or _HTML_BLOCK_START_RE.match(text):
         return "\\" + text
     return text
