@@ -116,10 +116,14 @@ class MarkdownRenderer(Renderer):
                 # A backslash before the end of a line is a hard line break,
                 # and it would pair with the backslash of a hard line break
                 text += "\\"
-            if line_start and child.get_type() == "RawText":
+            if child.get_type() == "RawText":
                 # A continuation line loses its indentation, so a leading block
-                # marker would start a list, heading, etc. instead of continuing
-                text = _escape_block_start(text, bool(self._second_prefix))
+                # marker would start a list, heading, etc. instead of continuing.
+                # The text holds the line breaks that follow an escaped backslash.
+                lines = text.split("\n")
+                for i in range(0 if line_start else 1, len(lines)):
+                    lines[i] = _escape_block_start(lines[i], bool(self._second_prefix))
+                text = "\n".join(lines)
             elif (
                 line_start
                 and child.get_type() == "InlineHTML"

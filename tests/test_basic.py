@@ -408,6 +408,10 @@ class TestBasic:
             ("foo\n    1. bar\n", "foo\n1\\. bar\n"),
             ("foo\n    > bar\n", "foo\n\\> bar\n"),
             ("foo\n    ```\n", "foo\n\\```\n"),
+            # the line break after an escaped backslash is part of the text
+            ("foo\\\\\n    - bar\n", "foo\\\\\n\\- bar\n"),
+            ("foo\\\\\n    # bar\n", "foo\\\\\n\\# bar\n"),
+            ("foo\\\\\n    > bar\n    1. baz\n", "foo\\\\\n\\> bar\n1\\. baz\n"),
             ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
             ("- a\n - b\n  - c\n   - d\n    - e\n", "- a\n- b\n- c\n- d\n\\- e\n"),
             # lines that cannot start a block are left alone
