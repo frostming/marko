@@ -171,7 +171,7 @@ class TestGFMTableLlistElement:
         [
             ("foo\n    # bar\n", "foo\n\\# bar\n"),
             ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
-            ("- [ ] foo\n      ***\n", "- [ ] foo\n\\***\n"),
+            ("- [ ] foo\n      ***\n", "- [ ] foo\n\\*\\*\\*\n"),
         ],
     )
     def test_render_paragraph_continuation_block_start(self, text, expected):

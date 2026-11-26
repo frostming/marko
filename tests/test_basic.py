@@ -400,7 +400,7 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text, expected",
         [
-            ("Foo\n    ***\n", "Foo\n\\***\n"),
+            ("Foo\n    ***\n", "Foo\n\\*\\*\\*\n"),
             ("foo\n    # bar\n", "foo\n\\# bar\n"),
             ("Foo\n    ---\n", "Foo\n\\---\n"),
             ("Foo\n    =\n", "Foo\n\\=\n"),
@@ -408,6 +408,12 @@ class TestBasic:
             ("foo\n    1. bar\n", "foo\n1\\. bar\n"),
             ("foo\n    > bar\n", "foo\n\\> bar\n"),
             ("foo\n    ```\n", "foo\n\\```\n"),
+            # the rest of a run of delimiters must not close an emphasis before it
+            ("*a\n    **\n", "*a\n\\*\\*\n"),
+            ("*a\n    ** b\n", "*a\n\\*\\* b\n"),
+            ("_a\n    __\n", "_a\n\\_\\_\n"),
+            ("**a\n    **\n", "**a\n\\*\\*\n"),
+            ("foo\n    **bar**\n", "foo\n**bar**\n"),
             ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
             ("- a\n - b\n  - c\n   - d\n    - e\n", "- a\n- b\n- c\n- d\n\\- e\n"),
             # lines that cannot start a block are left alone
