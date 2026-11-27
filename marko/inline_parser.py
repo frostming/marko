@@ -234,7 +234,7 @@ def find_links_or_emphs(
     delimiters: list[Delimiter] = []
     escape = False
     matches: list[MatchObj] = []
-    code_pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
+    code_spans = {m.start(): m.end() for m in patterns.find_code_spans(text)}
 
     while i < len(text):
         if escape:
@@ -243,8 +243,8 @@ def find_links_or_emphs(
         elif text[i] == "\\":
             escape = True
             i += 1
-        elif code_pattern.match(text, i):
-            i = code_pattern.match(text, i).end()  # type: ignore
+        elif i in code_spans:
+            i = code_spans[i]
         elif text[i] == "]":
             node = look_for_image_or_link(text, delimiters, i, link_ref_defs, matches)
             if node:

@@ -166,6 +166,31 @@ class TestBasic:
     def test_escaped_ampersand_is_not_an_entity(self, text, html):
         assert marko.convert(text) == html
 
+    @pytest.mark.parametrize(
+        "text, html",
+        [
+            ("\\`` `", "<p>`<code> </code></p>\n"),
+            ("\\``)`", "<p>`<code>)</code></p>\n"),
+            (
+                "`A` (`B ? \\`${C}\\``) and `D`",
+                "<p><code>A</code> (<code>B ? \\</code>${C}`<code>) and </code>D`</p>\n",
+            ),
+            ("x \\`` `y` z", "<p>x `<code> </code>y` z</p>\n"),
+            (
+                "\\``a` [b](/u) `c`",
+                '<p>`<code>a</code> <a href="/u">b</a> <code>c</code></p>\n',
+            ),
+            # the backslash is escaped, so the backticks after it are a run
+            ("\\\\``x`", "<p>\\``x`</p>\n"),
+            # inside a code span the backslash is a plain character
+            ("`a\\`b`", "<p><code>a\\</code>b`</p>\n"),
+        ],
+    )
+    def test_escaped_backtick_does_not_open_a_code_span(self, text, html):
+        # The backtick that a backslash escapes is text, so the one after it
+        # opens a code span, in the paragraph and when links are searched for
+        assert marko.convert(text) == html
+
     def test_long_paragraph_with_many_links_and_emphasis(self):
         text = " ".join(f"*e{i}* [l{i}](/u{i}) `c` \\* x" for i in range(200))
         html = marko.convert(text)
