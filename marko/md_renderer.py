@@ -62,7 +62,7 @@ class MarkdownRenderer(Renderer):
         super().__init__()
         self._prefix = ""
         self._second_prefix = ""
-        self._before_code_block = False
+        self._list_offset = 0
 
     def __enter__(self) -> MarkdownRenderer:
         self._prefix = ""
@@ -83,11 +83,23 @@ class MarkdownRenderer(Renderer):
                     ),
                     None,
                 )
-                self._before_code_block = (
-                    following is not None and following.get_type() == "CodeBlock"
-                )
+                self._list_offset = self._offset_before(following)
             rendered.append(self.render(child))
         return "".join(rendered)
+
+    @staticmethod
+    def _offset_before(following: Any) -> int:
+        """The column where the content of the items of a list must start, so
+        that the block after the list stays outside it."""
+        if following is None:
+            return 0
+        if following.get_type() == "CodeBlock":
+            return 5
+        if following.get_type() == "HTMLBlock":
+            # The spaces before the tag are part of the block
+            first = following.body.split("\n", 1)[0]
+            return len(first) - len(first.lstrip(" ")) + 1
+        return 0
 
     @contextmanager
     def container(
@@ -149,22 +161,22 @@ class MarkdownRenderer(Renderer):
 
     def render_list(self, element: block.List) -> str:
         result = []
-        # An indented code block after the list was outside it, so the content of
-        # the items started past column 4: indent the markers, or the code would
-        # continue the last item
-        before_code_block, self._before_code_block = self._before_code_block, False
+        # An indented code block or an HTML block after the list was outside it, so
+        # the content of the items started past the column of its first character:
+        # indent the markers, or the block would continue the last item
+        offset, self._list_offset = self._list_offset, 0
         if element.ordered:
             # Keep the delimiter: "1." and "1)" lists are different lists
             delimiter = element.bullet[-1]
             for num, child in enumerate(element.children, element.start):
                 width = len(str(num)) + 2
-                lead = " " * max(0, 5 - width) if before_code_block else ""
+                lead = " " * max(0, offset - width)
                 with self.container(f"{lead}{num}{delimiter} ", lead + " " * width):
                     result.append(self.render(child))
                 # The first item wrote the marker of the item holding this list
                 self._prefix = self._second_prefix
         else:
-            lead = "   " if before_code_block else ""
+            lead = " " * max(0, offset - 2)
             for child in element.children:
                 with self.container(f"{lead}{element.bullet} ", lead + "  "):
                     result.append(self.render(child))
