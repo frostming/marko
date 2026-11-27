@@ -696,6 +696,11 @@ class LinkRefDef(BlockElement):
             # no colon after the ending bracket
             return False
         i = inline_parser._parse_link_separator(text, link_label.end + 1)
+        newline = text.find("\n", link_label.end + 1, i)
+        if newline >= 0 and cls._breaks_paragraph_at(source, newline + 1):
+            # The destination is on the next line, which is not a continuation of
+            # the paragraph that the definition is in
+            return False
         try:
             link_dest, link_title = inline_parser._parse_link_dest_title(text, i)
         except inline_parser.ParseError:
@@ -717,6 +722,21 @@ class LinkRefDef(BlockElement):
             link_label, link_dest, link_title, end
         )
         return True
+
+    @staticmethod
+    def _breaks_paragraph_at(source: Source, pos: int) -> bool:
+        """Tell whether the line at pos starts a block that ends a paragraph."""
+        states = [s for s in source._states if hasattr(s, "_second_prefix")]
+        saved = (source.pos, source.match, [s._prefix for s in states])
+        try:
+            source.pos = pos
+            source._update_prefix()
+            return Paragraph.break_paragraph(source)
+        finally:
+            source.pos, source.match = saved[0], saved[1]
+            for state, prefix in zip(states, saved[2]):
+                state._prefix = prefix
+            source._prefix_cache = None
 
     @classmethod
     def parse(cls, source: Source) -> LinkRefDef:

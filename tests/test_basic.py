@@ -118,6 +118,39 @@ class TestBasic:
         assert res.startswith(paragraph + "\n")
         assert '<p><a href="/url">foo</a></p>' in res
 
+    @pytest.mark.parametrize(
+        "line, block",
+        [
+            ("***", "<hr />"),
+            ("___", "<hr />"),
+            ("```", "<pre><code></code></pre>"),
+            ("~~~", "<pre><code></code></pre>"),
+            ("<div>", "<div>"),
+            ("<!-- c -->", "<!-- c -->"),
+            ("<script>", "<script>"),
+            ("</p>", "</p>"),
+        ],
+    )
+    @pytest.mark.parametrize("prefix", ["", "- "])
+    def test_link_ref_def_destination_line_breaks_paragraph(self, prefix, line, block):
+        # A line that starts a block ends the paragraph that the definition is in,
+        # so it cannot be the destination, and the label stays in the paragraph.
+        indent = " " * len(prefix)
+        res = marko.convert(f"{prefix}[foo]:\n{indent}{line}\n")
+        assert "[foo]:" in res
+        assert block in res
+
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "[foo]:\n/url\n\n[foo]",
+            "[foo]:\n<url>\n\n[foo]",
+            "- [foo]:\n  /url\n\n[foo]",
+        ],
+    )
+    def test_link_ref_def_destination_on_next_line(self, text):
+        assert "<a href=" in marko.convert(text)
+
     def test_cdata_html_block_ends_at_cdata_end(self):
         res = marko.convert("<![CDATA[\na > b\nc\n]]>\nfoo\n")
         assert res == "<![CDATA[\na > b\nc\n]]>\n<p>foo</p>\n"
