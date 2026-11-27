@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import re
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Generator, cast
+from typing import TYPE_CHECKING, Any, Callable, Generator, Sequence, cast
 
 from . import patterns
 from .renderer import Renderer
@@ -109,11 +109,19 @@ class MarkdownRenderer(Renderer):
     def _render_paragraph_children(
         self, element: block.Paragraph | block.SetextHeading
     ) -> str:
+        return self._render_inline_children(element.children)
+
+    def _render_inline_children(
+        self,
+        children: Sequence[Any],
+        escape_text: Callable[[str], str] | None = None,
+    ) -> str:
         parts = []
         line_start = False
-        children = element.children
         for index, child in enumerate(children):
             text = self.render(child)
+            if child.get_type() == "RawText" and escape_text is not None:
+                text = escape_text(text)
             if (
                 child.get_type() == "RawText"
                 and text.endswith("\\")
@@ -289,13 +297,8 @@ class MarkdownRenderer(Renderer):
             return delimiter + inner + delimiter
         # A `*` in the text was not a delimiter, but next to the `*` of the emphasis
         # it would be one, so `_*_` would come back as `***`
-        inner = "".join(
-            (
-                self.render(child).replace("*", "\\*")
-                if child.get_type() == "RawText"
-                else self.render(child)
-            )
-            for child in children
+        inner = self._render_inline_children(
+            children, lambda text: text.replace("*", "\\*")
         )
         return delimiter + inner + delimiter
 
@@ -310,7 +313,7 @@ class MarkdownRenderer(Renderer):
         return escaped
 
     def render_link(self, element: inline.Link) -> str:
-        link_text = self.render_children(element)
+        link_text = self._render_inline_children(element.children)
         link_title = (
             '"{}"'.format(element.title.replace('"', '\\"')) if element.title else None
         )
@@ -340,7 +343,7 @@ class MarkdownRenderer(Renderer):
             ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
         )
         return template.format(
-            self.render_children(element),
+            self._render_inline_children(element.children),
             self._render_link_destination(element.dest),
             title,
         )
