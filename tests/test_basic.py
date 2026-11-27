@@ -534,6 +534,27 @@ class TestBasic:
         assert marko.convert(rerendered) == marko.convert(text)
 
     @pytest.mark.parametrize(
+        "text, expected",
+        [
+            ("Foo **  \nbar*\n", "Foo **  \nbar*\n"),
+            ("a _  \nb_ c\n", "a _  \nb_ c\n"),
+            ("- a **  \n  b*\n", "- a **  \nb*\n"),
+            # a delimiter that is not the end of the text, or a hard line break that is
+            # a backslash, is left as it was
+            ("*a*  \nb\n", "*a*\\\nb\n"),
+            ("a\\*  \nb\n", "a\\*\\\nb\n"),
+            ("foo  \nbar\n", "foo\\\nbar\n"),
+        ],
+    )
+    def test_markdown_renderer_hard_line_break_after_delimiter(self, text, expected):
+        # A backslash next to a "*" or "_" that is text makes it open an emphasis,
+        # which the spaces of the hard line break did not.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert rerendered == expected
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
         "text",
         [
             "- foo [x]\n\n  [x]: /url\n",
