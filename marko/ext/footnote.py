@@ -91,7 +91,11 @@ class FootnoteRendererMixin:
 
     @render_footnote_def.dispatch(MarkdownRenderer)
     def render_footnote_def(self, element):
-        return f"[^{element.label}]: {self.render_children(element)}"
+        # The blocks after the first one are indented, as the ones of a list item
+        with self.container(f"[^{element.label}]: ", "    "):
+            result = self.render_children(element)
+        self._prefix = self._second_prefix
+        return result
 
     def _render_footnote_def(self, element):
         children = self.render_children(element).rstrip()

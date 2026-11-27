@@ -671,6 +671,26 @@ class TestBasic:
         rerendered = markdown.convert(text)
         assert rerendered == text
 
+    @pytest.mark.parametrize(
+        "text",
+        [
+            "a[^1]\n\n[^1]: note\n\n    cont\n",
+            "a[^1]\n\n[^1]: note\n\n    cont\n\n    more\n",
+            "a[^1]\n\n[^1]: note\n\n    > quote\n\n        code\n",
+            "a[^1]\n\n> [^1]: note\n>\n>     cont\n",
+            "- [^1]: note\n\n      cont\n\n  after[^1]\n",
+            "- a[^1]\n- [^1]: note\n\n      cont\n",
+        ],
+    )
+    def test_markdown_renderer_footnote_def_blocks(self, text):
+        # The blocks of a footnote after the first one are indented: written
+        # without the indent, they ended the footnote.
+        html = marko.Markdown(extensions=["footnote"])
+        markdown = marko.Markdown(renderer=MarkdownRenderer, extensions=["footnote"])
+        rerendered = markdown.convert(text)
+        assert rerendered == text
+        assert html.convert(rerendered) == html.convert(text)
+
     @pytest.mark.parametrize("image", [False, True])
     @pytest.mark.parametrize("title", ["", ' "A title"'])
     @pytest.mark.parametrize(
