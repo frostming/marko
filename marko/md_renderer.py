@@ -135,6 +135,16 @@ class MarkdownRenderer(Renderer):
                 # An HTML tag cannot be escaped, but four spaces of indentation
                 # keep it from starting an HTML block that ends the paragraph
                 text = self._second_prefix + "    " + text
+            if (
+                child.get_type() == "LineBreak"
+                and not cast("inline.LineBreak", child).soft
+                and index > 0
+                and children[index - 1].get_type() == "RawText"
+                and parts[-1].endswith(("*", "_"))
+            ):
+                # A backslash after a delimiter makes it flank, as an opener, where
+                # the spaces of the hard line break did not: keep the spaces
+                text = "  \n"
             line_start = child.get_type() == "LineBreak"
             parts.append(text)
         return "".join(parts)
