@@ -430,6 +430,11 @@ class TestBasic:
             ("[a\n    1. m\nb](u)\n", "[a\n1\\. m\nb](u)\n"),
             ("![a\n    ```\nb](u)\n", "![a\n\\```\nb](u)\n"),
             ("*[a\n    - m\nb](u)*\n", "*[a\n\\- m\nb](u)*\n"),
+            # and in the title of a link or an image
+            ("[a](u 'x\n    - y')\n", '[a](u "x\n\\- y")\n'),
+            ("![a](u 'x\n    # y')\n", '![a](u "x\n\\# y")\n'),
+            ("[a](u 'x\n    1. y\n    > z')\n", '[a](u "x\n1\\. y\n\\> z")\n'),
+            ("[a](u 'x\n    y')\n", '[a](u "x\ny")\n'),
             ("> foo\n    - bar\n", "> foo\n\\- bar\n"),
             ("- a\n - b\n  - c\n   - d\n    - e\n", "- a\n- b\n- c\n- d\n\\- e\n"),
             # lines that cannot start a block are left alone

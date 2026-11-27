@@ -312,10 +312,20 @@ class MarkdownRenderer(Renderer):
             return f"<{escaped}>"
         return escaped
 
+    def _escape_title(self, title: str) -> str:
+        """
+        The title between double quotes. A line of it after the first one is a
+        continuation line of the paragraph, so a block marker at its start is escaped.
+        """
+        lines = title.replace('"', '\\"').split("\n")
+        for i in range(1, len(lines)):
+            lines[i] = _escape_block_start(lines[i], bool(self._second_prefix))
+        return "\n".join(lines)
+
     def render_link(self, element: inline.Link) -> str:
         link_text = self._render_inline_children(element.children)
         link_title = (
-            '"{}"'.format(element.title.replace('"', '\\"')) if element.title else None
+            '"{}"'.format(self._escape_title(element.title)) if element.title else None
         )
         assert self.root_node
         label = next(
@@ -340,7 +350,7 @@ class MarkdownRenderer(Renderer):
     def render_image(self, element: inline.Image) -> str:
         template = "![{}]({}{})"
         title = (
-            ' "{}"'.format(element.title.replace('"', '\\"')) if element.title else ""
+            ' "{}"'.format(self._escape_title(element.title)) if element.title else ""
         )
         return template.format(
             self._render_inline_children(element.children),
