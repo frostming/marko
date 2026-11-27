@@ -413,6 +413,10 @@ class TestBasic:
             ("foo\n    1. bar\n", "foo\n1\\. bar\n"),
             ("foo\n    > bar\n", "foo\n\\> bar\n"),
             ("foo\n    ```\n", "foo\n\\```\n"),
+            # the line break after an escaped backslash is a soft line break
+            ("foo\\\\\n    - bar\n", "foo\\\\\n\\- bar\n"),
+            ("foo\\\\\n    # bar\n", "foo\\\\\n\\# bar\n"),
+            ("foo\\\\\n    > bar\n    1. baz\n", "foo\\\\\n\\> bar\n1\\. baz\n"),
             # the rest of a run of delimiters must not close an emphasis before it
             ("*a\n    **\n", "*a\n\\*\\*\n"),
             ("*a\n    ** b\n", "*a\n\\*\\* b\n"),
@@ -783,6 +787,26 @@ class TestExtension:
         md = marko.Markdown(extensions=["gfm", "footnote"], renderer=MarkdownRenderer)
         res = md.convert(text)
         assert res == text
+
+    @pytest.mark.parametrize(
+        "text, soft",
+        [
+            ("foo\\\\\nbar", [True]),
+            ("foo\\\\\\\nbar", [False]),
+            ("foo\\\\\\\\\nbar", [True]),
+            ("foo\\\nbar", [False]),
+            ("foo\\\\\nbar\\\nbaz", [True, False]),
+        ],
+    )
+    def test_line_break_after_escaped_backslash(self, text, soft):
+        # An escaped backslash is a literal and cannot start a hard line break.
+        doc = marko.parse(text)
+        breaks = [
+            c.soft
+            for c in doc.children[0].children
+            if isinstance(c, marko.inline.LineBreak)
+        ]
+        assert breaks == soft
 
     def test_paragraph_breaking_element(self):
         class CustomElement(block.BlockElement):
