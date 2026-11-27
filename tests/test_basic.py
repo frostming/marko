@@ -104,6 +104,22 @@ class TestBasic:
         text = f"a\n{whitespace}\nb"
         assert marko.convert(text) == f"<p>a\n{whitespace}\nb</p>\n"
 
+    @pytest.mark.parametrize("whitespace", ["\u00a0", "\u3000", "\u2003", "\v", "\f"])
+    def test_heading_marker_needs_a_space_or_a_tab(self, whitespace):
+        # Only a space or a tab ends the "#": any other whitespace is text, so
+        # this is a paragraph, as for the "#\xa01.3.2" in a CHANGELOG
+        text = f"#{whitespace}foo"
+        assert marko.convert(text) == f"<p>{text}</p>\n"
+
+    @pytest.mark.parametrize("whitespace", ["\u00a0", "\u3000"])
+    def test_heading_is_stripped_of_spaces_and_tabs_only(self, whitespace):
+        assert marko.convert(f"# {whitespace}foo{whitespace}") == (
+            f"<h1>{whitespace}foo{whitespace}</h1>\n"
+        )
+        # The closing sequence follows a space or a tab
+        assert marko.convert(f"# foo{whitespace}#") == f"<h1>foo{whitespace}#</h1>\n"
+        assert marko.convert("# foo\t#\t") == "<h1>foo</h1>\n"
+
     @pytest.mark.parametrize(
         "text, paragraph",
         [

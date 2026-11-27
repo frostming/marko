@@ -147,21 +147,21 @@ class Heading(BlockElement):
 
     priority = 6
     pattern = re.compile(
-        r" {0,3}(#{1,6})((?=\s)[^\n]*?|[^\n\S]*)(?:(?<=\s)(?<!\\)#+)?[^\n\S]*$\n?",
+        r" {0,3}(#{1,6})((?=[ \t])[^\n]*?|[ \t]*)(?:(?<=[ \t])(?<!\\)#+)?[ \t]*$\n?",
         flags=re.MULTILINE,
     )
     breaks_paragraph = True
 
     def __init__(self, match: Match[str]) -> None:
         self.level = len(match.group(1))
-        self.inline_body = match.group(2).strip()
+        self.inline_body = match.group(2).strip(" \t")
         group = match.group(2)
         start = match.start(2)
         a = 0
-        while a < len(group) and group[a].isspace():
+        while a < len(group) and group[a] in " \t":
             a += 1
         b = len(group)
-        while b > a and group[b - 1].isspace():
+        while b > a and group[b - 1] in " \t":
             b -= 1
         self._inline_positions = _SourceMap([(start + a, b - a)])
 
