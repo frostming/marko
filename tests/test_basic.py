@@ -346,6 +346,25 @@ class TestBasic:
     @pytest.mark.parametrize(
         "text",
         [
+            "- foo\n    - bar\n    <!-- baz -->\n",
+            "- foo\n    - bar\n\n    <!-- baz -->\n",
+            "- foo\n    - bar\n    <div>baz</div>\n",
+            "- foo\n    - bar\n        - baz\n        <!-- qux -->\n",
+            "-    foo\n\n  <!-- bar -->\n",
+            "> - foo\n>     - bar\n>     <!-- baz -->\n",
+            "-   foo\n\n  <div>\n  bar\n  </div>\n",
+        ],
+    )
+    def test_markdown_renderer_list_before_indented_html(self, text):
+        # The spaces before the HTML are part of the block: it stays after the
+        # list instead of joining its last item.
+        markdown = marko.Markdown(renderer=MarkdownRenderer)
+        rerendered = markdown(text)
+        assert marko.convert(rerendered) == marko.convert(text)
+
+    @pytest.mark.parametrize(
+        "text",
+        [
             "Contact <foo@bar.example.com>.\n",
             "<foo+special@Bar.baz-bar0.com>\n",
             "<mailto:foo@bar.example.com>\n",
