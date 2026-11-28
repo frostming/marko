@@ -6,6 +6,7 @@ import functools
 import re
 import string
 import unicodedata
+from collections.abc import Iterator
 
 tags = [
     "address",
@@ -97,3 +98,24 @@ def is_punctuation(ch: str) -> bool:
         return True
     category = unicodedata.category(ch)
     return category.startswith("P") or category.startswith("S")
+
+
+_CODE_SPAN = re.compile(r"(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
+_ESCAPE_OR_BACKTICKS = re.compile(r"\\[\s\S]|`+")
+
+
+def find_code_spans(text: str) -> Iterator[re.Match[str]]:
+    """Find the code spans of the text.
+
+    A backslash escapes the backtick after it, so that one is not part of the run
+    of backticks that opens a span. Inside a span the backslash is a plain
+    character.
+    """
+    pos = 0
+    while match := _ESCAPE_OR_BACKTICKS.search(text, pos):
+        pos = match.end()
+        if match.group()[0] != "\\":
+            span = _CODE_SPAN.match(text, match.start())
+            if span:
+                yield span
+                pos = span.end()

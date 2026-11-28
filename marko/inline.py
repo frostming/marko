@@ -231,6 +231,10 @@ class CodeSpan(InlineElement):
     priority = 7
     pattern = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
 
+    @classmethod
+    def find(cls, text: str, *, source: Source) -> Iterator[_Match]:
+        return patterns.find_code_spans(text)
+
     def __init__(self, match: _Match) -> None:
         self.children = match.group(2).replace("\n", " ")
         if self.children.strip() and self.children[0] == self.children[-1] == " ":
