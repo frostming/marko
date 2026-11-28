@@ -305,7 +305,13 @@ def look_for_image_or_link(
     return None
 
 
+_CODE_SPAN = re.compile(r"(?<!`)(`+)(?!`)([\s\S]+?)(?<!`)\1(?!`)")
+
+
 def _is_legal_link_text(text: str) -> bool:
+    # A bracket inside a code span is code, not a bracket of the link text.
+    if "`" in text:
+        text = _CODE_SPAN.sub("", text)
     return is_paired(text, "[", "]")
 
 
