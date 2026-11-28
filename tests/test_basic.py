@@ -883,3 +883,20 @@ def test_block_children_are_not_shared_between_elements():
     second = block.Paragraph([])
     assert len(first.children) == 1
     assert len(second.children) == 0
+
+
+@pytest.mark.parametrize(
+    "text, html",
+    [
+        ("[a `]`](/u)", '<a href="/u">a <code>]</code></a>'),
+        ("[a `[`](/u)", '<a href="/u">a <code>[</code></a>'),
+        ("[a ``]`` b](/u)", '<a href="/u">a <code>]</code> b</a>'),
+        ("[`]`][x]\n\n[x]: /u", '<a href="/u"><code>]</code></a>'),
+        ("![a `]`](/i)", '<img src="/i" alt="a ]" />'),
+        ("[a `]](/u)", "[a `]](/u)"),
+        ("[a ]](/u)", "[a ]](/u)"),
+    ],
+)
+def test_bracket_in_code_span_of_link_text(text, html):
+    # A bracket inside a code span is code and does not unbalance the link text.
+    assert marko.convert(text).strip() == f"<p>{html}</p>"
